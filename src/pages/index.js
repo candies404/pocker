@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {isAuthenticated, setAccessKey} from '@/utils/auth';
+import {getAccessKey, isAuthenticated, setAccessKey} from '@/utils/auth';
 import {Geist, Geist_Mono} from "next/font/google";
 
 const geistSans = Geist({
@@ -17,12 +17,34 @@ export default function HomePage() {
     const [isAuth, setIsAuth] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
+    const [quotaData, setQuotaData] = useState(null);
 
     useEffect(() => {
         // 检查是否已认证
         setIsAuth(isAuthenticated());
         setLoading(false);
     }, []);
+
+    useEffect(() => {
+        // 如果已认证，获取配额信息
+        if (isAuth) {
+            fetchQuotaData();
+        }
+    }, [isAuth]);
+
+    const fetchQuotaData = async () => {
+        try {
+            const response = await fetch('/api/tcr/quota', {
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const data = await response.json();
+            setQuotaData(data.Data);
+        } catch (error) {
+            console.error('获取配额信息失败:', error);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -62,7 +84,26 @@ export default function HomePage() {
         return (
             <div className="container mx-auto p-4">
                 <h1 className="text-2xl font-bold mb-4">欢迎访问</h1>
-                <p className="text-gray-600">您已成功通过验证</p>
+                <p className="text-gray-600 mb-6">您已成功通过验证</p>
+
+                {quotaData && (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h2 className="text-xl font-semibold mb-4">腾讯容器镜像服务个人配额信息</h2>
+                        <div className="space-y-4">
+                            {quotaData.LimitInfo.map((item, index) => (
+                                <div key={index}
+                                     className="flex items-center justify-between border-b border-gray-200 pb-2">
+                                    <p className="text-sm text-gray-500">用户名: <span
+                                        className="font-mono">{item.Username}</span></p>
+                                    <p className="text-sm text-gray-500">类型: <span
+                                        className="font-mono">{item.Type}</span></p>
+                                    <p className="text-sm text-gray-500">配额值: <span
+                                        className="font-mono text-blue-600">{item.Value}</span></p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
