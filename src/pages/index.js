@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {getAccessKey, isAuthenticated, setAccessKey} from '@/utils/auth';
 import {Geist, Geist_Mono} from "next/font/google";
+import Navigation from '@/components/Navigation';
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -18,6 +19,7 @@ export default function HomePage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [quotaData, setQuotaData] = useState(null);
+    const [userName, setUserName] = useState(null);
 
     useEffect(() => {
         // 检查是否已认证
@@ -33,6 +35,7 @@ export default function HomePage() {
     }, [isAuth]);
 
     const fetchQuotaData = async () => {
+        setLoading(true);
         try {
             const response = await fetch('/api/tcr/quota', {
                 headers: {
@@ -41,8 +44,11 @@ export default function HomePage() {
             });
             const data = await response.json();
             setQuotaData(data.Data);
+            setUserName(data.Data.LimitInfo[0].Username);
+            setLoading(false);
         } catch (error) {
             console.error('获取配额信息失败:', error);
+            setLoading(false);
         }
     };
 
@@ -82,28 +88,34 @@ export default function HomePage() {
 
     if (isAuth) {
         return (
-            <div className="container mx-auto p-4">
-                <h1 className="text-2xl font-bold mb-4">欢迎访问</h1>
-                <p className="text-gray-600 mb-6">您已成功通过验证</p>
-
-                {quotaData && (
+            <div className="min-h-screen bg-gray-50">
+                <Navigation/>
+                <div className="container mx-auto p-4 mt-6">
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-xl font-semibold mb-4">腾讯容器镜像服务个人配额信息</h2>
-                        <div className="space-y-4">
-                            {quotaData.LimitInfo.map((item, index) => (
-                                <div key={index}
-                                     className="flex items-center justify-between border-b border-gray-200 pb-2">
-                                    <p className="text-sm text-gray-500">用户名: <span
-                                        className="font-mono">{item.Username}</span></p>
-                                    <p className="text-sm text-gray-500">类型: <span
-                                        className="font-mono">{item.Type}</span></p>
-                                    <p className="text-sm text-gray-500">配额值: <span
-                                        className="font-mono text-blue-600">{item.Value}</span></p>
-                                </div>
-                            ))}
-                        </div>
+                        <h2 className="text-xl font-semibold mb-4">腾讯容器镜像服务</h2>
+                        <h2 className="text-l font-semibold mb-4">个人配额信息，用户名：{userName} </h2>
+                        {quotaData && (
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full table-auto">
+                                    <thead>
+                                    <tr className="bg-gray-50">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">配额值</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                    {quotaData.LimitInfo.map((item, index) => (
+                                        <tr key={index}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{item.Type}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">{item.Value}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         );
     }
