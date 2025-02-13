@@ -25,7 +25,13 @@ export default function RepositoriesPage() {
                 },
             });
             const data = await response.json();
-            setRepositories(data.Data);
+            if (data.Data) {
+                setRepositories(data.Data);
+            } else if (data.code === "ResourceNotFound.ErrNoUser") {
+                setError('获取仓库列表失败:ResourceNotFound.ErrNoUser');
+            } else {
+                setError('获取仓库列表失败');
+            }
             setLoading(false);
         } catch (error) {
             console.error('获取仓库列表失败:', error);
@@ -55,8 +61,19 @@ export default function RepositoriesPage() {
                     </div>
 
                     {error && (
-                        <div className="bg-red-50 text-red-500 p-4 rounded-md mb-4">
-                            {error}
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+                            <p className="font-medium">错误提示</p>
+                            <p className="text-sm mt-1">{error}</p>
+                            {error.includes('ResourceNotFound.ErrNoUser') && (
+                                <a
+                                    href="https://console.cloud.tencent.com/tcr/repository"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
+                                >
+                                    点击此处前往控制台初始化
+                                </a>
+                            )}
                         </div>
                     )}
 

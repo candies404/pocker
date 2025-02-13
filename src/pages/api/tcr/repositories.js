@@ -12,6 +12,7 @@ const handler = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             message: '获取仓库列表失败',
+            code: error.code,
             error: error.message
         });
     }
