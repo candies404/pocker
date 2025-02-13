@@ -5,8 +5,8 @@ export default function Navigation() {
     const router = useRouter();
 
     const menuItems = [
-        {path: '/', label: '配额信息'},
-        {path: '/repositories', label: '镜像仓库'},
+        {path: '/', label: '镜像仓库'},
+        {path: '/quota', label: '配额信息'},
         {path: '/namespaces', label: '命名空间'},
         {path: '/tags', label: '镜像标签'}
     ];
@@ -16,7 +16,7 @@ export default function Navigation() {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex-shrink-0">
-                        <span className="text-xl font-bold text-gray-800">镜像管理</span>
+                        <span className="text-xl font-bold text-gray-800">镜像管理私服</span>
                     </div>
                     <div className="flex space-x-4">
                         {menuItems.map((item) => (

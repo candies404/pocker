@@ -18,36 +18,38 @@ export default function HomePage() {
     const [isAuth, setIsAuth] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
-    const [quotaData, setQuotaData] = useState(null);
-    const [userName, setUserName] = useState(null);
+    const [repositories, setRepositories] = useState(null);
 
     useEffect(() => {
-        // 检查是否已认证
         setIsAuth(isAuthenticated());
         setLoading(false);
     }, []);
 
     useEffect(() => {
-        // 如果已认证，获取配额信息
         if (isAuth) {
-            fetchQuotaData();
+            fetchRepositories();
         }
     }, [isAuth]);
 
-    const fetchQuotaData = async () => {
+    const fetchRepositories = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/tcr/quota', {
+            const response = await fetch('/api/tcr/repositories', {
                 headers: {
                     'x-access-key': getAccessKey(),
                 },
             });
             const data = await response.json();
-            setQuotaData(data.Data);
-            setUserName(data.Data.LimitInfo[0].Username);
+            if (data.Data) {
+                setRepositories(data.Data);
+            } else if (data.code === "ResourceNotFound.ErrNoUser") {
+                setError('获取仓库列表失败：ResourceNotFound.ErrNoUser');
+            } else {
+                setError('获取仓库列表失败');
+            }
             setLoading(false);
         } catch (error) {
-            console.error('获取配额信息失败:', error);
+            setError(error.message || '获取仓库列表失败');
             setLoading(false);
         }
     };
@@ -92,26 +94,83 @@ export default function HomePage() {
                 <Navigation/>
                 <div className="container mx-auto p-4 mt-6">
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-xl font-semibold mb-4">腾讯容器镜像服务</h2>
-                        <h2 className="text-l font-semibold mb-4">个人配额信息，用户名：{userName} </h2>
-                        {quotaData && (
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="text-sm text-gray-500">
+                                总仓库数: {repositories?.TotalCount || 0}
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+                                <p className="font-medium">错误提示</p>
+                                <p className="text-sm mt-1">{error}</p>
+                                {error.includes('ResourceNotFound.ErrNoUser') && (
+                                    <a
+                                        href="https://console.cloud.tencent.com/tcr/repository"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
+                                    >
+                                        点击此处前往控制台初始化
+                                    </a>
+                                )}
+                            </div>
+                        )}
+
+                        {repositories && repositories.RepoInfo.length > 0 ? (
                             <div className="overflow-x-auto">
-                                <table className="min-w-full table-auto">
-                                    <thead>
-                                    <tr className="bg-gray-50">
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">配额值</th>
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            仓库名称
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            类型
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            标签数
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            拉取次数
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            访问级别
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            更新时间
+                                        </th>
                                     </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                    {quotaData.LimitInfo.map((item, index) => (
-                                        <tr key={index}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{item.Type}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">{item.Value}</td>
+                                    {repositories.RepoInfo.map((repo, index) => (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                                                {repo.RepoName}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {repo.RepoType}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {repo.TagCount}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {repo.PullCount}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {repo.Public ? '公开' : '私有'}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {repo.UpdateTime}
+                                            </td>
                                         </tr>
                                     ))}
                                     </tbody>
                                 </table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-gray-500">
+                                暂无仓库数据
                             </div>
                         )}
                     </div>
