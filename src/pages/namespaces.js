@@ -2,6 +2,7 @@ import Navigation from '@/components/Navigation';
 import {useEffect, useState} from 'react';
 import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
+import ConfirmModal from '@/components/ConfirmModal';
 
 export default function NamespacesPage() {
     const router = useRouter();
@@ -14,6 +15,11 @@ export default function NamespacesPage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newNamespace, setNewNamespace] = useState('');
     const [creating, setCreating] = useState(false);
+    const [deletingNamespace, setDeletingNamespace] = useState(null);
+    const [deleteConfirm, setDeleteConfirm] = useState({
+        show: false,
+        namespace: null
+    });
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -98,6 +104,51 @@ export default function NamespacesPage() {
         }
     };
 
+    const handleDeleteClick = (namespace) => {
+        setDeleteConfirm({
+            show: true,
+            namespace
+        });
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteConfirm({
+            show: false,
+            namespace: null
+        });
+    };
+
+    const handleDeleteConfirm = async () => {
+        const namespace = deleteConfirm.namespace;
+        setDeletingNamespace(namespace);
+        
+        try {
+            const response = await fetch(`/api/tcr/delete-namespace?namespace=${encodeURIComponent(namespace)}`, {
+                method: 'DELETE',
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 刷新列表
+                fetchNamespaces(currentPage);
+            } else {
+                setError("删除命名空间失败：" + data.error);
+            }
+        } catch (error) {
+            setError('删除命名空间失败');
+        } finally {
+            setDeletingNamespace(null);
+            setDeleteConfirm({
+                show: false,
+                namespace: null
+            });
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -170,6 +221,9 @@ export default function NamespacesPage() {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             创建时间
                                         </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            操作
+                                        </th>
                                     </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
@@ -183,6 +237,20 @@ export default function NamespacesPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {namespace.CreationTime}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <button
+                                                    onClick={() => handleDeleteClick(namespace.Namespace)}
+                                                    disabled={namespace.RepoCount > 0}
+                                                    className={`text-sm rounded px-2 py-1 ${
+                                                        namespace.RepoCount > 0
+                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                                    }`}
+                                                    title={namespace.RepoCount > 0 ? "无法删除非空命名空间" : ""}
+                                                >
+                                                    删除
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -241,6 +309,19 @@ export default function NamespacesPage() {
                     )}
                 </div>
             </div>
+
+            {/* 删除确认模态框 */}
+            <ConfirmModal
+                isOpen={deleteConfirm.show}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="删除命名空间"
+                message={`确定要删除命名空间 "${deleteConfirm.namespace}" 吗？此操作不可恢复。`}
+                confirmText="删除"
+                cancelText="取消"
+                confirmButtonClass="bg-red-600 hover:bg-red-700"
+                isLoading={!!deletingNamespace}
+            />
 
             {/* 创建命名空间的模态框 */}
             {showCreateModal && (
