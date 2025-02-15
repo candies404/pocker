@@ -9,11 +9,13 @@ const handler = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const offset = (page - 1) * pageSize;
+    const searchKey = req.query.search || "";
 
     try {
         const result = await tcrClient.DescribeRepositoryOwnerPersonal({
             Limit: pageSize,
-            Offset: offset
+            Offset: offset,
+            RepoName: searchKey
         });
         res.status(200).json(result);
     } catch (error) {

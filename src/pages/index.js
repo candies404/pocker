@@ -22,6 +22,8 @@ export default function HomePage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
+    const [searchKey, setSearchKey] = useState('');
+    const [searchTimeout, setSearchTimeout] = useState(null);
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -34,11 +36,11 @@ export default function HomePage() {
         }
     }, [isAuth, currentPage, pageSize]);
 
-    const fetchRepositories = async (page) => {
+    const fetchRepositories = async (page, search = searchKey) => {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch(`/api/tcr/repositories?page=${page}&pageSize=${pageSize}`, {
+            const response = await fetch(`/api/tcr/repositories?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`, {
                 headers: {
                     'x-access-key': getAccessKey(),
                 },
@@ -46,7 +48,6 @@ export default function HomePage() {
             const data = await response.json();
             if (data.Data) {
                 setRepositories(data.Data);
-                // 计算总页数
                 const total = data.Data.TotalCount;
                 setTotalPages(Math.ceil(total / pageSize));
             } else if (data.code === "ResourceNotFound.ErrNoUser") {
@@ -97,6 +98,24 @@ export default function HomePage() {
         setCurrentPage(1); // 重置到第一页
     };
 
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setSearchKey(value);
+        
+        // 清除之前的定时器
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        
+        // 设置新的定时器，300ms 后执行搜索
+        const timeoutId = setTimeout(() => {
+            setCurrentPage(1); // 重置到第一页
+            fetchRepositories(1, value);
+        }, 300);
+        
+        setSearchTimeout(timeoutId);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -112,8 +131,33 @@ export default function HomePage() {
                 <div className="container mx-auto p-4 mt-6">
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <div className="flex justify-between items-center mb-6">
-                            <div className="text-sm text-gray-500">
-                                总仓库数: {repositories?.TotalCount || 0}
+                            <div className="flex items-center space-x-4">
+                                <div className="text-sm text-gray-500">
+                                    总仓库数: {repositories?.TotalCount || 0}
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={searchKey}
+                                        onChange={handleSearch}
+                                        placeholder="搜索仓库名称..."
+                                        className="pl-8 pr-4 py-1.5 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                    <svg
+                                        className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                        />
+                                    </svg>
+                                </div>
                             </div>
                             <div className="flex items-center space-x-4">
                                 <label className="text-sm text-gray-600">每页显示：</label>
