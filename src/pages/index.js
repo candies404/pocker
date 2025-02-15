@@ -19,6 +19,9 @@ export default function HomePage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [repositories, setRepositories] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -27,14 +30,15 @@ export default function HomePage() {
 
     useEffect(() => {
         if (isAuth) {
-            fetchRepositories();
+            fetchRepositories(currentPage);
         }
-    }, [isAuth]);
+    }, [isAuth, currentPage, pageSize]);
 
-    const fetchRepositories = async () => {
+    const fetchRepositories = async (page) => {
         setLoading(true);
+        setError("");
         try {
-            const response = await fetch('/api/tcr/repositories', {
+            const response = await fetch(`/api/tcr/repositories?page=${page}&pageSize=${pageSize}`, {
                 headers: {
                     'x-access-key': getAccessKey(),
                 },
@@ -42,6 +46,9 @@ export default function HomePage() {
             const data = await response.json();
             if (data.Data) {
                 setRepositories(data.Data);
+                // 计算总页数
+                const total = data.Data.TotalCount;
+                setTotalPages(Math.ceil(total / pageSize));
             } else if (data.code === "ResourceNotFound.ErrNoUser") {
                 setError('获取仓库列表失败：ResourceNotFound.ErrNoUser');
             } else {
@@ -80,6 +87,16 @@ export default function HomePage() {
         }
     };
 
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handlePageSizeChange = (e) => {
+        const newSize = parseInt(e.target.value);
+        setPageSize(newSize);
+        setCurrentPage(1); // 重置到第一页
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -97,6 +114,19 @@ export default function HomePage() {
                         <div className="flex justify-between items-center mb-6">
                             <div className="text-sm text-gray-500">
                                 总仓库数: {repositories?.TotalCount || 0}
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <label className="text-sm text-gray-600">每页显示：</label>
+                                <select
+                                    value={pageSize}
+                                    onChange={handlePageSizeChange}
+                                    className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                                >
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
                             </div>
                         </div>
 
@@ -118,56 +148,108 @@ export default function HomePage() {
                         )}
 
                         {repositories && repositories.RepoInfo.length > 0 ? (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            仓库名称
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            类型
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            标签数
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            拉取次数
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            访问级别
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            更新时间
-                                        </th>
-                                    </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                    {repositories.RepoInfo.map((repo, index) => (
-                                        <tr key={index} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                                                {repo.RepoName}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {repo.RepoType}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {repo.TagCount}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {repo.PullCount}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {repo.Public ? '公开' : '私有'}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {repo.UpdateTime}
-                                            </td>
+                            <>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                仓库名称
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                类型
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                标签数
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                拉取次数
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                访问级别
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                创建时间
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                更新时间
+                                            </th>
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                        {repositories.RepoInfo.map((repo, index) => (
+                                            <tr key={index} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                                                    {repo.RepoName}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {repo.RepoType}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {repo.TagCount}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {repo.PullCount}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {repo.Public ? '公开' : '私有'}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {repo.CreationTime}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {repo.UpdateTime}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* 分页控件 */}
+                                <div className="mt-4 flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                            className={`px-3 py-1 rounded-md text-sm ${
+                                                currentPage === 1
+                                                    ? 'bg-gray-100 text-gray-400'
+                                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                            }`}
+                                        >
+                                            上一页
+                                        </button>
+                                        {[...Array(totalPages)].map((_, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => handlePageChange(i + 1)}
+                                                className={`px-3 py-1 rounded-md text-sm ${
+                                                    currentPage === i + 1
+                                                        ? 'bg-blue-600 text-white'
+                                                        : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
+                                        <button
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                            className={`px-3 py-1 rounded-md text-sm ${
+                                                currentPage === totalPages
+                                                    ? 'bg-gray-100 text-gray-400'
+                                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                            }`}
+                                        >
+                                            下一页
+                                        </button>
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                        第 {currentPage} 页，共 {totalPages} 页
+                                    </div>
+                                </div>
+                            </>
                         ) : (
                             <div className="text-center py-8 text-gray-500">
                                 暂无仓库数据

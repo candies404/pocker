@@ -6,8 +6,15 @@ const handler = async (req, res) => {
         return res.status(405).json({message: '方法不允许'});
     }
 
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
+
     try {
-        const result = await tcrClient.DescribeRepositoryOwnerPersonal();
+        const result = await tcrClient.DescribeRepositoryOwnerPersonal({
+            Limit: pageSize,
+            Offset: offset
+        });
         res.status(200).json(result);
     } catch (error) {
         res.status(500).json({
