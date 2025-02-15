@@ -11,6 +11,9 @@ export default function NamespacesPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newNamespace, setNewNamespace] = useState('');
+    const [creating, setCreating] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -18,10 +21,12 @@ export default function NamespacesPage() {
             return;
         }
         fetchNamespaces(currentPage);
+        setError("")
     }, [router, currentPage, pageSize]);
 
     const fetchNamespaces = async (page) => {
         setLoading(true);
+        setError("")
         try {
             const response = await fetch(`/api/tcr/namespaces?page=${page}&pageSize=${pageSize}`, {
                 headers: {
@@ -55,6 +60,44 @@ export default function NamespacesPage() {
         setCurrentPage(1); // 重置到第一页
     };
 
+    const handleCreateNamespace = async (e) => {
+        e.preventDefault();
+        if (!newNamespace.trim()) {
+            setError('命名空间名称不能为空');
+            return;
+        }
+
+        setCreating(true);
+        try {
+            const response = await fetch('/api/tcr/create-namespace', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-key': getAccessKey(),
+                },
+                body: JSON.stringify({
+                    namespace: newNamespace.trim()
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setShowCreateModal(false);
+                setNewNamespace('');
+                // 刷新列表
+                fetchNamespaces(currentPage);
+            } else {
+                setError("创建命名空间失败：" + data.error);
+                setShowCreateModal(false)
+            }
+        } catch (error) {
+            setError('创建命名空间失败');
+        } finally {
+            setCreating(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -69,8 +112,16 @@ export default function NamespacesPage() {
             <div className="container mx-auto p-4 mt-6">
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <div className="text-sm text-gray-500">
-                            命名空间总数: {namespaces?.NamespaceCount || 0}
+                        <div className="flex items-center space-x-4">
+                            <div className="text-sm text-gray-500">
+                                命名空间总数: {namespaces?.NamespaceCount || 0}
+                            </div>
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="px-3 py-1.5 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            >
+                                创建命名空间
+                            </button>
                         </div>
                         <div className="flex items-center space-x-4">
                             <label className="text-sm text-gray-600">每页显示：</label>
@@ -190,6 +241,47 @@ export default function NamespacesPage() {
                     )}
                 </div>
             </div>
+
+            {/* 创建命名空间的模态框 */}
+            {showCreateModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-lg font-medium mb-4">创建新命名空间</h3>
+                        <form onSubmit={handleCreateNamespace}>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    命名空间名称
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newNamespace}
+                                    onChange={(e) => setNewNamespace(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="请输入命名空间名称"
+                                    disabled={creating}
+                                />
+                            </div>
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                                    disabled={creating}
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-blue-400"
+                                    disabled={creating}
+                                >
+                                    {creating ? '创建中...' : '创建'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 } 
