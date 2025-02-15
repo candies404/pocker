@@ -5,7 +5,8 @@ export default function FormModal({
                                       onClose,
                                       title,
                                       children,
-                                      isLoading = false
+                                      isLoading = false,
+                                      maxWidth = 'max-w-md'
                                   }) {
     const modalRef = useRef(null);
 
@@ -29,7 +30,7 @@ export default function FormModal({
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div ref={modalRef} className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div ref={modalRef} className={`bg-white rounded-lg p-6 w-full ${maxWidth}`}>
                 <h3 className="text-lg font-medium mb-4">{title}</h3>
                 {children}
             </div>
