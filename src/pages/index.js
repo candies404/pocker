@@ -4,6 +4,7 @@ import {Geist, Geist_Mono} from "next/font/google";
 import Navigation from '@/components/Navigation';
 import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
+import TagListModal from '@/components/TagListModal';
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function HomePage() {
         show: false,
         repo: null
     });
+    const [selectedRepo, setSelectedRepo] = useState(null);
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -244,6 +246,10 @@ export default function HomePage() {
         }
     };
 
+    const handleRepoClick = (repo) => {
+        setSelectedRepo(repo.RepoName);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -361,7 +367,12 @@ export default function HomePage() {
                                         {repositories.RepoInfo.map((repo, index) => (
                                             <tr key={index} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                                                    {repo.RepoName}
+                                                    <button
+                                                        onClick={() => handleRepoClick(repo)}
+                                                        className="hover:underline focus:outline-none"
+                                                    >
+                                                        {repo.RepoName}
+                                                    </button>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {repo.RepoType}
@@ -533,6 +544,13 @@ export default function HomePage() {
                     cancelText="取消"
                     confirmButtonClass="bg-red-600 hover:bg-red-700"
                     isLoading={!!deletingRepo}
+                />
+
+                {/* 标签列表模态框 */}
+                <TagListModal
+                    isOpen={!!selectedRepo}
+                    onClose={() => setSelectedRepo(null)}
+                    repoName={selectedRepo}
                 />
             </div>
         );
