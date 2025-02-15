@@ -24,6 +24,11 @@ export default function HomePage() {
     const [totalPages, setTotalPages] = useState(1);
     const [searchKey, setSearchKey] = useState('');
     const [searchTimeout, setSearchTimeout] = useState(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newRepoName, setNewRepoName] = useState('');
+    const [creating, setCreating] = useState(false);
+    const [namespaces, setNamespaces] = useState([]);
+    const [selectedNamespace, setSelectedNamespace] = useState('');
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -116,6 +121,77 @@ export default function HomePage() {
         setSearchTimeout(timeoutId);
     };
 
+    const fetchNamespaces = async () => {
+        try {
+            const response = await fetch('/api/tcr/namespaces', {
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const data = await response.json();
+            
+            if (data.Data && data.Data.NamespaceInfo) {
+                setNamespaces(data.Data.NamespaceInfo);
+                // 如果有命名空间，默认选中第一个
+                if (data.Data.NamespaceInfo.length > 0) {
+                    setSelectedNamespace(data.Data.NamespaceInfo[0].Namespace);
+                }
+            }
+        } catch (error) {
+            setError('获取命名空间列表失败');
+        }
+    };
+
+    const handleOpenCreateModal = () => {
+        setShowCreateModal(true);
+        fetchNamespaces();
+    };
+
+    const handleCreateRepository = async (e) => {
+        e.preventDefault();
+        if (!selectedNamespace) {
+            setError('请选择命名空间');
+            return;
+        }
+        if (!newRepoName.trim()) {
+            setError('仓库名称不能为空');
+            return;
+        }
+
+        const fullRepoName = `${selectedNamespace}/${newRepoName.trim()}`;
+
+        setCreating(true);
+        try {
+            const response = await fetch('/api/tcr/create-repository', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-key': getAccessKey(),
+                },
+                body: JSON.stringify({
+                    repoName: fullRepoName
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setShowCreateModal(false);
+                setNewRepoName('');
+                setSelectedNamespace('');
+                // 刷新列表
+                fetchRepositories(currentPage);
+            } else {
+                setError("创建仓库失败：" + data.error);
+                setShowCreateModal(false);
+            }
+        } catch (error) {
+            setError('创建仓库失败');
+        } finally {
+            setCreating(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -135,6 +211,12 @@ export default function HomePage() {
                                 <div className="text-sm text-gray-500">
                                     总仓库数: {repositories?.TotalCount || 0}
                                 </div>
+                                <button
+                                    onClick={handleOpenCreateModal}
+                                    className="px-3 py-1.5 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                >
+                                    创建仓库
+                                </button>
                                 <div className="relative">
                                     <input
                                         type="text"
@@ -301,6 +383,76 @@ export default function HomePage() {
                         )}
                     </div>
                 </div>
+
+                {/* 创建仓库的模态框 */}
+                {showCreateModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                            <h3 className="text-lg font-medium mb-4">创建新仓库</h3>
+                            <form onSubmit={handleCreateRepository}>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        选择命名空间
+                                    </label>
+                                    <select
+                                        value={selectedNamespace}
+                                        onChange={(e) => setSelectedNamespace(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        disabled={creating || namespaces.length === 0}
+                                    >
+                                        {namespaces.length === 0 ? (
+                                            <option value="">暂无可用命名空间</option>
+                                        ) : (
+                                            namespaces.map((ns) => (
+                                                <option key={ns.Namespace} value={ns.Namespace}>
+                                                    {ns.Namespace}
+                                                </option>
+                                            ))
+                                        )}
+                                    </select>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        仓库名称
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={newRepoName}
+                                        onChange={(e) => setNewRepoName(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="请输入仓库名称"
+                                        disabled={creating || !selectedNamespace}
+                                    />
+                                    {selectedNamespace && (
+                                        <p className="mt-2 text-sm text-gray-500">
+                                            完整仓库名称: {selectedNamespace}/{newRepoName || '[仓库名称]'}
+                                        </p>
+                                    )}
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        注：仓库默认创建为私有仓库
+                                    </p>
+                                </div>
+                                <div className="flex justify-end space-x-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCreateModal(false)}
+                                        className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                                        disabled={creating}
+                                    >
+                                        取消
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-blue-400"
+                                        disabled={creating || !selectedNamespace || !newRepoName.trim()}
+                                    >
+                                        {creating ? '创建中...' : '创建'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
