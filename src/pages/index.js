@@ -38,6 +38,9 @@ export default function HomePage() {
         repo: null
     });
     const [selectedRepo, setSelectedRepo] = useState(null);
+    const [selectedRepos, setSelectedRepos] = useState(new Set());
+    const [batchDeleting, setBatchDeleting] = useState(false);
+    const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -250,6 +253,59 @@ export default function HomePage() {
         setSelectedRepo(repo.RepoName);
     };
 
+    const handleSelectRepo = (repoName) => {
+        const newSelected = new Set(selectedRepos);
+        if (newSelected.has(repoName)) {
+            newSelected.delete(repoName);
+        } else {
+            newSelected.add(repoName);
+        }
+        setSelectedRepos(newSelected);
+    };
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allRepos = new Set(repositories.RepoInfo.map(repo => repo.RepoName));
+            setSelectedRepos(allRepos);
+        } else {
+            setSelectedRepos(new Set());
+        }
+    };
+
+    const handleBatchDelete = () => {
+        setBatchDeleteConfirm(true);
+    };
+
+    const handleBatchDeleteConfirm = async () => {
+        setBatchDeleting(true);
+        try {
+            const response = await fetch('/api/tcr/batch-delete-repository', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-key': getAccessKey(),
+                },
+                body: JSON.stringify({
+                    repoNames: Array.from(selectedRepos)
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setSelectedRepos(new Set());
+                fetchRepositories(currentPage);
+            } else {
+                setError("批量删除仓库失败：" + data.error);
+            }
+        } catch (error) {
+            setError('批量删除仓库失败');
+        } finally {
+            setBatchDeleting(false);
+            setBatchDeleteConfirm(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -333,15 +389,35 @@ export default function HomePage() {
 
                         {repositories && repositories.RepoInfo.length > 0 ? (
                             <>
+                                {/* 添加批量删除按钮 */}
+                                {selectedRepos.size > 0 && (
+                                    <div className="mt-4 flex items-center space-x-2">
+                                        <span className="text-sm text-gray-500">
+                                            已选择 {selectedRepos.size} 个仓库
+                                        </span>
+                                        <button
+                                            onClick={handleBatchDelete}
+                                            disabled={batchDeleting}
+                                            className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50"
+                                        >
+                                            {batchDeleting ? '删除中...' : '批量删除'}
+                                        </button>
+                                    </div>
+                                )}
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
                                         <tr>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                仓库名称
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    checked={selectedRepos.size === repositories?.RepoInfo.length}
+                                                    onChange={handleSelectAll}
+                                                />
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                类型
+                                                仓库名称
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 标签数
@@ -366,6 +442,14 @@ export default function HomePage() {
                                         <tbody className="bg-white divide-y divide-gray-200">
                                         {repositories.RepoInfo.map((repo, index) => (
                                             <tr key={index} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        checked={selectedRepos.has(repo.RepoName)}
+                                                        onChange={() => handleSelectRepo(repo.RepoName)}
+                                                    />
+                                                </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
                                                     <button
                                                         onClick={() => handleRepoClick(repo)}
@@ -373,9 +457,6 @@ export default function HomePage() {
                                                     >
                                                         {repo.RepoName}
                                                     </button>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {repo.RepoType}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {repo.TagCount}
@@ -454,6 +535,8 @@ export default function HomePage() {
                                         第 {currentPage} 页，共 {totalPages} 页
                                     </div>
                                 </div>
+
+
                             </>
                         ) : (
                             <div className="text-center py-8 text-gray-500">
@@ -551,6 +634,19 @@ export default function HomePage() {
                     isOpen={!!selectedRepo}
                     onClose={() => setSelectedRepo(null)}
                     repoName={selectedRepo}
+                />
+
+                {/* 批量删除确认模态框 */}
+                <ConfirmModal
+                    isOpen={batchDeleteConfirm}
+                    onClose={() => setBatchDeleteConfirm(false)}
+                    onConfirm={handleBatchDeleteConfirm}
+                    title="批量删除仓库"
+                    message={`确定要删除选中的 ${selectedRepos.size} 个仓库吗？此操作不可恢复。`}
+                    confirmText="删除"
+                    cancelText="取消"
+                    confirmButtonClass="bg-red-600 hover:bg-red-700"
+                    isLoading={batchDeleting}
                 />
             </div>
         );
