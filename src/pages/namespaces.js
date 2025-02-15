@@ -121,7 +121,7 @@ export default function NamespacesPage() {
     const handleDeleteConfirm = async () => {
         const namespace = deleteConfirm.namespace;
         setDeletingNamespace(namespace);
-        
+
         try {
             const response = await fetch(`/api/tcr/delete-namespace?namespace=${encodeURIComponent(namespace)}`, {
                 method: 'DELETE',

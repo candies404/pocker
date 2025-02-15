@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {getAccessKey, isAuthenticated, setAccessKey} from '@/utils/auth';
 import {Geist, Geist_Mono} from "next/font/google";
 import Navigation from '@/components/Navigation';
+import ConfirmModal from '@/components/ConfirmModal';
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -29,6 +30,11 @@ export default function HomePage() {
     const [creating, setCreating] = useState(false);
     const [namespaces, setNamespaces] = useState([]);
     const [selectedNamespace, setSelectedNamespace] = useState('');
+    const [deletingRepo, setDeletingRepo] = useState(null);
+    const [deleteConfirm, setDeleteConfirm] = useState({
+        show: false,
+        repo: null
+    });
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -106,18 +112,18 @@ export default function HomePage() {
     const handleSearch = (e) => {
         const value = e.target.value;
         setSearchKey(value);
-        
+
         // 清除之前的定时器
         if (searchTimeout) {
             clearTimeout(searchTimeout);
         }
-        
+
         // 设置新的定时器，300ms 后执行搜索
         const timeoutId = setTimeout(() => {
             setCurrentPage(1); // 重置到第一页
             fetchRepositories(1, value);
         }, 300);
-        
+
         setSearchTimeout(timeoutId);
     };
 
@@ -129,7 +135,7 @@ export default function HomePage() {
                 },
             });
             const data = await response.json();
-            
+
             if (data.Data && data.Data.NamespaceInfo) {
                 setNamespaces(data.Data.NamespaceInfo);
                 // 如果有命名空间，默认选中第一个
@@ -189,6 +195,51 @@ export default function HomePage() {
             setError('创建仓库失败');
         } finally {
             setCreating(false);
+        }
+    };
+
+    const handleDeleteClick = (repo) => {
+        setDeleteConfirm({
+            show: true,
+            repo
+        });
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteConfirm({
+            show: false,
+            repo: null
+        });
+    };
+
+    const handleDeleteConfirm = async () => {
+        const repo = deleteConfirm.repo;
+        setDeletingRepo(repo.RepoName);
+
+        try {
+            const response = await fetch(`/api/tcr/delete-repository?repoName=${encodeURIComponent(repo.RepoName)}`, {
+                method: 'DELETE',
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 刷新列表
+                fetchRepositories(currentPage);
+            } else {
+                setError("删除仓库失败：" + data.error);
+            }
+        } catch (error) {
+            setError('删除仓库失败');
+        } finally {
+            setDeletingRepo(null);
+            setDeleteConfirm({
+                show: false,
+                repo: null
+            });
         }
     };
 
@@ -300,6 +351,9 @@ export default function HomePage() {
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 更新时间
                                             </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                操作
+                                            </th>
                                         </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
@@ -325,6 +379,19 @@ export default function HomePage() {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {repo.UpdateTime}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    <button
+                                                        onClick={() => handleDeleteClick(repo)}
+                                                        disabled={deletingRepo === repo.RepoName}
+                                                        className={`text-sm rounded px-2 py-1 ${
+                                                            deletingRepo === repo.RepoName
+                                                                ? 'bg-red-100 text-red-400'
+                                                                : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                                        }`}
+                                                    >
+                                                        删除
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -401,7 +468,7 @@ export default function HomePage() {
                                         disabled={creating || namespaces.length === 0}
                                     >
                                         {namespaces.length === 0 ? (
-                                            <option value="">暂无可用命名空间</option>
+                                            <option value="">暂无可用命名空间，请先创建</option>
                                         ) : (
                                             namespaces.map((ns) => (
                                                 <option key={ns.Namespace} value={ns.Namespace}>
@@ -453,6 +520,19 @@ export default function HomePage() {
                         </div>
                     </div>
                 )}
+
+                {/* 删除确认模态框 */}
+                <ConfirmModal
+                    isOpen={deleteConfirm.show}
+                    onClose={handleDeleteCancel}
+                    onConfirm={handleDeleteConfirm}
+                    title="删除仓库"
+                    message={`确定要删除仓库 "${deleteConfirm.repo?.RepoName}" 吗？此操作不可恢复。`}
+                    confirmText="删除"
+                    cancelText="取消"
+                    confirmButtonClass="bg-red-600 hover:bg-red-700"
+                    isLoading={!!deletingRepo}
+                />
             </div>
         );
     }
