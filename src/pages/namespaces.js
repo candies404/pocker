@@ -8,19 +8,22 @@ export default function NamespacesPage() {
     const [loading, setLoading] = useState(true);
     const [namespaces, setNamespaces] = useState(null);
     const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         if (!isAuthenticated()) {
             router.push('/');
             return;
         }
-        fetchNamespaces();
-    }, [router]);
+        fetchNamespaces(currentPage);
+    }, [router, currentPage, pageSize]);
 
-    const fetchNamespaces = async () => {
+    const fetchNamespaces = async (page) => {
         setLoading(true);
         try {
-            const response = await fetch('/api/tcr/namespaces', {
+            const response = await fetch(`/api/tcr/namespaces?page=${page}&pageSize=${pageSize}`, {
                 headers: {
                     'x-access-key': getAccessKey(),
                 },
@@ -31,12 +34,25 @@ export default function NamespacesPage() {
                 setError(data.message);
             } else {
                 setNamespaces(data.Data);
+                // 计算总页数
+                const total = data.Data.NamespaceCount;
+                setTotalPages(Math.ceil(total / pageSize));
             }
             setLoading(false);
         } catch (error) {
             setError(error.message || '获取命名空间列表失败');
             setLoading(false);
         }
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handlePageSizeChange = (e) => {
+        const newSize = parseInt(e.target.value);
+        setPageSize(newSize);
+        setCurrentPage(1); // 重置到第一页
     };
 
     if (loading) {
@@ -55,6 +71,19 @@ export default function NamespacesPage() {
                     <div className="flex justify-between items-center mb-6">
                         <div className="text-sm text-gray-500">
                             命名空间总数: {namespaces?.NamespaceCount || 0}
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <label className="text-sm text-gray-600">每页显示：</label>
+                            <select
+                                value={pageSize}
+                                onChange={handlePageSizeChange}
+                                className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            >
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
                         </div>
                     </div>
 
@@ -76,38 +105,84 @@ export default function NamespacesPage() {
                     )}
 
                     {namespaces && namespaces.NamespaceInfo.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        命名空间
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        仓库数量
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        创建时间
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                {namespaces.NamespaceInfo.map((namespace, index) => (
-                                    <tr key={index} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                                            {namespace.Namespace}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {namespace.RepoCount}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {namespace.CreationTime}
-                                        </td>
+                        <>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            命名空间
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            仓库数量
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            创建时间
+                                        </th>
                                     </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                    {namespaces.NamespaceInfo.map((namespace, index) => (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                                                {namespace.Namespace}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {namespace.RepoCount}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {namespace.CreationTime}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* 分页控件 */}
+                            <div className="mt-4 flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className={`px-3 py-1 rounded-md text-sm ${
+                                            currentPage === 1
+                                                ? 'bg-gray-100 text-gray-400'
+                                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                        }`}
+                                    >
+                                        上一页
+                                    </button>
+                                    {[...Array(totalPages)].map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => handlePageChange(i + 1)}
+                                            className={`px-3 py-1 rounded-md text-sm ${
+                                                currentPage === i + 1
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                            }`}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                        className={`px-3 py-1 rounded-md text-sm ${
+                                            currentPage === totalPages
+                                                ? 'bg-gray-100 text-gray-400'
+                                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                        }`}
+                                    >
+                                        下一页
+                                    </button>
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                    第 {currentPage} 页，共 {totalPages} 页
+                                </div>
+                            </div>
+                        </>
                     ) : (
                         <div className="text-center py-8 text-gray-500">
                             暂无命名空间数据
