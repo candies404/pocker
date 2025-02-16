@@ -9,7 +9,8 @@ export default function Navigation() {
         {path: '/', label: '镜像仓库'},
         {path: '/namespaces', label: '命名空间'},
         {path: '/quota', label: '配额信息'},
-        {path: '/tags', label: '镜像标签'}
+        // {path: '/tags', label: '镜像标签'},
+        {path: '/github-config', label: 'GitHub配置'},
     ];
 
     const handleLogout = () => {
