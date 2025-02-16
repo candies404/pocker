@@ -175,14 +175,14 @@ export default function GithubConfigPage() {
                             <h3 className="text-lg font-medium">GitHub Actions 配置</h3>
                             {workflowExists ? (
                                 <div className="space-y-4">
-                                    <div className="bg-gray-50 p-4 rounded-md">
-                                        <pre className="text-sm overflow-x-auto">
+                                    <p className="text-sm text-gray-500">
+                                        工作流文件存在于 .github/workflows/docker-publish.yml
+                                    </p>
+                                    <div className="bg-gray-100 p-4 rounded-md border border-gray-200">
+                                        <pre className="text-sm overflow-x-auto text-gray-700">
                                             <code>{workflowContent}</code>
                                         </pre>
                                     </div>
-                                    <p className="text-sm text-gray-500">
-                                        工作流文件已存在于 .github/workflows/docker-publish.yml
-                                    </p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
