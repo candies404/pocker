@@ -90,7 +90,8 @@ export default function GithubConfigPage() {
                     {repoExists ? (
                         <div className="space-y-4">
                             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-                                <p className="font-medium">配置仓库已存在，注：千万不要公开这个项目</p>
+                                <p className="font-medium">配置仓库已存在</p>
+                                <p className="font-medium text-red-600">注：千万不要公开这个项目</p>
                                 <p className="text-sm mt-1">仓库名称：{repoData.full_name}</p>
                                 <p className="text-sm">创建时间：{new Date(repoData.created_at).toLocaleString()}</p>
                                 <p className="text-sm">最后更新：{new Date(repoData.updated_at).toLocaleString()}</p>
