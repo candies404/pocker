@@ -338,23 +338,33 @@ export default function HomePage() {
                                         type="text"
                                         value={searchKey}
                                         onChange={handleSearch}
-                                        placeholder="搜索仓库名称..."
-                                        className="pl-8 pr-4 py-1.5 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="搜索仓库名称"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10"
                                     />
-                                    <svg
-                                        className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                        />
-                                    </svg>
+                                    {searchKey && (
+                                        <button
+                                            onClick={() => {
+                                                setSearchKey('');
+                                                fetchRepositories(1, '');
+                                            }}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100"
+                                            title="清除搜索"
+                                        >
+                                            <svg 
+                                                className="w-4 h-4 text-gray-400" 
+                                                fill="none" 
+                                                viewBox="0 0 24 24" 
+                                                stroke="currentColor"
+                                            >
+                                                <path 
+                                                    strokeLinecap="round" 
+                                                    strokeLinejoin="round" 
+                                                    strokeWidth={2} 
+                                                    d="M6 18L18 6M6 6l12 12"
+                                                />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4">
