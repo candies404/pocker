@@ -120,6 +120,40 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         }
     };
 
+    // 添加处理 docker pull 命令的函数
+    const handleSourceImageChange = (e) => {
+        const value = e.target.value;
+
+        // 检查是否是 docker pull 格式
+        if (value.startsWith('docker pull ')) {
+            const imageAddress = value.replace('docker pull ', '').trim();
+
+            // 如果没有标签，自动添加 latest
+            if (!imageAddress.includes(':')) {
+                setSourceImage(`${imageAddress}:latest`);
+                setTargetTag('latest');
+            } else {
+                // 设置源镜像地址
+                setSourceImage(imageAddress);
+
+                // 提取标签
+                const tagMatch = imageAddress.match(/:([^/]+)$/);
+                if (tagMatch) {
+                    setTargetTag(tagMatch[1]);
+                }
+            }
+        } else {
+            // 非 docker pull 格式的输入
+            setSourceImage(value);
+
+            // 如果输入的是不带标签的镜像名，自动添加 latest
+            if (value && !value.includes(':')) {
+                setSourceImage(`${value}:latest`);
+                setTargetTag('latest');
+            }
+        }
+    };
+
     return (
         <FormModal
             isOpen={isOpen}
@@ -135,11 +169,14 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                         <input
                             type="text"
                             value={sourceImage}
-                            onChange={(e) => setSourceImage(e.target.value)}
-                            placeholder="例如：homeassistant/amd64-addon-mosquitto:latest"
+                            onChange={handleSourceImageChange}
+                            placeholder="例如：nginx:alpine 或 docker pull nginx:alpine"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             disabled={creating}
                         />
+                        <p className="mt-1 text-xs text-gray-500">
+                            支持直接粘贴 docker pull 命令，将自动解析
+                        </p>
                     </div>
 
                     <div>
