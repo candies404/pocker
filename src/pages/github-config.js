@@ -80,7 +80,6 @@ export default function GithubConfigPage() {
             <Navigation/>
             <div className="container mx-auto p-4 mt-6">
                 <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-semibold mb-4">GitHub 配置</h2>
 
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
@@ -91,7 +90,7 @@ export default function GithubConfigPage() {
                     {repoExists ? (
                         <div className="space-y-4">
                             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-                                <p className="font-medium">配置仓库已存在</p>
+                                <p className="font-medium">配置仓库已存在，注：千万不要公开这个项目</p>
                                 <p className="text-sm mt-1">仓库名称：{repoData.full_name}</p>
                                 <p className="text-sm">创建时间：{new Date(repoData.created_at).toLocaleString()}</p>
                                 <p className="text-sm">最后更新：{new Date(repoData.updated_at).toLocaleString()}</p>
@@ -108,7 +107,7 @@ export default function GithubConfigPage() {
                     ) : (
                         <div className="space-y-4">
                             <p className="text-gray-600">
-                                未检测到配置仓库，点击下方按钮创建一个名为 "myDockerHub" 的私有仓库。
+                                未检测到GitHub配置仓库，点击下方按钮创建一个名为 "myDockerHub" 的私有仓库。
                             </p>
                             <button
                                 onClick={handleCreateRepo}
