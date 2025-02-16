@@ -77,4 +77,92 @@ export const createGithubRepo = async () => {
     } catch (error) {
         throw error;
     }
+};
+
+const WORKFLOW_FILE = '.github/workflows/docker-publish.yml';
+
+export const checkWorkflowFile = async () => {
+    try {
+        const username = await getUsername();
+        const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}/contents/${WORKFLOW_FILE}`, {
+            headers: {
+                'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        if (response.status === 404) {
+            return {exists: false};
+        }
+
+        if (response.ok) {
+            const data = await response.json();
+            // 解码 base64 内容
+            const content = Buffer.from(data.content, 'base64').toString('utf-8');
+            return {exists: true, content, sha: data.sha};
+        }
+
+        throw new Error('获取工作流文件失败');
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const createWorkflowFile = async () => {
+    try {
+        const username = await getUsername();
+        const workflowContent = `
+name: Docker Image CI
+
+on:
+  repository_dispatch:
+    types:
+      - createTag
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Docker image from Docker Hub
+        run: |
+          docker pull nginxproxy/nginx-proxy:latest
+
+      - name: Login to Tencent Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ccr.ccs.tencentyun.com
+          username: 100023041744
+          password: Bnbssd242418
+
+      - name: Tag the image for Tencent
+        run: |
+          docker tag nginxproxy/nginx-proxy:latest ccr.ccs.tencentyun.com/lufocs/test2:latest2
+
+      - name: Push the image to Tencent Docker Hub
+        run: |
+          docker push ccr.ccs.tencentyun.com/lufocs/test2:latest2
+`;
+
+        const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}/contents/${WORKFLOW_FILE}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Add Docker publish workflow',
+                content: Buffer.from(workflowContent).toString('base64')
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('创建工作流文件失败');
+        }
+
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
 }; 

@@ -10,6 +10,9 @@ export default function GithubConfigPage() {
     const [repoExists, setRepoExists] = useState(false);
     const [repoData, setRepoData] = useState(null);
     const [creating, setCreating] = useState(false);
+    const [workflowExists, setWorkflowExists] = useState(false);
+    const [workflowContent, setWorkflowContent] = useState(null);
+    const [creatingWorkflow, setCreatingWorkflow] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -17,6 +20,7 @@ export default function GithubConfigPage() {
             return;
         }
         checkRepo();
+        checkWorkflow();
     }, [router]);
 
     const checkRepo = async () => {
@@ -67,6 +71,51 @@ export default function GithubConfigPage() {
         }
     };
 
+    const checkWorkflow = async () => {
+        try {
+            const response = await fetch('/api/github/check-workflow', {
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                setWorkflowExists(data.exists);
+                if (data.exists) {
+                    setWorkflowContent(data.content);
+                }
+            } else {
+                setError(data.message);
+            }
+        } catch (error) {
+            setError('检查工作流文件失败');
+        }
+    };
+
+    const handleCreateWorkflow = async () => {
+        setCreatingWorkflow(true);
+        try {
+            const response = await fetch('/api/github/create-workflow', {
+                method: 'POST',
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                await checkWorkflow();
+            } else {
+                setError(data.message);
+            }
+        } catch (error) {
+            setError('创建工作流文件失败');
+        } finally {
+            setCreatingWorkflow(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -89,6 +138,7 @@ export default function GithubConfigPage() {
 
                     {repoExists ? (
                         <div className="space-y-4">
+                            <h3 className="text-lg font-medium">GitHub Repo 配置</h3>
                             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
                                 <p className="font-medium">配置仓库已存在</p>
                                 <p className="font-medium text-red-600">注：千万不要公开这个项目</p>
@@ -117,6 +167,37 @@ export default function GithubConfigPage() {
                             >
                                 {creating ? '创建中...' : '创建配置仓库'}
                             </button>
+                        </div>
+                    )}
+
+                    {repoExists && (
+                        <div className="mt-8 space-y-4">
+                            <h3 className="text-lg font-medium">GitHub Actions 配置</h3>
+                            {workflowExists ? (
+                                <div className="space-y-4">
+                                    <div className="bg-gray-50 p-4 rounded-md">
+                                        <pre className="text-sm overflow-x-auto">
+                                            <code>{workflowContent}</code>
+                                        </pre>
+                                    </div>
+                                    <p className="text-sm text-gray-500">
+                                        工作流文件已存在于 .github/workflows/docker-publish.yml
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <p className="text-gray-600">
+                                        未检测到 Docker 发布工作流文件，点击下方按钮创建。
+                                    </p>
+                                    <button
+                                        onClick={handleCreateWorkflow}
+                                        disabled={creatingWorkflow}
+                                        className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 disabled:bg-green-400"
+                                    >
+                                        {creatingWorkflow ? '创建中...' : '创建工作流文件'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
