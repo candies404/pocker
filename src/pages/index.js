@@ -5,6 +5,7 @@ import Navigation from '@/components/Navigation';
 import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
 import TagListModal from '@/components/TagListModal';
+import CreateTagModal from '@/components/CreateTagModal';
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default function HomePage() {
     const [selectedRepos, setSelectedRepos] = useState(new Set());
     const [batchDeleting, setBatchDeleting] = useState(false);
     const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
+    const [createTagRepo, setCreateTagRepo] = useState(null);
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -429,9 +431,6 @@ export default function HomePage() {
                                                 访问级别
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                创建时间
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 更新时间
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -468,23 +467,29 @@ export default function HomePage() {
                                                     {repo.Public ? '公开' : '私有'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {repo.CreationTime}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {repo.UpdateTime}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    <button
-                                                        onClick={() => handleDeleteClick(repo)}
-                                                        disabled={deletingRepo === repo.RepoName}
-                                                        className={`text-sm rounded px-2 py-1 ${
-                                                            deletingRepo === repo.RepoName
-                                                                ? 'bg-red-100 text-red-400'
-                                                                : 'bg-red-50 text-red-600 hover:bg-red-100'
-                                                        }`}
-                                                    >
-                                                        删除
-                                                    </button>
+                                                    <div className="flex items-center space-x-2">
+                                                        <button
+                                                            onClick={() => setSelectedRepo(repo.RepoName)}
+                                                            className="text-blue-600 hover:text-blue-800"
+                                                        >
+                                                            查看标签
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setCreateTagRepo(repo)}
+                                                            className="text-green-600 hover:text-green-800"
+                                                        >
+                                                            新增标签
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteClick(repo)}
+                                                            className="text-red-600 hover:text-red-800"
+                                                        >
+                                                            删除
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -648,6 +653,16 @@ export default function HomePage() {
                     confirmButtonClass="bg-red-600 hover:bg-red-700"
                     isLoading={batchDeleting}
                 />
+
+                {/* 新增标签模态框 */}
+                {createTagRepo && (
+                    <CreateTagModal
+                        isOpen={!!createTagRepo}
+                        onClose={() => setCreateTagRepo(null)}
+                        repoName={createTagRepo.RepoName.split('/')[1]}
+                        namespace={createTagRepo.RepoName.split('/')[0]}
+                    />
+                )}
             </div>
         );
     }

@@ -126,22 +126,22 @@ jobs:
     steps:
       - name: Pull Docker image from Docker Hub
         run: |
-          docker pull nginxproxy/nginx-proxy:latest
+          docker pull 源Docker Hub镜像地址
 
       - name: Login to Tencent Docker Hub
         uses: docker/login-action@v3
         with:
           registry: ccr.ccs.tencentyun.com
-          username: 100023041744
-          password: Bnbssd242418
+          username: 腾讯云账号
+          password: 腾讯云容器镜像服务初始化的密码
 
       - name: Tag the image for Tencent
         run: |
-          docker tag nginxproxy/nginx-proxy:latest ccr.ccs.tencentyun.com/lufocs/test2:latest2
+          docker tag 源Docker Hub镜像地址 目标Docker Hub镜像地址
 
       - name: Push the image to Tencent Docker Hub
         run: |
-          docker push ccr.ccs.tencentyun.com/lufocs/test2:latest2
+          docker push 目标Docker Hub镜像地址
 `;
 
         const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}/contents/${WORKFLOW_FILE}`, {
@@ -162,6 +162,139 @@ jobs:
         }
 
         return await response.json();
+    } catch (error) {
+        throw error;
+    }
+};
+
+// 更新工作流文件
+export const updateWorkflowFile = async (sourceImage, targetImage) => {
+    try {
+        const username = await getUsername();
+        const workflowContent = `
+name: Docker Image CI
+
+on:
+  repository_dispatch:
+    types:
+      - createTag
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Docker image from Docker Hub
+        run: |
+          docker pull ${sourceImage}
+
+      - name: Login to Tencent Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ccr.ccs.tencentyun.com
+          username: ${process.env.TENCENTCLOUD_USERNAME}
+          password: ${process.env.TENCENTCLOUD_PASSWORD}
+
+      - name: Tag the image for Tencent
+        run: |
+          docker tag ${sourceImage} ${targetImage}
+
+      - name: Push the image to Tencent Docker Hub
+        run: |
+          docker push ${targetImage}
+`;
+
+        // 先检查文件是否存在
+        const checkResult = await checkWorkflowFile();
+        const method = checkResult.exists ? 'PUT' : 'POST';
+        const body = {
+            message: 'Update Docker publish workflow',
+            content: Buffer.from(workflowContent).toString('base64')
+        };
+
+        // 如果文件存在，需要提供 sha
+        if (checkResult.exists) {
+            body.sha = checkResult.sha;
+        }
+
+        const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}/contents/${WORKFLOW_FILE}`, {
+            method,
+            headers: {
+                'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            throw new Error('更新工作流文件失败');
+        }
+
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
+};
+
+// 触发工作流
+export const triggerWorkflow = async () => {
+    try {
+        const username = await getUsername();
+        const response = await fetch(
+            `https://api.github.com/repos/${username}/${REPO_NAME}/dispatches`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    event_type: 'createTag'
+                })
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('触发工作流失败');
+        }
+
+        return true;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// 检查工作流运行状态
+export const checkWorkflowRun = async () => {
+    try {
+        const username = await getUsername();
+        const response = await fetch(
+            `https://api.github.com/repos/${username}/${REPO_NAME}/actions/runs?event=repository_dispatch`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('检查工作流状态失败');
+        }
+
+        const data = await response.json();
+        if (data.workflow_runs.length > 0) {
+            const latestRun = data.workflow_runs[0];
+            return {
+                status: latestRun.status,
+                conclusion: latestRun.conclusion,
+                id: latestRun.id
+            };
+        }
+
+        return null;
     } catch (error) {
         throw error;
     }
