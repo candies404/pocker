@@ -15,7 +15,9 @@ export default function Navigation() {
 
     const handleLogout = () => {
         clearAuth();
-        router.push('/');
+        router.replace('/').then(() => {
+            window.location.reload();
+        });
     };
 
     return (
