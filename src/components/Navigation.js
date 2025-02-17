@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import {useRouter} from 'next/router';
 import {clearAuth} from '@/utils/auth';
 import {useTheme} from '@/utils/themeContext';
@@ -33,8 +32,9 @@ export default function Navigation() {
         <nav className="bg-white dark:bg-gray-800 shadow-md">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
-                    <div className="flex-shrink-0">
-                        <span className="text-xl font-bold text-gray-800 dark:text-white">镜像管理私服</span>
+                    <div className="flex-shrink-0 flex flex-col items-start">
+                        <span className="text-xl font-bold text-gray-800 dark:text-white">Docker 镜像私服</span>
+                        <span className="text-lg font-semibold text-gray-600 dark:text-gray-200 mt-1 ml-5">Make Docker Great Again</span>
                     </div>
                     <div className="flex items-center space-x-4">
                         <div className="flex space-x-4">

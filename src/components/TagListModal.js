@@ -198,7 +198,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
             <FormModal
                 isOpen={isOpen}
                 onClose={onClose}
-                title={`镜像标签列表 - ${repoName}`}
+                title={`镜像标签列表 - ${repoName} - ${tags?.TagInfo?.length}个`}
                 maxWidth="max-w-4xl"
             >
                 {loading ? (
