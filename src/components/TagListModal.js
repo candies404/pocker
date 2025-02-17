@@ -198,7 +198,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
             <FormModal
                 isOpen={isOpen}
                 onClose={onClose}
-                title={`镜像标签列表 - ${repoName} - ${tags?.TagInfo?.length}个`}
+                title={`镜像标签列表 - ${repoName}`}
                 maxWidth="max-w-4xl"
             >
                 {loading ? (
@@ -236,6 +236,8 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                         />
                                     </th>
                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">标签</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">平台</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">系统</th>
                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">大小</th>
                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">推送时间</th>
                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
@@ -255,6 +257,12 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                         </td>
                                         <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-600 dark:text-blue-500">
                                             {tag.TagName}
+                                        </td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                            {tag.Architecture}
+                                        </td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                            {tag.OS}
                                         </td>
                                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {formatSize(tag.SizeByte || tag.Size)}
