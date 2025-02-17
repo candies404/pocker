@@ -21,6 +21,14 @@ export default function Navigation() {
         });
     };
 
+    const handleMenuClick = (path) => {
+        if (router.pathname === path) {
+            router.reload();
+        } else {
+            router.push(path);
+        }
+    };
+
     return (
         <nav className="bg-white dark:bg-gray-800 shadow-md">
             <div className="container mx-auto px-4">
@@ -31,9 +39,9 @@ export default function Navigation() {
                     <div className="flex items-center space-x-4">
                         <div className="flex space-x-4">
                             {menuItems.map((item) => (
-                                <Link
+                                <button
                                     key={item.path}
-                                    href={item.path}
+                                    onClick={() => handleMenuClick(item.path)}
                                     className={`px-3 py-2 rounded-md text-sm font-medium ${
                                         router.pathname === item.path
                                             ? 'bg-blue-600 text-white'
@@ -41,7 +49,7 @@ export default function Navigation() {
                                     }`}
                                 >
                                     {item.label}
-                                </Link>
+                                </button>
                             ))}
                         </div>
                         <button
