@@ -152,35 +152,36 @@ export default function NamespacesPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-800">
+                <div
+                    className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
             <Navigation/>
             <div className="container mx-auto p-4 mt-6">
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center space-x-4">
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-gray-500 dark:text-gray-300">
                                 命名空间总数: {namespaces?.NamespaceCount || 0}
                             </div>
                             <button
                                 onClick={() => setShowCreateModal(true)}
-                                className="px-3 py-1.5 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                className="px-3 py-1.5 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-500"
                             >
                                 创建命名空间
                             </button>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <label className="text-sm text-gray-600">每页显示：</label>
+                            <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
                             <select
                                 value={pageSize}
                                 onChange={handlePageSizeChange}
-                                className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                                className="border border-gray-300 rounded-md px-2 py-1 text-sm dark:border-gray-600 dark:text-white bg-white dark:bg-gray-700"
                             >
                                 <option value="5">5</option>
                                 <option value="10">10</option>
@@ -191,7 +192,8 @@ export default function NamespacesPage() {
                     </div>
 
                     {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+                        <div
+                            className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4 dark:bg-red-500 dark:border-red-600 dark:text-white">
                             <p className="font-medium">错误提示</p>
                             <p className="text-sm mt-1">{error}</p>
                             {error.includes('ResourceNotFound.ErrNoUser') && (
@@ -199,7 +201,7 @@ export default function NamespacesPage() {
                                     href="https://console.cloud.tencent.com/tcr/repository"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
+                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-500"
                                 >
                                     点击此处前往控制台初始化
                                 </a>
@@ -210,44 +212,45 @@ export default function NamespacesPage() {
                     {namespaces && namespaces.NamespaceInfo.length > 0 ? (
                         <>
                             <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
+                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead className="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                             命名空间
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                             仓库数量
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                             创建时间
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                             操作
                                         </th>
                                     </tr>
                                     </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
+                                    <tbody
+                                        className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                     {namespaces.NamespaceInfo.map((namespace, index) => (
-                                        <tr key={index} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
                                                 {namespace.Namespace}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                                 {namespace.RepoCount}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                                 {namespace.CreationTime}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                                 <button
                                                     onClick={() => handleDeleteClick(namespace.Namespace)}
                                                     disabled={namespace.RepoCount > 0}
                                                     className={`text-sm rounded px-2 py-1 ${
                                                         namespace.RepoCount > 0
-                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-red-50 text-red-600 hover:bg-red-100'
-                                                    }`}
+                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-300 dark:text-gray-500 dark:cursor-not-allowed'
+                                                            : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-700 dark:text-red-300 dark:hover:bg-red-600 dark:hover:bg-red-700'
+                                                    } dark:bg-gray-700 dark:text-gray-500`}
                                                     title={namespace.RepoCount > 0 ? "无法删除非空命名空间" : ""}
                                                 >
                                                     删除
@@ -267,8 +270,8 @@ export default function NamespacesPage() {
                                         disabled={currentPage === 1}
                                         className={`px-3 py-1 rounded-md text-sm ${
                                             currentPage === 1
-                                                ? 'bg-gray-100 text-gray-400'
-                                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                                         }`}
                                     >
                                         上一页
@@ -279,8 +282,8 @@ export default function NamespacesPage() {
                                             onClick={() => handlePageChange(i + 1)}
                                             className={`px-3 py-1 rounded-md text-sm ${
                                                 currentPage === i + 1
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                    ? 'bg-blue-600 text-white dark:bg-blue-600 dark:text-white'
+                                                    : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                                             }`}
                                         >
                                             {i + 1}
@@ -291,20 +294,20 @@ export default function NamespacesPage() {
                                         disabled={currentPage === totalPages}
                                         className={`px-3 py-1 rounded-md text-sm ${
                                             currentPage === totalPages
-                                                ? 'bg-gray-100 text-gray-400'
-                                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                                         }`}
                                     >
                                         下一页
                                     </button>
                                 </div>
-                                <div className="text-sm text-gray-500">
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
                                     第 {currentPage} 页，共 {totalPages} 页
                                 </div>
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-8 text-gray-500">
+                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                             暂无命名空间数据
                         </div>
                     )}
@@ -320,7 +323,8 @@ export default function NamespacesPage() {
                 message={`确定要删除命名空间 "${deleteConfirm.namespace}" 吗？此操作不可恢复。`}
                 confirmText="删除"
                 cancelText="取消"
-                confirmButtonClass="bg-red-600 hover:bg-red-700"
+                confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                cancelButtonClass="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
                 isLoading={!!deletingNamespace}
             />
 
@@ -333,14 +337,14 @@ export default function NamespacesPage() {
             >
                 <form onSubmit={handleCreateNamespace}>
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
                             命名空间名称
                         </label>
                         <input
                             type="text"
                             value={newNamespace}
                             onChange={(e) => setNewNamespace(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-600 dark:focus:border-blue-600 dark:bg-gray-700 dark:text-white"
                             placeholder="请输入命名空间名称"
                             disabled={creating}
                         />
@@ -349,14 +353,14 @@ export default function NamespacesPage() {
                         <button
                             type="button"
                             onClick={() => setShowCreateModal(false)}
-                            className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                            className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white dark:hover:text-white"
                             disabled={creating}
                         >
                             取消
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-blue-400"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-500 dark:text-white"
                             disabled={creating}
                         >
                             {creating ? '创建中...' : '创建'}

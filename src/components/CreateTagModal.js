@@ -163,7 +163,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                             Docker Hub 镜像地址
                         </label>
                         <input
@@ -171,16 +171,16 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             value={sourceImage}
                             onChange={handleSourceImageChange}
                             placeholder="例如：nginx:alpine 或 docker pull nginx:alpine"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-400 dark:focus:border-blue-400"
                             disabled={creating}
                         />
-                        <p className="mt-1 text-xs text-gray-500">
-                            支持直接粘贴 docker pull 命令，将自动解析
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
+                            支持直接粘贴 docker pull 命令，将自动解析，不带标签默认latest
                         </p>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                             目标标签
                         </label>
                         <input
@@ -188,28 +188,29 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             value={targetTag}
                             onChange={(e) => setTargetTag(e.target.value)}
                             placeholder="输入新标签名称"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-400 dark:focus:border-blue-400"
                             disabled={creating}
                         />
                     </div>
 
                     {(sourceImage || targetTag) && (
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 dark:text-gray-300">
                             <p>最终地址将为：</p>
-                            <p className="font-mono mt-1">
+                            <p className="font-mono mt-1 dark:text-white">
                                 ccr.ccs.tencentyun.com/{namespace}/{repoName}:{targetTag || '[标签名]'}
                             </p>
                         </div>
                     )}
 
                     {status !== 'initial' && (
-                        <div className={`text-sm ${status === 'error' ? 'text-red-600' : 'text-blue-600'}`}>
+                        <div
+                            className={`text-sm ${status === 'error' ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
                             {getStatusText()}
                         </div>
                     )}
 
                     {error && (
-                        <div className="text-sm text-red-600">
+                        <div className="text-sm text-red-600 dark:text-red-400">
                             {error}
                         </div>
                     )}
@@ -218,14 +219,14 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                            className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-600 dark:text-white"
                             disabled={creating}
                         >
                             取消
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-blue-400"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-blue-300 dark:text-white"
                             disabled={creating || !sourceImage.trim() || !targetTag.trim()}
                         >
                             {creating ? '处理中...' : '确认创建'}

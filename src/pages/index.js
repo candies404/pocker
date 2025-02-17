@@ -313,36 +313,37 @@ export default function HomePage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-800">
+                <div
+                    className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500"></div>
             </div>
         );
     }
 
     if (isAuth) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <Navigation/>
                 <div className="container mx-auto p-4 mt-6">
-                    <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                         <div className="flex justify-between items-center mb-6">
                             <div className="flex items-center space-x-4">
-                                <div className="text-sm text-gray-500">
-                                    总仓库数: {repositories?.TotalCount || 0}
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    总镜像数: {repositories?.TotalCount || 0}
                                 </div>
                                 <button
                                     onClick={handleOpenCreateModal}
-                                    className="px-3 py-1.5 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                    className="px-3 py-1.5 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-offset-gray-800"
                                 >
-                                    创建仓库
+                                    创建镜像
                                 </button>
                                 <div className="relative">
                                     <input
                                         type="text"
                                         value={searchKey}
                                         onChange={handleSearch}
-                                        placeholder="搜索仓库名称"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10"
+                                        placeholder="搜索镜像名称"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                                     />
                                     {searchKey && (
                                         <button
@@ -350,11 +351,11 @@ export default function HomePage() {
                                                 setSearchKey('');
                                                 fetchRepositories(1, '');
                                             }}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-500"
                                             title="清除搜索"
                                         >
                                             <svg
-                                                className="w-4 h-4 text-gray-400"
+                                                className="w-4 h-4 text-gray-400 dark:text-gray-300"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -371,11 +372,11 @@ export default function HomePage() {
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4">
-                                <label className="text-sm text-gray-600">每页显示：</label>
+                                <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
                                 <select
                                     value={pageSize}
                                     onChange={handlePageSizeChange}
-                                    className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                                    className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
                                     <option value="5">5</option>
                                     <option value="10">10</option>
@@ -386,7 +387,8 @@ export default function HomePage() {
                         </div>
 
                         {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+                            <div
+                                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
                                 <p className="font-medium">错误提示</p>
                                 <p className="text-sm mt-1">{error}</p>
                                 {error.includes('ResourceNotFound.ErrNoUser') && (
@@ -394,9 +396,9 @@ export default function HomePage() {
                                         href="https://console.cloud.tencent.com/tcr/repository"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
+                                        className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-600"
                                     >
-                                        点击此处前往控制台初始化
+                                        您还没开通镜像服务，点击此处前往腾讯云控制台初始化
                                     </a>
                                 )}
                             </div>
@@ -407,62 +409,63 @@ export default function HomePage() {
                                 {/* 添加批量删除按钮 */}
                                 {selectedRepos.size > 0 && (
                                     <div className="mt-4 flex items-center space-x-2">
-                                        <span className="text-sm text-gray-500">
+                                        <span className="text-sm text-gray-500 dark:text-gray-400">
                                             已选择 {selectedRepos.size} 个仓库
                                         </span>
                                         <button
                                             onClick={handleBatchDelete}
                                             disabled={batchDeleting}
-                                            className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50"
+                                            className="px-3 py-1.5 bg-red-500 dark:bg-red-600 text-white rounded text-sm hover:bg-red-600 dark:hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 dark:focus:ring-red-500 disabled:opacity-50"
                                         >
                                             {batchDeleting ? '删除中...' : '批量删除'}
                                         </button>
                                     </div>
                                 )}
                                 <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead className="bg-gray-50">
+                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead className="bg-gray-50 dark:bg-gray-700">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 <input
                                                     type="checkbox"
-                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-400 dark:focus:ring-blue-400"
                                                     checked={selectedRepos.size === repositories?.RepoInfo.length}
                                                     onChange={handleSelectAll}
                                                 />
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                命名空间/仓库名称
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                命名空间/镜像名称
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 标签数
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 拉取次数
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 访问级别
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 更新时间
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 操作
                                             </th>
                                         </tr>
                                         </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
+                                        <tbody
+                                            className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                         {repositories.RepoInfo.map((repo, index) => (
-                                            <tr key={index} className="hover:bg-gray-50">
+                                            <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <input
                                                         type="checkbox"
-                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-400 dark:focus:ring-blue-400"
                                                         checked={selectedRepos.has(repo.RepoName)}
                                                         onChange={() => handleSelectRepo(repo.RepoName)}
                                                     />
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
                                                     <button
                                                         onClick={() => handleRepoClick(repo)}
                                                         className="hover:underline focus:outline-none"
@@ -470,37 +473,37 @@ export default function HomePage() {
                                                         {repo.RepoName}
                                                     </button>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     {repo.TagCount}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     {repo.PullCount}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     {repo.Public ? '公开' : '私有'}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     {repo.UpdateTime}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     <div className="flex items-center space-x-2">
                                                         <button
                                                             onClick={() => setSelectedRepo(repo.RepoName)}
-                                                            className="text-blue-600 hover:text-blue-800"
+                                                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
                                                         >
                                                             查看标签
                                                         </button>
                                                         <button
                                                             onClick={() => setCreateTagRepo(repo)}
-                                                            className="text-green-600 hover:text-green-800"
+                                                            className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-600"
                                                         >
                                                             新增标签
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteClick(repo)}
                                                             disabled={repo.TagCount > 0}
-                                                            className={`group relative p-1 hover:bg-gray-100 rounded ${
-                                                                repo.TagCount > 0 ? 'cursor-not-allowed opacity-50' : 'text-red-600 hover:text-red-800'
+                                                            className={`group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-700 ${
+                                                                repo.TagCount > 0 ? 'cursor-not-allowed opacity-50' : 'text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600'
                                                             }`}
                                                             title={repo.TagCount > 0 ? '仓库存在标签，请先删除所有标签' : '删除仓库'}
                                                         >
@@ -534,8 +537,8 @@ export default function HomePage() {
                                             disabled={currentPage === 1}
                                             className={`px-3 py-1 rounded-md text-sm ${
                                                 currentPage === 1
-                                                    ? 'bg-gray-100 text-gray-400'
-                                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                                    : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                                             }`}
                                         >
                                             上一页
@@ -546,8 +549,8 @@ export default function HomePage() {
                                                 onClick={() => handlePageChange(i + 1)}
                                                 className={`px-3 py-1 rounded-md text-sm ${
                                                     currentPage === i + 1
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                        ? 'bg-blue-600 text-white dark:bg-blue-600 dark:text-white'
+                                                        : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                                                 }`}
                                             >
                                                 {i + 1}
@@ -558,14 +561,14 @@ export default function HomePage() {
                                             disabled={currentPage === totalPages}
                                             className={`px-3 py-1 rounded-md text-sm ${
                                                 currentPage === totalPages
-                                                    ? 'bg-gray-100 text-gray-400'
-                                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                                    : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                                             }`}
                                         >
                                             下一页
                                         </button>
                                     </div>
-                                    <div className="text-sm text-gray-500">
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">
                                         第 {currentPage} 页，共 {totalPages} 页
                                     </div>
                                 </div>
@@ -573,7 +576,7 @@ export default function HomePage() {
 
                             </>
                         ) : (
-                            <div className="text-center py-8 text-gray-500">
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                                 暂无仓库数据
                             </div>
                         )}
@@ -584,18 +587,18 @@ export default function HomePage() {
                 <FormModal
                     isOpen={showCreateModal}
                     onClose={() => setShowCreateModal(false)}
-                    title="创建新仓库"
+                    title="创建新镜像"
                     isLoading={creating}
                 >
                     <form onSubmit={handleCreateRepository}>
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
                                 选择命名空间
                             </label>
                             <select
                                 value={selectedNamespace}
                                 onChange={(e) => setSelectedNamespace(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-600 dark:focus:border-blue-600 dark:bg-gray-700 dark:text-white"
                                 disabled={creating || namespaces.length === 0}
                             >
                                 {namespaces.length === 0 ? (
@@ -610,38 +613,38 @@ export default function HomePage() {
                             </select>
                         </div>
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                仓库名称
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
+                                镜像名称
                             </label>
                             <input
                                 type="text"
                                 value={newRepoName}
                                 onChange={(e) => setNewRepoName(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="请输入仓库名称"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-600 dark:focus:border-blue-600 dark:bg-gray-700 dark:text-white"
+                                placeholder="请输入镜像名称"
                                 disabled={creating || !selectedNamespace}
                             />
                             {selectedNamespace && (
-                                <p className="mt-2 text-sm text-gray-500">
-                                    完整仓库名称: {selectedNamespace}/{newRepoName || '[仓库名称]'}
+                                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                    完整镜像名称: {selectedNamespace}/{newRepoName || '[镜像名称]'}
                                 </p>
                             )}
-                            <p className="mt-1 text-sm text-gray-500">
-                                注：仓库默认创建为私有仓库
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                注：镜像默认创建为私有镜像
                             </p>
                         </div>
                         <div className="flex justify-end space-x-3">
                             <button
                                 type="button"
                                 onClick={() => setShowCreateModal(false)}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                                className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white dark:hover:text-white"
                                 disabled={creating}
                             >
                                 取消
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-blue-400"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-500 dark:text-white"
                                 disabled={creating || !selectedNamespace || !newRepoName.trim()}
                             >
                                 {creating ? '创建中...' : '创建'}
@@ -659,7 +662,8 @@ export default function HomePage() {
                     message={`确定要删除仓库 "${deleteConfirm.repo?.RepoName}" 吗？此操作不可恢复。`}
                     confirmText="删除"
                     cancelText="取消"
-                    confirmButtonClass="bg-red-600 hover:bg-red-700"
+                    confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                    cancelButtonClass="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
                     isLoading={!!deletingRepo}
                 />
 
@@ -679,7 +683,8 @@ export default function HomePage() {
                     message={`确定要删除选中的 ${selectedRepos.size} 个仓库吗？此操作不可恢复。`}
                     confirmText="删除"
                     cancelText="取消"
-                    confirmButtonClass="bg-red-600 hover:bg-red-700"
+                    confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                    cancelButtonClass="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
                     isLoading={batchDeleting}
                 />
 
@@ -697,10 +702,10 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                 <div>
-                    <h2 className="text-center text-3xl font-extrabold text-gray-900">
+                    <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
                         请输入访问密钥
                     </h2>
                 </div>
@@ -710,18 +715,18 @@ export default function HomePage() {
                             type="password"
                             value={key}
                             onChange={(e) => setKey(e.target.value)}
-                            className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder="请输入密钥"
                             required
                         />
                     </div>
                     {error && (
-                        <div className="text-red-500 text-sm text-center">{error}</div>
+                        <div className="text-red-500 dark:text-red-400 text-sm text-center">{error}</div>
                     )}
                     <div>
                         <button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
                         >
                             验证
                         </button>

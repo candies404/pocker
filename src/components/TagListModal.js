@@ -203,10 +203,12 @@ export default function TagListModal({isOpen, onClose, repoName}) {
             >
                 {loading ? (
                     <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <div
+                            className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500"></div>
                     </div>
                 ) : error ? (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                    <div
+                        className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md dark:bg-red-700 dark:text-white">
                         <p className="text-sm">{error}</p>
                     </div>
                 ) : tags?.TagInfo?.length > 0 ? (
@@ -215,59 +217,61 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                             {selectedTags.size > 0 && (
                                 <button
                                     onClick={handleBatchDelete}
-                                    className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-4 dark:focus:ring-red-600"
                                 >
                                     批量删除 ({selectedTags.size})
                                 </button>
                             )}
                         </div>
                         <div className="overflow-x-auto max-h-[calc(100vh-16rem)]">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         <input
                                             type="checkbox"
-                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
                                             checked={selectedTags.size === tags.TagInfo.length}
                                             onChange={handleSelectAll}
                                         />
                                     </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">标签</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">大小</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">推送时间</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">标签</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">大小</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">推送时间</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
                                 </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody
+                                    className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 {tags.TagInfo.map((tag) => (
-                                    <tr key={tag.TagId} className="hover:bg-gray-50">
+                                    <tr key={tag.TagId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <input
                                                 type="checkbox"
-                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
                                                 checked={selectedTags.has(tag.TagName)}
                                                 onChange={() => handleSelectTag(tag.TagName)}
                                             />
                                         </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-600">
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-600 dark:text-blue-500">
                                             {tag.TagName}
                                         </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {formatSize(tag.SizeByte || tag.Size)}
                                         </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {tag.PushTime}
                                         </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             <div className="flex items-center space-x-2">
                                                 <button
                                                     onClick={() => handleCopy(tag)}
-                                                    className="group relative p-1 hover:bg-gray-100 rounded"
+                                                    className="group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500"
                                                     title={`复制：${tags.Server}/${repoName}:${tag.TagName}`}
                                                 >
                                                     {copyStatus === tag.TagId ? (
-                                                        <svg className="w-5 h-5 text-green-500" fill="none"
+                                                        <svg className="w-5 h-5 text-green-500 dark:text-green-400"
+                                                             fill="none"
                                                              viewBox="0 0 24 24"
                                                              stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round"
@@ -275,9 +279,10 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                                                   d="M5 13l4 4L19 7"/>
                                                         </svg>
                                                     ) : (
-                                                        <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-500"
-                                                             fill="none"
-                                                             viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg
+                                                            className="w-5 h-5 text-gray-400 group-hover:text-gray-500 dark:text-gray-300 dark:group-hover:text-gray-400"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round"
                                                                   strokeWidth={2}
                                                                   d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
@@ -288,12 +293,12 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                                 <button
                                                     onClick={() => handleDeleteClick(tag)}
                                                     disabled={deletingTag === tag.TagName}
-                                                    className={`group relative p-1 hover:bg-gray-100 rounded ${
+                                                    className={`group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500 ${
                                                         deletingTag === tag.TagName ? 'opacity-50 cursor-not-allowed' : ''
                                                     }`}
                                                     title="删除标签"
                                                 >
-                                                    <svg className="w-5 h-5 text-red-500" fill="none"
+                                                    <svg className="w-5 h-5 text-red-500 dark:text-red-400" fill="none"
                                                          viewBox="0 0 24 24"
                                                          stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round"
@@ -310,7 +315,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-300">
                         暂无标签数据
                     </div>
                 )}
@@ -325,7 +330,8 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                 message={`确定要删除标签 "${deleteConfirm.tag?.TagName}" 吗？此操作不可恢复。`}
                 confirmText="删除"
                 cancelText="取消"
-                confirmButtonClass="bg-red-600 hover:bg-red-700"
+                confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                cancelButtonClass="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
                 isLoading={!!deletingTag}
             />
 
@@ -341,7 +347,8 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                 message={`确定要从仓库 "${batchDeleteConfirm.repoName}" 中删除选中的 ${selectedTags.size} 个标签吗？此操作不可恢复。`}
                 confirmText="删除"
                 cancelText="取消"
-                confirmButtonClass="bg-red-600 hover:bg-red-700"
+                confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                cancelButtonClass="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
                 isLoading={batchDeleting}
             />
         </>
