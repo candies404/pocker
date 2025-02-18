@@ -13,6 +13,7 @@ export default function LifecyclePolicyPage() {
     const [settingType, setSettingType] = useState('global_keep_last_nums');
     const [settingValue, setSettingValue] = useState('');
     const [updating, setUpdating] = useState(false);
+    const [toggleLoading, setToggleLoading] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -84,6 +85,30 @@ export default function LifecyclePolicyPage() {
         }
     };
 
+    const handleToggleStatus = async () => {
+        setToggleLoading(true);
+        try {
+            const response = await fetch('/api/tcr/toggle-lifecycle-policy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-key': getAccessKey(),
+                },
+            });
+
+            const data = await response.json();
+            if (data) {
+                await fetchPolicy();
+            } else {
+                setError(data.message || '修改策略状态失败');
+            }
+        } catch (error) {
+            setError('修改策略状态失败');
+        } finally {
+            setToggleLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -111,6 +136,13 @@ export default function LifecyclePolicyPage() {
                         </button>
                     </div>
 
+                    <div
+                        className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400 px-4 py-3 rounded-md">
+                        <p className="text-sm">
+                            注：2种策略配置是互斥的。只能1次生效一种或者全不生效。
+                        </p>
+                    </div>
+
                     {error && (
                         <div
                             className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
@@ -134,6 +166,9 @@ export default function LifecyclePolicyPage() {
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         创建时间
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        操作
                                     </th>
                                 </tr>
                                 </thead>
@@ -160,6 +195,37 @@ export default function LifecyclePolicyPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {strategy.CreationTime}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <button
+                                                onClick={handleToggleStatus}
+                                                disabled={toggleLoading}
+                                                className={`group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500 ${
+                                                    !strategy.Valid ? 'opacity-50 cursor-not-allowed' : ''
+                                                }`}
+                                                title={strategy.Valid ? '禁用策略' : '策略已禁用'}
+                                            >
+                                                <svg
+                                                    className={`w-5 h-5 ${
+                                                        strategy.Valid
+                                                            ? 'text-red-500 dark:text-red-400'
+                                                            : 'text-gray-400 dark:text-gray-500'
+                                                    }`}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                                                    />
+                                                </svg>
+                                                <span className="sr-only">
+                                                    {strategy.Valid ? '禁用策略' : '策略已禁用'}
+                                                </span>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
