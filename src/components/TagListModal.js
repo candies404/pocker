@@ -318,7 +318,43 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                 </select>
                             </div>
                         </div>
-                        <div className="overflow-x-auto max-h-[calc(100vh-16rem)]">
+                        <div className="overflow-x-auto max-h-[calc(100vh-16rem)] scrollbar-custom">
+                            <style jsx global>{`
+                                .scrollbar-custom {
+                                    scrollbar-width: thin;
+                                    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+                                }
+                                
+                                .dark .scrollbar-custom {
+                                    scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+                                }
+                                
+                                .scrollbar-custom::-webkit-scrollbar {
+                                    width: 8px;
+                                    height: 8px;
+                                }
+                                
+                                .scrollbar-custom::-webkit-scrollbar-track {
+                                    background: transparent;
+                                }
+                                
+                                .scrollbar-custom::-webkit-scrollbar-thumb {
+                                    background-color: rgba(156, 163, 175, 0.5);
+                                    border-radius: 4px;
+                                }
+                                
+                                .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+                                    background-color: rgba(156, 163, 175, 0.7);
+                                }
+                                
+                                .dark .scrollbar-custom::-webkit-scrollbar-thumb {
+                                    background-color: rgba(75, 85, 99, 0.5);
+                                }
+                                
+                                .dark .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+                                    background-color: rgba(75, 85, 99, 0.7);
+                                }
+                            `}</style>
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
