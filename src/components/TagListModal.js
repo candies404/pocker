@@ -278,7 +278,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                         type="text"
                                         value={searchKey}
                                         onChange={handleSearch}
-                                        placeholder="搜索标签..."
+                                        placeholder="搜索标签"
                                         className="w-48 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400"
                                     />
                                     {searchKey ? (
@@ -379,8 +379,8 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                 </thead>
                                 <tbody
                                     className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                {tags.TagInfo.map((tag) => (
-                                    <tr key={tag.TagId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                {tags.TagInfo.map((tag, index) => (
+                                    <tr key={`${tag.TagName}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <input
                                                 type="checkbox"
