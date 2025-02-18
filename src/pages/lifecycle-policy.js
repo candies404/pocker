@@ -56,6 +56,12 @@ export default function LifecyclePolicyPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (settingType === 'global_keep_last_nums' && parseInt(settingValue) > 99) {
+            setError('保留标签数量不能超过99个');
+            return;
+        }
+        
         setUpdating(true);
         try {
             const response = await fetch('/api/tcr/update-lifecycle-policy', {
@@ -274,10 +280,16 @@ export default function LifecyclePolicyPage() {
                                 value={settingValue}
                                 onChange={(e) => setSettingValue(e.target.value)}
                                 min="1"
+                                max={settingType === 'global_keep_last_nums' ? "99" : undefined}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                placeholder={settingType === 'global_keep_last_nums' ? '请输入保留的标签数量' : '请输入保留的天数'}
+                                placeholder={settingType === 'global_keep_last_nums' ? '请输入保留的标签数量（1-99）' : '请输入保留的天数'}
                                 required
                             />
+                            {settingType === 'global_keep_last_nums' && (
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    最多可保留99个最新标签
+                                </p>
+                            )}
                         </div>
                     </div>
 
