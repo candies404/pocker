@@ -255,7 +255,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                         className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md dark:bg-red-700 dark:text-white">
                         <p className="text-sm">{error}</p>
                     </div>
-                ) : tags?.TagInfo?.length > 0 ? (
+                ) : (
                     <div>
                         <div className="mb-4 flex justify-between items-center">
                             <div className="flex items-center space-x-4">
@@ -267,10 +267,13 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                         批量删除 ({selectedTags.size})
                                     </button>
                                 )}
-                                <span className="text-sm text-gray-600 dark:text-gray-300">
-                                    总标签数：<span
-                                    className="font-medium text-blue-600 dark:text-blue-400">{tags.TagCount || tags.TagInfo.length}</span>
-                                </span>
+                                {tags?.TagInfo && (
+                                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                                        总标签数：<span className="font-medium text-blue-600 dark:text-blue-400">
+                                            {tags.TagCount || tags.TagInfo.length}
+                                        </span>
+                                    </span>
+                                )}
                             </div>
                             <div className="flex items-center space-x-4">
                                 <div className="relative">
@@ -321,188 +324,195 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                 </select>
                             </div>
                         </div>
-                        <div className="overflow-x-auto max-h-[calc(100vh-16rem)] scrollbar-custom">
-                            <style jsx global>{`
-                                .scrollbar-custom {
-                                    scrollbar-width: thin;
-                                    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-                                }
+                        {tags?.TagInfo?.length > 0 ? (
+                            <>
+                                <div className="overflow-x-auto max-h-[calc(100vh-16rem)] scrollbar-custom">
+                                    <style jsx global>{`
+                                        .scrollbar-custom {
+                                            scrollbar-width: thin;
+                                            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+                                        }
 
-                                .dark .scrollbar-custom {
-                                    scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
-                                }
+                                        .dark .scrollbar-custom {
+                                            scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+                                        }
 
-                                .scrollbar-custom::-webkit-scrollbar {
-                                    width: 8px;
-                                    height: 8px;
-                                }
+                                        .scrollbar-custom::-webkit-scrollbar {
+                                            width: 8px;
+                                            height: 8px;
+                                        }
 
-                                .scrollbar-custom::-webkit-scrollbar-track {
-                                    background: transparent;
-                                }
+                                        .scrollbar-custom::-webkit-scrollbar-track {
+                                            background: transparent;
+                                        }
 
-                                .scrollbar-custom::-webkit-scrollbar-thumb {
-                                    background-color: rgba(156, 163, 175, 0.5);
-                                    border-radius: 4px;
-                                }
+                                        .scrollbar-custom::-webkit-scrollbar-thumb {
+                                            background-color: rgba(156, 163, 175, 0.5);
+                                            border-radius: 4px;
+                                        }
 
-                                .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-                                    background-color: rgba(156, 163, 175, 0.7);
-                                }
+                                        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+                                            background-color: rgba(156, 163, 175, 0.7);
+                                        }
 
-                                .dark .scrollbar-custom::-webkit-scrollbar-thumb {
-                                    background-color: rgba(75, 85, 99, 0.5);
-                                }
+                                        .dark .scrollbar-custom::-webkit-scrollbar-thumb {
+                                            background-color: rgba(75, 85, 99, 0.5);
+                                        }
 
-                                .dark .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-                                    background-color: rgba(75, 85, 99, 0.7);
-                                }
-                            `}</style>
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead className="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                        <input
-                                            type="checkbox"
-                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
-                                            checked={selectedTags.size === tags.TagInfo.length}
-                                            onChange={handleSelectAll}
-                                        />
-                                    </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">标签</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">平台</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">系统</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">大小</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">推送时间</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
-                                </tr>
-                                </thead>
-                                <tbody
-                                    className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                {tags.TagInfo.map((tag, index) => (
-                                    <tr key={`${tag.TagName}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <input
-                                                type="checkbox"
-                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
-                                                checked={selectedTags.has(tag.TagName)}
-                                                onChange={() => handleSelectTag(tag.TagName)}
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-600 dark:text-blue-500">
-                                            {tag.TagName}
-                                        </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {tag.Architecture}
-                                        </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {tag.OS}
-                                        </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {formatSize(tag.SizeByte || tag.Size)}
-                                        </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {tag.PushTime}
-                                        </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            <div className="flex items-center space-x-2">
-                                                <button
-                                                    onClick={() => handleCopy(tag)}
-                                                    className="group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500"
-                                                    title={`复制：${tags.Server}/${repoName}:${tag.TagName}`}
-                                                >
-                                                    {copyStatus === tag.TagName ? (
-                                                        <svg className="w-5 h-5 text-green-500 dark:text-green-400"
-                                                             fill="none"
-                                                             viewBox="0 0 24 24"
-                                                             stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round"
-                                                                  strokeWidth={2}
-                                                                  d="M5 13l4 4L19 7"/>
-                                                        </svg>
-                                                    ) : (
-                                                        <svg
-                                                            className="w-5 h-5 text-gray-400 group-hover:text-gray-500 dark:text-gray-300 dark:group-hover:text-gray-400"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round"
-                                                                  strokeWidth={2}
-                                                                  d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
-                                                        </svg>
-                                                    )}
-                                                    <span className="sr-only">复制镜像地址</span>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteClick(tag)}
-                                                    disabled={deletingTag === tag.TagName}
-                                                    className={`group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500 ${
-                                                        deletingTag === tag.TagName ? 'opacity-50 cursor-not-allowed' : ''
-                                                    }`}
-                                                    title="删除标签"
-                                                >
-                                                    <svg className="w-5 h-5 text-red-500 dark:text-red-400" fill="none"
-                                                         viewBox="0 0 24 24"
-                                                         stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round"
-                                                              strokeWidth={2}
-                                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                        .dark .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+                                            background-color: rgba(75, 85, 99, 0.7);
+                                        }
+                                    `}</style>
+                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead className="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
+                                                    checked={selectedTags.size === tags.TagInfo.length}
+                                                    onChange={handleSelectAll}
+                                                />
+                                            </th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">标签</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">平台</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">系统</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">大小</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">推送时间</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody
+                                            className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        {tags.TagInfo.map((tag, index) => (
+                                            <tr key={`${tag.TagName}-${index}`}
+                                                className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
+                                                        checked={selectedTags.has(tag.TagName)}
+                                                        onChange={() => handleSelectTag(tag.TagName)}
+                                                    />
+                                                </td>
+                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-600 dark:text-blue-500">
+                                                    {tag.TagName}
+                                                </td>
+                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                    {tag.Architecture}
+                                                </td>
+                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                    {tag.OS}
+                                                </td>
+                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                    {formatSize(tag.SizeByte || tag.Size)}
+                                                </td>
+                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                    {tag.PushTime}
+                                                </td>
+                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                    <div className="flex items-center space-x-2">
+                                                        <button
+                                                            onClick={() => handleCopy(tag)}
+                                                            className="group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500"
+                                                            title={`复制：${tags.Server}/${repoName}:${tag.TagName}`}
+                                                        >
+                                                            {copyStatus === tag.TagName ? (
+                                                                <svg
+                                                                    className="w-5 h-5 text-green-500 dark:text-green-400"
+                                                                    fill="none"
+                                                                    viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round"
+                                                                          strokeWidth={2}
+                                                                          d="M5 13l4 4L19 7"/>
+                                                                </svg>
+                                                            ) : (
+                                                                <svg
+                                                                    className="w-5 h-5 text-gray-400 group-hover:text-gray-500 dark:text-gray-300 dark:group-hover:text-gray-400"
+                                                                    fill="none"
+                                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round"
+                                                                          strokeWidth={2}
+                                                                          d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                                                </svg>
+                                                            )}
+                                                            <span className="sr-only">复制镜像地址</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteClick(tag)}
+                                                            disabled={deletingTag === tag.TagName}
+                                                            className={`group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500 ${
+                                                                deletingTag === tag.TagName ? 'opacity-50 cursor-not-allowed' : ''
+                                                            }`}
+                                                            title="删除标签"
+                                                        >
+                                                            <svg className="w-5 h-5 text-red-500 dark:text-red-400"
+                                                                 fill="none"
+                                                                 viewBox="0 0 24 24"
+                                                                 stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round"
+                                                                      strokeWidth={2}
+                                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
 
-                        {/* 添加分页控件 */}
-                        <div className="mt-4 flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className={`px-3 py-1 rounded-md text-sm ${
-                                        currentPage === 1
-                                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
-                                            : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                                    }`}
-                                >
-                                    上一页
-                                </button>
-                                {[...Array(totalPages)].map((_, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handlePageChange(i + 1)}
-                                        className={`px-3 py-1 rounded-md text-sm ${
-                                            currentPage === i + 1
-                                                ? 'bg-blue-600 text-white dark:bg-blue-600 dark:text-white'
-                                                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                                        }`}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                ))}
-                                <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className={`px-3 py-1 rounded-md text-sm ${
-                                        currentPage === totalPages
-                                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
-                                            : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                                    }`}
-                                >
-                                    下一页
-                                </button>
+                                {/* 添加分页控件 */}
+                                <div className="mt-4 flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                            className={`px-3 py-1 rounded-md text-sm ${
+                                                currentPage === 1
+                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                                    : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                                            }`}
+                                        >
+                                            上一页
+                                        </button>
+                                        {[...Array(totalPages)].map((_, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => handlePageChange(i + 1)}
+                                                className={`px-3 py-1 rounded-md text-sm ${
+                                                    currentPage === i + 1
+                                                        ? 'bg-blue-600 text-white dark:bg-blue-600 dark:text-white'
+                                                        : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                                                }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
+                                        <button
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                            className={`px-3 py-1 rounded-md text-sm ${
+                                                currentPage === totalPages
+                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                                    : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                                            }`}
+                                        >
+                                            下一页
+                                        </button>
+                                    </div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                                        第 {currentPage} 页，共 {totalPages} 页
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-300">
+                                {searchKey ? '没有找到匹配的标签' : '暂无标签数据'}
                             </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                                第 {currentPage} 页，共 {totalPages} 页
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-300">
-                        {searchKey ? '没有找到匹配的标签' : '暂无标签数据'}
+                        )}
                     </div>
                 )}
             </FormModal>
