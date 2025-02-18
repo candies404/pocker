@@ -9,6 +9,9 @@ export default function TagListModal({isOpen, onClose, repoName}) {
     const [tags, setTags] = useState(null);
     const [copyStatus, setCopyStatus] = useState('');
     const [deletingTag, setDeletingTag] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
     const [deleteConfirm, setDeleteConfirm] = useState({
         show: false,
         tag: null,
@@ -23,23 +26,29 @@ export default function TagListModal({isOpen, onClose, repoName}) {
 
     useEffect(() => {
         if (isOpen && repoName) {
-            fetchTags();
+            fetchTags(currentPage);
         }
-    }, [isOpen, repoName]);
+    }, [isOpen, repoName, currentPage, pageSize]);
 
-    const fetchTags = async () => {
+    const fetchTags = async (page) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`/api/tcr/image-tags?repoName=${encodeURIComponent(repoName)}`, {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
+            const response = await fetch(
+                `/api/tcr/image-tags?repoName=${encodeURIComponent(repoName)}&page=${page}&pageSize=${pageSize}`,
+                {
+                    headers: {
+                        'x-access-key': getAccessKey(),
+                    },
+                }
+            );
             const data = await response.json();
 
             if (data.Data) {
                 setTags(data.Data);
+                // 计算总页数
+                const total = data.Data.TagCount || data.Data.TagInfo.length;
+                setTotalPages(Math.ceil(total / pageSize));
             } else {
                 setError('获取标签列表失败');
             }
@@ -178,7 +187,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
             const data = await response.json();
             if (data.success) {
                 setSelectedTags(new Set());
-                await fetchTags();
+                await fetchTags(currentPage);
             } else {
                 setError(data.message || '批量删除失败');
             }
@@ -191,6 +200,16 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                 repoName: null
             });
         }
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handlePageSizeChange = (e) => {
+        const newSize = parseInt(e.target.value);
+        setPageSize(newSize);
+        setCurrentPage(1); // 重置到第一页
     };
 
     return (
@@ -214,14 +233,32 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                 ) : tags?.TagInfo?.length > 0 ? (
                     <div>
                         <div className="mb-4 flex justify-between items-center">
-                            {selectedTags.size > 0 && (
-                                <button
-                                    onClick={handleBatchDelete}
-                                    className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-4 dark:focus:ring-red-600"
+                            <div className="flex items-center space-x-4">
+                                {selectedTags.size > 0 && (
+                                    <button
+                                        onClick={handleBatchDelete}
+                                        className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 dark:bg-red-700 dark:hover:bg-red-800"
+                                    >
+                                        批量删除 ({selectedTags.size})
+                                    </button>
+                                )}
+                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                                    总标签数：<span className="font-medium text-blue-600 dark:text-blue-400">{tags.TagCount || tags.TagInfo.length}</span>
+                                </span>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
+                                <select
+                                    value={pageSize}
+                                    onChange={handlePageSizeChange}
+                                    className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
-                                    批量删除 ({selectedTags.size})
-                                </button>
-                            )}
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
                         </div>
                         <div className="overflow-x-auto max-h-[calc(100vh-16rem)]">
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -320,6 +357,50 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                 ))}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* 添加分页控件 */}
+                        <div className="mt-4 flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className={`px-3 py-1 rounded-md text-sm ${
+                                        currentPage === 1
+                                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                            : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                                    }`}
+                                >
+                                    上一页
+                                </button>
+                                {[...Array(totalPages)].map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handlePageChange(i + 1)}
+                                        className={`px-3 py-1 rounded-md text-sm ${
+                                            currentPage === i + 1
+                                                ? 'bg-blue-600 text-white dark:bg-blue-600 dark:text-white'
+                                                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                                        }`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className={`px-3 py-1 rounded-md text-sm ${
+                                        currentPage === totalPages
+                                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                            : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                                    }`}
+                                >
+                                    下一页
+                                </button>
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                                第 {currentPage} 页，共 {totalPages} 页
+                            </div>
                         </div>
                     </div>
                 ) : (
