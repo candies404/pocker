@@ -268,7 +268,8 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                     </button>
                                 )}
                                 <span className="text-sm text-gray-600 dark:text-gray-300">
-                                    总标签数：<span className="font-medium text-blue-600 dark:text-blue-400">{tags.TagCount || tags.TagInfo.length}</span>
+                                    总标签数：<span
+                                    className="font-medium text-blue-600 dark:text-blue-400">{tags.TagCount || tags.TagInfo.length}</span>
                                 </span>
                             </div>
                             <div className="flex items-center space-x-4">
@@ -286,8 +287,10 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                             className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                                             title="清除搜索"
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor"
+                                                 viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                      d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
                                         </button>
                                     ) : null}
@@ -324,33 +327,33 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                     scrollbar-width: thin;
                                     scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
                                 }
-                                
+
                                 .dark .scrollbar-custom {
                                     scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
                                 }
-                                
+
                                 .scrollbar-custom::-webkit-scrollbar {
                                     width: 8px;
                                     height: 8px;
                                 }
-                                
+
                                 .scrollbar-custom::-webkit-scrollbar-track {
                                     background: transparent;
                                 }
-                                
+
                                 .scrollbar-custom::-webkit-scrollbar-thumb {
                                     background-color: rgba(156, 163, 175, 0.5);
                                     border-radius: 4px;
                                 }
-                                
+
                                 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
                                     background-color: rgba(156, 163, 175, 0.7);
                                 }
-                                
+
                                 .dark .scrollbar-custom::-webkit-scrollbar-thumb {
                                     background-color: rgba(75, 85, 99, 0.5);
                                 }
-                                
+
                                 .dark .scrollbar-custom::-webkit-scrollbar-thumb:hover {
                                     background-color: rgba(75, 85, 99, 0.7);
                                 }
