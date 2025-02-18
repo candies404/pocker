@@ -70,7 +70,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
         const fullImageUrl = `${tags.Server}/${repoName}:${tag.TagName}`;
         try {
             await navigator.clipboard.writeText(fullImageUrl);
-            setCopyStatus(tag.TagId);
+            setCopyStatus(tag.TagName);
             setTimeout(() => {
                 setCopyStatus('');
             }, 1500);
@@ -408,7 +408,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                                     className="group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500"
                                                     title={`复制：${tags.Server}/${repoName}:${tag.TagName}`}
                                                 >
-                                                    {copyStatus === tag.TagId ? (
+                                                    {copyStatus === tag.TagName ? (
                                                         <svg className="w-5 h-5 text-green-500 dark:text-green-400"
                                                              fill="none"
                                                              viewBox="0 0 24 24"
