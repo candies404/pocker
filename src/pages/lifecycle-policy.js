@@ -2,12 +2,17 @@ import {useEffect, useState} from 'react';
 import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import Navigation from '@/components/Navigation';
+import FormModal from '@/components/FormModal';
 
 export default function LifecyclePolicyPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [policy, setPolicy] = useState(null);
+    const [showSettingModal, setShowSettingModal] = useState(false);
+    const [settingType, setSettingType] = useState('global_keep_last_nums');
+    const [settingValue, setSettingValue] = useState('');
+    const [updating, setUpdating] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -48,6 +53,37 @@ export default function LifecyclePolicyPage() {
         return typeMap[type] || type;
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setUpdating(true);
+        try {
+            const response = await fetch('/api/tcr/update-lifecycle-policy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-key': getAccessKey(),
+                },
+                body: JSON.stringify({
+                    type: settingType,
+                    value: settingValue
+                }),
+            });
+
+            const data = await response.json();
+            if (data) {
+                await fetchPolicy();
+                setShowSettingModal(false);
+                setSettingValue('');
+            } else {
+                setError(data.message || '设置策略失败');
+            }
+        } catch (error) {
+            setError('设置策略失败');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -65,6 +101,15 @@ export default function LifecyclePolicyPage() {
             <Navigation/>
             <div className="container mx-auto p-4 mt-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">自动清理策略</h2>
+                        <button
+                            onClick={() => setShowSettingModal(true)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600"
+                        >
+                            设置策略
+                        </button>
+                    </div>
 
                     {error && (
                         <div
@@ -128,6 +173,77 @@ export default function LifecyclePolicyPage() {
                     )}
                 </div>
             </div>
+
+            <FormModal
+                isOpen={showSettingModal}
+                onClose={() => {
+                    setShowSettingModal(false);
+                    setError(null);
+                    setSettingValue('');
+                }}
+                title="设置清理策略"
+                isLoading={updating}
+            >
+                <form onSubmit={handleSubmit}>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                策略类型
+                            </label>
+                            <select
+                                value={settingType}
+                                onChange={(e) => setSettingType(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            >
+                                <option value="global_keep_last_nums">保留最新标签数</option>
+                                <option value="global_keep_last_days">保留最近天数</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {settingType === 'global_keep_last_nums' ? '保留数量' : '保留天数'}
+                            </label>
+                            <input
+                                type="number"
+                                value={settingValue}
+                                onChange={(e) => setSettingValue(e.target.value)}
+                                min="1"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                placeholder={settingType === 'global_keep_last_nums' ? '请输入保留的标签数量' : '请输入保留的天数'}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div className="mt-4 text-sm text-red-600 dark:text-red-400">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="mt-6 flex justify-end space-x-3">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowSettingModal(false);
+                                setError(null);
+                                setSettingValue('');
+                            }}
+                            className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                            disabled={updating}
+                        >
+                            取消
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:opacity-50"
+                            disabled={updating || !settingValue}
+                        >
+                            {updating ? '保存中...' : '保存'}
+                        </button>
+                    </div>
+                </form>
+            </FormModal>
         </div>
     );
 } 
