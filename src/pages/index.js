@@ -351,7 +351,7 @@ export default function HomePage() {
                                                 setSearchKey('');
                                                 fetchRepositories(1, '');
                                             }}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-500"
+                                            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-700"
                                             title="清除搜索"
                                         >
                                             <svg
@@ -369,6 +369,19 @@ export default function HomePage() {
                                             </svg>
                                         </button>
                                     )}
+                                    <svg
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                        />
+                                    </svg>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4">
