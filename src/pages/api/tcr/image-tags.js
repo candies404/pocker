@@ -6,7 +6,7 @@ const handler = async (req, res) => {
         return res.status(405).json({message: '方法不允许'});
     }
 
-    const {repoName, page = 1, pageSize = 10} = req.query;
+    const {repoName, page = 1, pageSize = 10, search = ''} = req.query;
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     if (!repoName) {
@@ -20,7 +20,8 @@ const handler = async (req, res) => {
         const result = await tcrClient.DescribeImagePersonal({
             RepoName: repoName,
             Offset: offset,
-            Limit: parseInt(pageSize)
+            Limit: parseInt(pageSize),
+            Tag: search.trim()
         });
         res.status(200).json(result);
     } catch (error) {

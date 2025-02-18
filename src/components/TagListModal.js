@@ -23,6 +23,8 @@ export default function TagListModal({isOpen, onClose, repoName}) {
         show: false,
         repoName: null
     });
+    const [searchKey, setSearchKey] = useState('');
+    const [searchTimeout, setSearchTimeout] = useState(null);
 
     useEffect(() => {
         if (isOpen && repoName) {
@@ -30,12 +32,12 @@ export default function TagListModal({isOpen, onClose, repoName}) {
         }
     }, [isOpen, repoName, currentPage, pageSize]);
 
-    const fetchTags = async (page) => {
+    const fetchTags = async (page, search = searchKey) => {
         setLoading(true);
         setError(null);
         try {
             const response = await fetch(
-                `/api/tcr/image-tags?repoName=${encodeURIComponent(repoName)}&page=${page}&pageSize=${pageSize}`,
+                `/api/tcr/image-tags?repoName=${encodeURIComponent(repoName)}&page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`,
                 {
                     headers: {
                         'x-access-key': getAccessKey(),
@@ -46,7 +48,6 @@ export default function TagListModal({isOpen, onClose, repoName}) {
 
             if (data.Data) {
                 setTags(data.Data);
-                // 计算总页数
                 const total = data.Data.TagCount || data.Data.TagInfo.length;
                 setTotalPages(Math.ceil(total / pageSize));
             } else {
@@ -212,6 +213,24 @@ export default function TagListModal({isOpen, onClose, repoName}) {
         setCurrentPage(1); // 重置到第一页
     };
 
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setSearchKey(value);
+
+        // 清除之前的定时器
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+
+        // 设置新的定时器，300ms 后执行搜索
+        const timeoutId = setTimeout(() => {
+            setCurrentPage(1); // 重置到第一页
+            fetchTags(1, value);
+        }, 300);
+
+        setSearchTimeout(timeoutId);
+    };
+
     return (
         <>
             <FormModal
@@ -247,6 +266,28 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                 </span>
                             </div>
                             <div className="flex items-center space-x-4">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={searchKey}
+                                        onChange={handleSearch}
+                                        placeholder="搜索标签..."
+                                        className="w-48 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400"
+                                    />
+                                    <svg
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                        />
+                                    </svg>
+                                </div>
                                 <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
                                 <select
                                     value={pageSize}
@@ -405,7 +446,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                     </div>
                 ) : (
                     <div className="text-center py-8 text-gray-500 dark:text-gray-300">
-                        暂无标签数据
+                        {searchKey ? '没有找到匹配的标签' : '暂无标签数据'}
                     </div>
                 )}
             </FormModal>
