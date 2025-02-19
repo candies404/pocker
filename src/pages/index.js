@@ -311,6 +311,33 @@ export default function HomePage() {
         }
     };
 
+    const handleToggleAccess = async (repo) => {
+        try {
+            const response = await fetch('/api/tcr/toggle-repo-access', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-key': getAccessKey(),
+                },
+                body: JSON.stringify({
+                    repoName: repo.RepoName,
+                    public: repo.Public === 1 ? 0 : 1
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 刷新列表
+                fetchRepositories(currentPage);
+            } else {
+                setError("修改访问级别失败：" + data.error);
+            }
+        } catch (error) {
+            setError('修改访问级别失败');
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-800">
@@ -493,7 +520,7 @@ export default function HomePage() {
                                                     {repo.PullCount}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {repo.Public ? '公开' : '私有'}
+                                                    {repo.Public === 1 ? '公开' : '私有'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     {repo.UpdateTime}
@@ -511,6 +538,13 @@ export default function HomePage() {
                                                             className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-600"
                                                         >
                                                             新增标签
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleToggleAccess(repo)}
+                                                            className="text-sm rounded px-2 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                                                            title={repo.Public === 1 ? "设为私有" : "设为公开"}
+                                                        >
+                                                            {repo.Public === 1 ? "私有" : "公开"}
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteClick(repo)}
