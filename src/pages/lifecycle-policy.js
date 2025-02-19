@@ -14,14 +14,19 @@ export default function LifecyclePolicyPage() {
     const [settingValue, setSettingValue] = useState('');
     const [updating, setUpdating] = useState(false);
     const [toggleLoading, setToggleLoading] = useState(false);
+    const [isAuth, setIsAuth] = useState(false);
 
     useEffect(() => {
-        if (!isAuthenticated()) {
-            router.push('/');
-            return;
+        setIsAuth(isAuthenticated());
+        setLoading(false);
+    }, []);
+
+    useEffect(() => {
+        if (isAuth) {
+            fetchPolicy();
         }
-        fetchPolicy();
-    }, [router]);
+    }, [isAuth]);
+
 
     const fetchPolicy = async () => {
         setLoading(true);
@@ -119,9 +124,16 @@ export default function LifecyclePolicyPage() {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <Navigation/>
-                <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
-                    <div
-                        className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500"></div>
+                <div className="container mx-auto p-4 mt-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                        <div className="flex justify-center items-center h-64">
+                            <div className="flex flex-col items-center">
+                                <div
+                                    className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500 mb-4"></div>
+                                <p className="text-gray-500 dark:text-gray-400">正在加载自动清理策略...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );

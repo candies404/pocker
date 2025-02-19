@@ -21,15 +21,18 @@ export default function NamespacesPage() {
         show: false,
         namespace: null
     });
+    const [isAuth, setIsAuth] = useState(false);
 
     useEffect(() => {
-        if (!isAuthenticated()) {
-            router.push('/');
-            return;
+        setIsAuth(isAuthenticated());
+        setLoading(false);
+    }, []);
+
+    useEffect(() => {
+        if (isAuth) {
+            fetchNamespaces(currentPage);
         }
-        fetchNamespaces(currentPage);
-        setError("")
-    }, [router, currentPage, pageSize]);
+    }, [isAuth, currentPage, pageSize]);
 
     const fetchNamespaces = async (page) => {
         setLoading(true);
@@ -152,9 +155,19 @@ export default function NamespacesPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-800">
-                <div
-                    className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500"></div>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                <Navigation/>
+                <div className="container mx-auto p-4 mt-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                        <div className="flex justify-center items-center h-64">
+                            <div className="flex flex-col items-center">
+                                <div
+                                    className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500 mb-4"></div>
+                                <p className="text-gray-500 dark:text-gray-400">正在加载命名空间...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

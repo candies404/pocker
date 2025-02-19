@@ -12,14 +12,33 @@ export default function QuotaPage() {
         namespaceCount: 0,
         repoCount: 0,
         tagCount: 0,
-        triggerCount: 0,
         loading: {
             namespace: true,
             repo: true,
             tag: true,
-            trigger: true
         }
     });
+    const [isAuth, setIsAuth] = useState(false);
+
+    useEffect(() => {
+        setIsAuth(isAuthenticated());
+        setLoading(false);
+    }, []);
+
+    useEffect(() => {
+        if (isAuth) {
+            // 并行发起所有请求
+            setLoading(true);
+            setError("");
+            Promise.all([
+                fetchQuotaData(),
+                fetchNamespaceCount(),
+                fetchRepoAndTagCount(),
+            ]).finally(() => {
+                setLoading(false);
+            });
+        }
+    }, [isAuth]);
 
     // 获取配额信息
     const fetchQuotaData = async () => {
@@ -108,40 +127,9 @@ export default function QuotaPage() {
         }
     };
 
-    // 获取触发器数量（如果有相关API的话）
-    const fetchTriggerCount = async () => {
-        try {
-            // 实现触发器数量获取逻辑
-            setUsageData(prev => ({
-                ...prev,
-                loading: {...prev.loading, trigger: false}
-            }));
-        } catch (error) {
-            console.error('获取触发器数量失败:', error);
-        }
-    };
-
-    useEffect(() => {
-        if (!isAuthenticated()) {
-            router.push('/');
-            return;
-        }
-
-        // 并行发起所有请求
-        Promise.all([
-            fetchQuotaData(),
-            fetchNamespaceCount(),
-            fetchRepoAndTagCount(),
-            fetchTriggerCount()
-        ]).finally(() => {
-            setLoading(false);
-        });
-    }, [router]);
-
     const isAllDataLoaded = !usageData.loading.namespace &&
         !usageData.loading.repo &&
-        !usageData.loading.tag &&
-        !usageData.loading.trigger;
+        !usageData.loading.tag;
 
     if (loading || !isAllDataLoaded) {
         return (
@@ -152,8 +140,8 @@ export default function QuotaPage() {
                         <div className="flex justify-center items-center h-64">
                             <div className="flex flex-col items-center">
                                 <div
-                                    className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-                                <p className="text-gray-500">正在加载配额信息...</p>
+                                    className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500 mb-4"></div>
+                                <p className="text-gray-500 dark:text-gray-400">正在加载配额信息...</p>
                             </div>
                         </div>
                     </div>
