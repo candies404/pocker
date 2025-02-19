@@ -65,7 +65,7 @@ export const createGithubRepo = async () => {
                 name: REPO_NAME,
                 private: true,
                 auto_init: true,
-                description: 'Docker Hub 配置仓库'
+                description: 'Docker 镜像私服中转仓库'
             })
         });
 
@@ -271,7 +271,7 @@ export const checkWorkflowRun = async () => {
     try {
         const username = await getUsername();
         const response = await fetch(
-            `https://api.github.com/repos/${username}/${REPO_NAME}/actions/runs?event=repository_dispatch`,
+            `https://api.github.com/repos/${username}/${REPO_NAME}/actions/runs?event=repository_dispatch&page=1&per_page=1&exclude_pull_requests=false`,
             {
                 headers: {
                     'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -298,4 +298,27 @@ export const checkWorkflowRun = async () => {
     } catch (error) {
         throw error;
     }
-}; 
+};
+
+export const getWorkflowList = async ({page = 1, per_page = 10} = {}) => {
+    try {
+        const username = await getUsername();
+        const response = await fetch(
+            `https://api.github.com/repos/${username}/${REPO_NAME}/actions/runs?event=repository_dispatch&exclude_pull_requests=false&page=${page}&per_page=${per_page}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('获取工作流列表失败');
+        }
+
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
+};

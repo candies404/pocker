@@ -8,9 +8,10 @@ export default function Navigation() {
 
     const menuItems = [
         {path: '/', label: '镜像仓库'},
+        {path: '/workflow-logs', label: '构建日志'},
         {path: '/namespaces', label: '命名空间'},
-        {path: '/github-config', label: 'GitHub配置'},
         {path: '/lifecycle-policy', label: '自动清理策略'},
+        {path: '/github-config', label: 'GitHub配置'},
         {path: '/quota', label: '配额信息'},
     ];
 
@@ -35,7 +36,6 @@ export default function Navigation() {
                 <div className="flex items-center justify-between h-16">
                     <div className="flex-shrink-0 flex flex-col items-start">
                         <span className="text-xl font-bold text-gray-800 dark:text-white">Docker 镜像私服</span>
-                        <span className="text-lg font-semibold text-gray-600 dark:text-gray-200 mt-1 ml-5">Make Docker Great Again</span>
                     </div>
                     <div className="flex items-center space-x-4">
                         <div className="flex space-x-4">

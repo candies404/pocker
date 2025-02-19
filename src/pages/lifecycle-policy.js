@@ -56,12 +56,12 @@ export default function LifecyclePolicyPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (settingType === 'global_keep_last_nums' && parseInt(settingValue) > 99) {
             setError('保留标签数量不能超过99个');
             return;
         }
-        
+
         setUpdating(true);
         try {
             const response = await fetch('/api/tcr/update-lifecycle-policy', {
@@ -133,7 +133,6 @@ export default function LifecyclePolicyPage() {
             <div className="container mx-auto p-4 mt-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">自动清理策略</h2>
                         <button
                             onClick={() => setShowSettingModal(true)}
                             className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600"
