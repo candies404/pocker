@@ -10,8 +10,8 @@ export default function Navigation() {
         {path: '/', label: '镜像仓库'},
         {path: '/workflow-logs', label: '构建日志'},
         {path: '/namespaces', label: '命名空间'},
-        {path: '/lifecycle-policy', label: '自动清理策略'},
         {path: '/github-config', label: 'GitHub配置'},
+        {path: '/lifecycle-policy', label: '自动清理策略'},
         {path: '/quota', label: '配额信息'},
     ];
 

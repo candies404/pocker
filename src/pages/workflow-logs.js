@@ -150,7 +150,7 @@ export default function WorkflowLogsPage() {
                                                 rel="noopener noreferrer"
                                                 className="hover:underline"
                                             >
-                                                {run.name}
+                                                {run.name} - {run.run_number}
                                             </a>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
