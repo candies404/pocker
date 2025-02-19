@@ -269,7 +269,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                 )}
                                 {tags?.TagInfo && (
                                     <span className="text-sm text-gray-600 dark:text-gray-300">
-                                        总标签数：<span className="font-medium text-blue-600 dark:text-blue-400">
+                                        标签总数：<span className="font-medium text-blue-600 dark:text-blue-400">
                                             {tags.TagCount || tags.TagInfo.length}
                                         </span>
                                     </span>

@@ -208,7 +208,7 @@ jobs:
         const checkResult = await checkWorkflowFile();
         const method = checkResult.exists ? 'PUT' : 'POST';
         const body = {
-            message: 'Update Docker publish workflow',
+            message: sourceImage,
             content: Buffer.from(workflowContent).toString('base64')
         };
 

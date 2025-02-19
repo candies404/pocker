@@ -89,7 +89,13 @@ export default function WorkflowLogsPage() {
             <div className="container mx-auto p-4 mt-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center space-x-4">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                            日志总数：
+                            <span className="font-medium text-blue-600 dark:text-blue-400">
+                                {logs?.total_count || 0}
+                            </span>
+                        </span>
+                        <div className="flex items-center space-x-2">
                             <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
                             <select
                                 value={pageSize}
@@ -120,16 +126,16 @@ export default function WorkflowLogsPage() {
                                         工作流
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        构建内容
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         状态
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         结果
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                        触发事件
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                        创建时间
+                                        构建时间
                                     </th>
                                 </tr>
                                 </thead>
@@ -146,6 +152,9 @@ export default function WorkflowLogsPage() {
                                             >
                                                 {run.name}
                                             </a>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
+                                            {run.head_commit.message}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
                                             {{
@@ -173,9 +182,6 @@ export default function WorkflowLogsPage() {
                                                     ? (run.conclusion === 'success' ? '成功' : '失败')
                                                     : '进行中'}
                                             </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
-                                            {run.event}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {run.created_at}

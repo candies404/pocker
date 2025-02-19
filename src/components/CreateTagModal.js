@@ -86,13 +86,14 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             setStatus('completed');
                             setTimeout(() => {
                                 onClose();
+                                window.location.reload();
                             }, 2000);
                         } else {
                             throw new Error(`工作流执行失败: ${conclusion}`);
                         }
                     }
                 }
-            }, 5000); // 每5秒检查一次
+            }, 5000);
 
             setCheckInterval(interval);
         } catch (error) {
@@ -116,7 +117,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             case 'error':
                 return '创建失败';
             default:
-                return '';
+                return '处理中...';
         }
     };
 
@@ -205,7 +206,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                     {status !== 'initial' && (
                         <div
                             className={`text-sm ${status === 'error' ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
-                            {getStatusText()}
+                            注：可以直接关闭，然后在《构建日志》里看日志
                         </div>
                     )}
 
@@ -227,9 +228,9 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                         <button
                             type="submit"
                             className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-blue-300 dark:text-white"
-                            disabled={creating || !sourceImage.trim() || !targetTag.trim()}
+                            disabled={creating || !sourceImage.trim() || !targetTag.trim() || status !== 'initial'}
                         >
-                            {creating ? '处理中...' : '确认创建'}
+                            {status !== 'initial' ? getStatusText() : (creating ? '处理中...' : '确认创建')}
                         </button>
                     </div>
                 </div>
