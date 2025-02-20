@@ -98,6 +98,43 @@ export const tourSteps = {
             }
         }
     ],
+    'workflow-logs': [
+        {
+            element: '#workflow-link',
+            popover: {
+                title: '构建日志详情',
+                description: '点击可以跳转到 GitHub Actions 查看详细的构建日志',
+                side: 'bottom',
+                align: 'start'
+            }
+        },
+        {
+            element: '#workflow-content',
+            popover: {
+                title: '构建内容',
+                description: 'Docker Hub的镜像名',
+                side: 'bottom',
+                align: 'start'
+            }
+        }, {
+            element: '#workflow-status',
+            popover: {
+                title: '构建状态',
+                description: '显示构建任务的执行状态',
+                side: 'bottom',
+                align: 'start'
+            }
+        },
+        {
+            element: '#workflow-result',
+            popover: {
+                title: '构建结果',
+                description: '显示构建任务的结果，成功or失败',
+                side: 'bottom',
+                align: 'start'
+            }
+        }
+    ],
     namespaces: [
         {
             element: '#create-namespace-btn',

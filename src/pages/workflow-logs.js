@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import Navigation from '@/components/Navigation';
+import { useTour } from '@/hooks/useTour';
 
 export default function WorkflowLogsPage() {
     const router = useRouter();
@@ -12,6 +13,7 @@ export default function WorkflowLogsPage() {
     const [pageSize, setPageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
     const [isAuth, setIsAuth] = useState(false);
+    const { startTour } = useTour('workflow-logs');
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -106,18 +108,26 @@ export default function WorkflowLogsPage() {
                                 {logs?.total_count || 0}
                             </span>
                         </span>
-                        <div className="flex items-center space-x-2">
-                            <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
-                            <select
-                                value={pageSize}
-                                onChange={handlePageSizeChange}
-                                className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                                <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
+                                <select
+                                    value={pageSize}
+                                    onChange={handlePageSizeChange}
+                                    className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                >
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                            <button
+                                onClick={startTour}
+                                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
                             >
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
-                            </select>
+                                查看引导
+                            </button>
                         </div>
                     </div>
 
@@ -133,16 +143,16 @@ export default function WorkflowLogsPage() {
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th id="workflow-link" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         工作流
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th id="workflow-content" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         构建内容
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th id="workflow-status" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         状态
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th id="workflow-result" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         结果
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
