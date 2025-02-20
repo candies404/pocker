@@ -130,7 +130,7 @@ export default function GithubConfigPage() {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <Navigation/>
-                <div className="container mx-auto p-4 mt-6">
+                <div className="container mx-auto p-4 mt-0">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                         <div className="flex justify-center items-center h-64">
                             <div className="flex flex-col items-center">
@@ -148,7 +148,7 @@ export default function GithubConfigPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <Navigation/>
-            <div className="container mx-auto p-4 mt-6">
+            <div className="container mx-auto p-4 mt-0">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
 
                     {error && (

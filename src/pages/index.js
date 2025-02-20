@@ -344,7 +344,7 @@ export default function HomePage() {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <Navigation/>
-                <div className="container mx-auto p-4 mt-6">
+                <div className="container mx-auto p-4 mt-0">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                         <div className="flex justify-center items-center h-64">
                             <div className="flex flex-col items-center">
@@ -363,7 +363,7 @@ export default function HomePage() {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <Navigation/>
-                <div className="container mx-auto p-4 mt-6">
+                <div className="container mx-auto p-4 mt-0">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                         <div className="flex justify-between items-center mb-6">
                             <div className="flex items-center space-x-4">
@@ -426,24 +426,26 @@ export default function HomePage() {
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4">
-                                <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
-                                <select
-                                    value={pageSize}
-                                    onChange={handlePageSizeChange}
-                                    className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                <div className="flex items-center space-x-2">
+                                    <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
+                                    <select
+                                        value={pageSize}
+                                        onChange={handlePageSizeChange}
+                                        className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    >
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="20">20</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                </div>
+                                <button
+                                    onClick={startTour}
+                                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
                                 >
-                                    <option value="5">5</option>
-                                    <option value="10">10</option>
-                                    <option value="20">20</option>
-                                    <option value="50">50</option>
-                                </select>
+                                    查看引导
+                                </button>
                             </div>
-                            <button
-                                onClick={startTour}
-                                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                            >
-                                查看引导
-                            </button>
                         </div>
 
                         {error && (
