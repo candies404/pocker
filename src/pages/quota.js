@@ -170,7 +170,7 @@ export default function QuotaPage() {
                                     资源类型
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    使用情况
+                                    已用/总数
                                 </th>
                             </tr>
                             </thead>
@@ -198,7 +198,7 @@ export default function QuotaPage() {
                                 </td>
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">标签总数</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">标签数量</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     <span
                                         className="text-blue-600 font-mono dark:text-blue-400">{usageData.tagCount}</span>

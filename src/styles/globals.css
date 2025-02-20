@@ -19,3 +19,32 @@ body {
     background: var(--background);
     font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Driver.js 主题定制 */
+.driverjs-theme {
+    @apply bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.driverjs-theme .driver-popover-title {
+    @apply text-lg font-semibold text-gray-900 dark:text-white mb-2;
+}
+
+.driverjs-theme .driver-popover-description {
+    @apply text-sm text-gray-600 dark:text-gray-300;
+}
+
+.driverjs-theme .driver-popover-footer button {
+    @apply px-3 py-1.5 rounded text-sm;
+}
+
+.driverjs-theme .driver-popover-footer .driver-next-btn {
+    @apply bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+}
+
+.driverjs-theme .driver-popover-footer .driver-prev-btn {
+    @apply text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700;
+}
+
+.driverjs-theme .driver-popover-footer .driver-close-btn {
+    @apply text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700;
+}

@@ -41,6 +41,7 @@ export default function Navigation() {
                         <div className="flex space-x-4">
                             {menuItems.map((item) => (
                                 <button
+                                    id={item.label}
                                     key={item.path}
                                     onClick={() => handleMenuClick(item.path)}
                                     className={`px-3 py-2 rounded-md text-sm font-medium ${

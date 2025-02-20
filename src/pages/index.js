@@ -6,6 +6,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
 import TagListModal from '@/components/TagListModal';
 import CreateTagModal from '@/components/CreateTagModal';
+import { useTour } from '@/hooks/useTour';
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function HomePage() {
     const [batchDeleting, setBatchDeleting] = useState(false);
     const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
     const [createTagRepo, setCreateTagRepo] = useState(null);
+    const { startTour } = useTour('home');
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -369,6 +371,7 @@ export default function HomePage() {
                                     镜像总数: {repositories?.TotalCount || 0}
                                 </div>
                                 <button
+                                    id="create-image-btn"
                                     onClick={handleOpenCreateModal}
                                     className="px-3 py-1.5 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-offset-gray-800"
                                 >
@@ -376,6 +379,7 @@ export default function HomePage() {
                                 </button>
                                 <div className="relative">
                                     <input
+                                        id="search-image"
                                         type="text"
                                         value={searchKey}
                                         onChange={handleSearch}
@@ -434,6 +438,12 @@ export default function HomePage() {
                                     <option value="50">50</option>
                                 </select>
                             </div>
+                            <button
+                                onClick={startTour}
+                                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                            >
+                                查看引导
+                            </button>
                         </div>
 
                         {error && (
