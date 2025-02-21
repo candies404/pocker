@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import Navigation from '@/components/Navigation';
-import { useTour } from '@/hooks/useTour';
+import {useTour} from '@/hooks/useTour';
 
 export default function WorkflowLogsPage() {
     const router = useRouter();
@@ -13,7 +13,7 @@ export default function WorkflowLogsPage() {
     const [pageSize, setPageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
     const [isAuth, setIsAuth] = useState(false);
-    const { startTour } = useTour('workflow-logs');
+    const {startTour} = useTour('workflow-logs');
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -43,6 +43,8 @@ export default function WorkflowLogsPage() {
             if (data.workflow_runs) {
                 setLogs(data);
                 setTotalPages(Math.ceil(data.total_count / pageSize));
+            } else if (data.error && data.error.includes("ResourceNotFound")) {
+                setError('获取构建日志失败：ResourceNotFound');
             } else {
                 setError('获取构建日志失败');
             }
@@ -134,7 +136,17 @@ export default function WorkflowLogsPage() {
                     {error && (
                         <div
                             className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
-                            <p className="text-sm">{error}</p>
+                            <p className="font-medium">错误提示</p>
+                            <p className="text-sm mt-1">{error}</p>
+                            {error.includes('ResourceNotFound') && (
+                                <a
+                                    href={`${window.location.origin}/github-config`}
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-600"
+                                >
+                                    请先配置您的GitHub仓库，点击此处前往配置
+                                </a>
+                            )}
                         </div>
                     )}
 
@@ -143,16 +155,20 @@ export default function WorkflowLogsPage() {
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th id="workflow-link" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th id="workflow-link"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         工作流
                                     </th>
-                                    <th id="workflow-content" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th id="workflow-content"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         构建内容
                                     </th>
-                                    <th id="workflow-status" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th id="workflow-status"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         状态
                                     </th>
-                                    <th id="workflow-result" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th id="workflow-result"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         结果
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
@@ -213,8 +229,35 @@ export default function WorkflowLogsPage() {
                             </table>
                         </div>
                     ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            暂无构建日志
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th id="workflow-link"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        工作流
+                                    </th>
+                                    <th id="workflow-content"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        构建内容
+                                    </th>
+                                    <th id="workflow-status"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        状态
+                                    </th>
+                                    <th id="workflow-result"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        结果
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        构建时间
+                                    </th>
+                                </tr>
+                                </thead>
+                            </table>
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                暂无构建日志
+                            </div>
                         </div>
                     )}
 

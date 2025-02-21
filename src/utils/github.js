@@ -314,7 +314,7 @@ export const getWorkflowList = async ({page = 1, per_page = 10} = {}) => {
         );
 
         if (!response.ok) {
-            throw new Error('获取工作流列表失败');
+            throw new Error('获取工作流列表失败：ResourceNotFound');
         }
 
         return await response.json();
