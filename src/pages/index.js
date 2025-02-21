@@ -6,7 +6,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
 import TagListModal from '@/components/TagListModal';
 import CreateTagModal from '@/components/CreateTagModal';
-import { useTour } from '@/hooks/useTour';
+import {useTour} from '@/hooks/useTour';
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -44,7 +44,7 @@ export default function HomePage() {
     const [batchDeleting, setBatchDeleting] = useState(false);
     const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
     const [createTagRepo, setCreateTagRepo] = useState(null);
-    const { startTour } = useTour('home');
+    const {startTour} = useTour('home');
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -495,22 +495,23 @@ export default function HomePage() {
                                                     onChange={handleSelectAll}
                                                 />
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            <th id="tag-list"
+                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 命名空间/镜像名称
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            <th id="tag-count"
+                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 标签数
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                拉取次数
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            <th id="access-level"
+                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 访问级别
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 更新时间
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            <th id="repo-actions"
+                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 操作
                                             </th>
                                         </tr>
@@ -537,9 +538,6 @@ export default function HomePage() {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     {repo.TagCount}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {repo.PullCount}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     {repo.Public === 1 ? '公开' : '私有'}

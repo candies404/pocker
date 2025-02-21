@@ -4,6 +4,7 @@ import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
+import {useTour} from '@/hooks/useTour';
 
 export default function NamespacesPage() {
     const router = useRouter();
@@ -22,6 +23,7 @@ export default function NamespacesPage() {
         namespace: null
     });
     const [isAuth, setIsAuth] = useState(false);
+    const {startTour} = useTour('namespaces');
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -183,6 +185,7 @@ export default function NamespacesPage() {
                                 命名空间总数: {namespaces?.NamespaceCount || 0}
                             </div>
                             <button
+                                id="create-namespace-btn"
                                 onClick={() => setShowCreateModal(true)}
                                 className="px-3 py-1.5 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-500"
                             >
@@ -190,17 +193,25 @@ export default function NamespacesPage() {
                             </button>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
-                            <select
-                                value={pageSize}
-                                onChange={handlePageSizeChange}
-                                className="border border-gray-300 rounded-md px-2 py-1 text-sm dark:border-gray-600 dark:text-white bg-white dark:bg-gray-700"
+                            <div className="flex items-center space-x-2">
+                                <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
+                                <select
+                                    value={pageSize}
+                                    onChange={handlePageSizeChange}
+                                    className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                >
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                            <button
+                                onClick={startTour}
+                                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
                             >
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
-                            </select>
+                                查看引导
+                            </button>
                         </div>
                     </div>
 
@@ -231,13 +242,15 @@ export default function NamespacesPage() {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                             命名空间
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        <th id="repository-count"
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                             仓库数量
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                             创建时间
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        <th id="del-namespace"
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                                             操作
                                         </th>
                                     </tr>
