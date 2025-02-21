@@ -219,13 +219,23 @@ export const tourSteps = {
             }
         }
     ],
-    lifecycle: [
+    'github-config': [
         {
-            element: '#set-policy-btn',
+            element: '#repo-status',
             popover: {
-                title: '设置清理策略',
-                description: '设置自动清理策略，管理镜像生命周期',
-                position: 'bottom'
+                title: 'GitHub Repo 配置',
+                description: '显示 GitHub 私有仓库的状态，这个仓库用于存储 CI/CD 构建工作流，中转 Docker Hub 镜像至腾讯云镜像仓库',
+                side: 'right',
+                align: 'start'
+            }
+        },
+        {
+            element: '#workflow-status',
+            popover: {
+                title: 'GitHub Actions 工作流',
+                description: '显示 GitHub Actions 工作流的配置内容',
+                side: 'right',
+                align: 'start'
             }
         }
     ]

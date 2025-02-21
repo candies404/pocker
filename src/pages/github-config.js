@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import Navigation from '@/components/Navigation';
 import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
+import {useTour} from '@/hooks/useTour';
 
 export default function GithubConfigPage() {
     const router = useRouter();
@@ -14,6 +15,7 @@ export default function GithubConfigPage() {
     const [workflowContent, setWorkflowContent] = useState(null);
     const [creatingWorkflow, setCreatingWorkflow] = useState(false);
     const [isAuth, setIsAuth] = useState(false);
+    const {startTour} = useTour('github-config');
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -150,6 +152,14 @@ export default function GithubConfigPage() {
             <Navigation/>
             <div className="container mx-auto p-4 mt-0">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                    <div className="flex justify-end items-center mb-6">
+                        <button
+                            onClick={startTour}
+                            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                        >
+                            查看引导
+                        </button>
+                    </div>
 
                     {error && (
                         <div
@@ -160,7 +170,7 @@ export default function GithubConfigPage() {
 
                     {repoExists ? (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-medium dark:text-white">GitHub Repo 配置</h3>
+                            <h3 id="repo-status" className="text-lg font-medium dark:text-white">GitHub Repo 配置</h3>
                             <div
                                 className="bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-gray-300 text-green-700 dark:text-emerald-400 px-4 py-3 rounded-lg">
                                 <p className="font-semibold">配置仓库已存在</p>
@@ -197,7 +207,8 @@ export default function GithubConfigPage() {
 
                     {repoExists && (
                         <div className="mt-8 space-y-4">
-                            <h3 className="text-lg font-medium dark:text-white">GitHub Actions 配置</h3>
+                            <h3 id="workflow-status" className="text-lg font-medium dark:text-white">GitHub Actions
+                                配置</h3>
                             {workflowExists ? (
                                 <div className="space-y-4">
                                     <p className="text-sm text-gray-500 dark:text-gray-300">
