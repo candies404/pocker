@@ -455,7 +455,7 @@ export default function HomePage() {
                                 <p className="text-sm mt-1">{error}</p>
                                 {error.includes('ResourceNotFound.ErrNoUser') && (
                                     <a
-                                        href="https://console.cloud.tencent.com/tcr/repository"
+                                        href="https://console.cloud.tencent.com/tcr/?rid=1"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-600"

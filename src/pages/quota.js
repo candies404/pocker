@@ -29,18 +29,44 @@ export default function QuotaPage() {
 
     useEffect(() => {
         if (isAuth) {
-            // 并行发起所有请求
-            setLoading(true);
-            setError("");
-            Promise.all([
-                fetchQuotaData(),
-                fetchNamespaceCount(),
-                fetchRepoAndTagCount(),
-            ]).finally(() => {
-                setLoading(false);
-            });
+            // 检查命名空间是否已初始化
+            checkNamespaceInitialization();
         }
     }, [isAuth]);
+
+    const checkNamespaceInitialization = async () => {
+        try {
+            const response = await fetch('/api/tcr/namespaces?pageSize=1', {
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const data = await response.json();
+            if (data.Data) {
+                // 并行发起所有请求
+                setLoading(true);
+                setError("");
+                Promise.all([
+                    fetchQuotaData(),
+                    fetchNamespaceCount(),
+                    fetchRepoAndTagCount(),
+                ]).finally(() => {
+                    setLoading(false);
+                });
+            } else if (data.code === "ResourceNotFound.ErrNoUser") {
+                setError('获取命名空间失败：ResourceNotFound.ErrNoUser');
+                setUsageData(prev => ({
+                    ...prev,
+                    loading: {...prev.loading, namespace: false, repo: false, tag: false}
+                }));
+            } else {
+                setError('获取命名空间列表失败');
+            }
+        } catch (error) {
+            setError('获取命名空间信息失败');
+            setLoading(false);
+        }
+    };
 
     // 获取配额信息
     const fetchQuotaData = async () => {
@@ -169,7 +195,18 @@ export default function QuotaPage() {
                     {error && (
                         <div
                             className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
-                            <p className="text-sm">{error}</p>
+                            <p className="font-medium">错误提示</p>
+                            <p className="text-sm mt-1">{error}</p>
+                            {error.includes('ResourceNotFound.ErrNoUser') && (
+                                <a
+                                    href="https://console.cloud.tencent.com/tcr/?rid=1"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-600"
+                                >
+                                    您还没开通镜像服务，点击此处前往腾讯云控制台初始化
+                                </a>
+                            )}
                         </div>
                     )}
 

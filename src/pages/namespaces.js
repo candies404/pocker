@@ -46,14 +46,14 @@ export default function NamespacesPage() {
                 },
             });
             const data = await response.json();
-
-            if (data.success === false) {
-                setError(data.message);
-            } else {
+            if (data.Data) {
                 setNamespaces(data.Data);
-                // 计算总页数
                 const total = data.Data.NamespaceCount;
                 setTotalPages(Math.ceil(total / pageSize));
+            } else if (data.code === "ResourceNotFound.ErrNoUser") {
+                setError('获取命名空间列表失败：ResourceNotFound.ErrNoUser');
+            } else {
+                setError('获取命名空间列表失败');
             }
             setLoading(false);
         } catch (error) {
@@ -217,17 +217,17 @@ export default function NamespacesPage() {
 
                     {error && (
                         <div
-                            className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4 dark:bg-red-500 dark:border-red-600 dark:text-white">
+                            className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
                             <p className="font-medium">错误提示</p>
                             <p className="text-sm mt-1">{error}</p>
                             {error.includes('ResourceNotFound.ErrNoUser') && (
                                 <a
-                                    href="https://console.cloud.tencent.com/tcr/repository"
+                                    href="https://console.cloud.tencent.com/tcr/?rid=1"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-500"
+                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-600"
                                 >
-                                    点击此处前往控制台初始化
+                                    您还没开通镜像服务，点击此处前往腾讯云控制台初始化
                                 </a>
                             )}
                         </div>
