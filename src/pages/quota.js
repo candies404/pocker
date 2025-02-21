@@ -214,10 +214,10 @@ export default function QuotaPage() {
                         <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
                             <thead>
                             <tr className="bg-gray-50 dark:bg-gray-700">
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th id="repoType" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     资源类型
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th id="quota" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     已用/总数
                                 </th>
                             </tr>

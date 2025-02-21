@@ -455,6 +455,7 @@ export default function HomePage() {
                                 <p className="text-sm mt-1">{error}</p>
                                 {error.includes('ResourceNotFound.ErrNoUser') && (
                                     <a
+                                        id="TencentCloudServiceInitialization"
                                         href="https://console.cloud.tencent.com/tcr/?rid=1"
                                         target="_blank"
                                         rel="noopener noreferrer"

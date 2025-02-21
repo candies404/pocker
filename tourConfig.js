@@ -9,6 +9,7 @@ export const tourSteps = {
             }
         },
         {
+            element: '#TencentCloudServiceInitialization',
             popover: {
                 title: '腾讯云服务初始化',
                 description: '请先完成腾讯云服务配置：<br/>- 访问 <a href="https://console.cloud.tencent.com/tcr/repository" target="_blank">腾讯云控制台</a><br/>- 完成以下操作：<br/> 1. 开通容器镜像服务<br/> 2. 获取API访问密钥',
@@ -241,19 +242,19 @@ export const tourSteps = {
     ],
     quota: [
         {
-            element: '#quota',
+            element: '#repoType',
             popover: {
-                title: '命名空间配额',
-                description: '显示当前账号可创建的命名空间数量及已使用数量',
+                title: '资源类型概览',
+                description: '展示命名空间、仓库和标签的数量信息',
                 side: 'bottom',
                 align: 'start'
             }
         },
         {
-            element: '#repo-quota',
+            element: '#quota',
             popover: {
-                title: '仓库配额',
-                description: '显示当前账号可创建的镜像仓库数量及已使用数量',
+                title: '配额详情',
+                description: '显示当前账号已创建的资源数量及可使用的总数量',
                 side: 'bottom',
                 align: 'start'
             }
