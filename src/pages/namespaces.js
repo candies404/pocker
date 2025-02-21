@@ -333,9 +333,32 @@ export default function NamespacesPage() {
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            暂无命名空间数据
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        命名空间
+                                    </th>
+                                    <th id="repository-count"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        仓库数量
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        创建时间
+                                    </th>
+                                    <th id="del-namespace"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        操作
+                                    </th>
+                                </tr>
+                                </thead>
+                            </table>
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                暂无命名空间数据
+                            </div>
                         </div>
+
                     )}
                 </div>
             </div>

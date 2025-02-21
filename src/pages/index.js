@@ -643,9 +643,37 @@ export default function HomePage() {
 
                             </>
                         ) : (
-                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                暂无仓库数据
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead className="bg-gray-50 dark:bg-gray-700">
+                                    <tr>
+                                        <th id="tag-list"
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            命名空间/镜像名称
+                                        </th>
+                                        <th id="tag-count"
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            标签数
+                                        </th>
+                                        <th id="access-level"
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            访问级别
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            更新时间
+                                        </th>
+                                        <th id="repo-actions"
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            操作
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                    暂无仓库数据
+                                </div>
                             </div>
+
                         )}
                     </div>
                 </div>
