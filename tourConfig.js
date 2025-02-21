@@ -238,6 +238,26 @@ export const tourSteps = {
                 align: 'start'
             }
         }
+    ],
+    quota: [
+        {
+            element: '#quota',
+            popover: {
+                title: '命名空间配额',
+                description: '显示当前账号可创建的命名空间数量及已使用数量',
+                side: 'bottom',
+                align: 'start'
+            }
+        },
+        {
+            element: '#repo-quota',
+            popover: {
+                title: '仓库配额',
+                description: '显示当前账号可创建的镜像仓库数量及已使用数量',
+                side: 'bottom',
+                align: 'start'
+            }
+        }
     ]
 };
 

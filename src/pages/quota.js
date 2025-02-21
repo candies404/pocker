@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import Navigation from '@/components/Navigation';
 import {useRouter} from 'next/router';
+import {useTour} from '@/hooks/useTour';
 
 export default function QuotaPage() {
     const router = useRouter();
@@ -19,6 +20,7 @@ export default function QuotaPage() {
         }
     });
     const [isAuth, setIsAuth] = useState(false);
+    const {startTour} = useTour('quota');
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -155,6 +157,15 @@ export default function QuotaPage() {
             <Navigation/>
             <div className="container mx-auto p-4 mt-0">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                    <div className="flex justify-end items-center mb-6">
+                        <button
+                            onClick={startTour}
+                            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                        >
+                            查看引导
+                        </button>
+                    </div>
+
                     {error && (
                         <div
                             className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
