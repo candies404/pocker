@@ -1,5 +1,6 @@
 import {updateWorkflowFile} from '@/utils/github';
 import {withAuth} from '@/utils/withAuth';
+import {tcrClient} from "@/utils/tcr";
 
 const handler = async (req, res) => {
     if (req.method !== 'POST') {
@@ -16,7 +17,8 @@ const handler = async (req, res) => {
     }
 
     try {
-        const result = await updateWorkflowFile(sourceImage, targetImage);
+        const tenCentUserName = await getTenCentUsername();
+        const result = await updateWorkflowFile(sourceImage, targetImage, tenCentUserName);
         res.status(200).json({
             success: true,
             data: result
@@ -26,6 +28,15 @@ const handler = async (req, res) => {
             success: false,
             message: error.message
         });
+    }
+};
+
+const getTenCentUsername = async () => {
+    try {
+        const result = await tcrClient.DescribeUserQuotaPersonal();
+        return result.Data.LimitInfo[0].Username;
+    } catch (error) {
+        throw error;
     }
 };
 

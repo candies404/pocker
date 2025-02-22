@@ -1,7 +1,7 @@
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_NAME = 'myDockerHub';
 
-// 获取当前用户信息
+// 获取当前github用户信息
 const getUsername = async () => {
     try {
         if (!GITHUB_TOKEN) {
@@ -65,7 +65,7 @@ export const createGithubRepo = async () => {
                 name: REPO_NAME,
                 private: true,
                 auto_init: true,
-                description: 'Docker 镜像私服中转仓库'
+                description: '我的Docker Hub镜像私服中转仓库'
             })
         });
 
@@ -137,11 +137,11 @@ jobs:
 
       - name: Tag the image for Tencent
         run: |
-          docker tag 源Docker Hub镜像地址 目标Docker Hub镜像地址
+          docker tag 源Docker Hub镜像地址 目标容器镜像地址
 
       - name: Push the image to Tencent Docker Hub
         run: |
-          docker push 目标Docker Hub镜像地址
+          docker push 目标容器镜像地址
 `;
 
         const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}/contents/${WORKFLOW_FILE}`, {
@@ -168,7 +168,7 @@ jobs:
 };
 
 // 更新工作流文件
-export const updateWorkflowFile = async (sourceImage, targetImage) => {
+export const updateWorkflowFile = async (sourceImage, targetImage, tenCentUserName) => {
     try {
         const username = await getUsername();
         const workflowContent = `
@@ -192,7 +192,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ccr.ccs.tencentyun.com
-          username: ${process.env.TENCENTCLOUD_USERNAME}
+          username: ${tenCentUserName}
           password: ${process.env.TENCENTCLOUD_PASSWORD}
 
       - name: Tag the image for Tencent
