@@ -86,7 +86,7 @@ export default function HomePage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-
+        setLoading(true);
         try {
             const response = await fetch('/api/verify-key', {
                 method: 'POST',
@@ -106,6 +106,8 @@ export default function HomePage() {
             }
         } catch (err) {
             setError('验证过程出错');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -177,6 +179,8 @@ export default function HomePage() {
         const fullRepoName = `${selectedNamespace}/${newRepoName.trim()}`;
 
         setCreating(true);
+        setError(null);
+
         try {
             const response = await fetch('/api/tcr/create-repository', {
                 method: 'POST',
@@ -205,6 +209,7 @@ export default function HomePage() {
             setError('创建仓库失败');
         } finally {
             setCreating(false);
+            setLoading(false);
         }
     };
 
@@ -253,6 +258,7 @@ export default function HomePage() {
                 show: false,
                 repo: null
             });
+            setLoading(false);
         }
     };
 
@@ -310,6 +316,7 @@ export default function HomePage() {
         } finally {
             setBatchDeleting(false);
             setBatchDeleteConfirm(false);
+            setLoading(false);
         }
     };
 
@@ -337,6 +344,8 @@ export default function HomePage() {
             }
         } catch (error) {
             setError('修改访问级别失败');
+        } finally {
+            setLoading(false);
         }
     };
 
