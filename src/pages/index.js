@@ -671,7 +671,7 @@ export default function HomePage() {
                                     </thead>
                                 </table>
                                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                    暂无仓库数据
+                                    暂无镜像数据
                                 </div>
                             </div>
 
