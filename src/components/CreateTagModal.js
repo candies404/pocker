@@ -86,8 +86,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             setStatus('completed');
                             setTimeout(() => {
                                 onClose();
-                                window.location.reload();
-                            }, 2000);
+                            }, 1000);
                         } else {
                             throw new Error(`工作流执行失败: ${conclusion}`);
                         }

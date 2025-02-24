@@ -32,6 +32,8 @@ export default function HomePage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newRepoName, setNewRepoName] = useState('');
     const [creating, setCreating] = useState(false);
+    const [verifying, setVerifying] = useState(false);
+    const [fetchNameSpacesIng, setFetchNameSpacesIng] = useState(false);
     const [namespaces, setNamespaces] = useState([]);
     const [selectedNamespace, setSelectedNamespace] = useState('');
     const [deletingRepo, setDeletingRepo] = useState(null);
@@ -86,7 +88,7 @@ export default function HomePage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
+        setVerifying(true)
         try {
             const response = await fetch('/api/verify-key', {
                 method: 'POST',
@@ -107,7 +109,7 @@ export default function HomePage() {
         } catch (err) {
             setError('验证过程出错');
         } finally {
-            setLoading(false);
+            setVerifying(false);
         }
     };
 
@@ -157,12 +159,15 @@ export default function HomePage() {
             }
         } catch (error) {
             setError('获取命名空间列表失败');
+        } finally {
+            setFetchNameSpacesIng(false)
         }
     };
 
-    const handleOpenCreateModal = () => {
+    const handleOpenCreateModal = async () => {
         setShowCreateModal(true);
-        fetchNamespaces();
+        setFetchNameSpacesIng(true)
+        await fetchNamespaces();
     };
 
     const handleCreateRepository = async (e) => {
@@ -200,7 +205,7 @@ export default function HomePage() {
                 setNewRepoName('');
                 setSelectedNamespace('');
                 // 刷新列表
-                fetchRepositories(currentPage);
+                await fetchRepositories(currentPage);
             } else {
                 setError("创建仓库失败：" + data.error);
                 setShowCreateModal(false);
@@ -246,7 +251,7 @@ export default function HomePage() {
 
             if (data.success) {
                 // 刷新列表
-                fetchRepositories(currentPage);
+                await fetchRepositories(currentPage);
             } else {
                 setError("删除仓库失败：" + data.error);
             }
@@ -307,7 +312,7 @@ export default function HomePage() {
 
             if (data.success) {
                 setSelectedRepos(new Set());
-                fetchRepositories(currentPage);
+                await fetchRepositories(currentPage);
             } else {
                 setError("批量删除仓库失败：" + data.error);
             }
@@ -322,6 +327,7 @@ export default function HomePage() {
 
     const handleToggleAccess = async (repo) => {
         try {
+            setLoading(true);
             const response = await fetch('/api/tcr/toggle-repo-access', {
                 method: 'POST',
                 headers: {
@@ -338,7 +344,7 @@ export default function HomePage() {
 
             if (data.success) {
                 // 刷新列表
-                fetchRepositories(currentPage);
+                await fetchRepositories(currentPage);
             } else {
                 setError("修改访问级别失败：" + data.error);
             }
@@ -348,6 +354,12 @@ export default function HomePage() {
             setLoading(false);
         }
     };
+
+
+    const handleCloseCreateTagModal = async (repo) => {
+        setCreateTagRepo(null);
+        await fetchRepositories(currentPage);
+    }
 
     if (loading) {
         return (
@@ -706,7 +718,8 @@ export default function HomePage() {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-600 dark:focus:border-blue-600 dark:bg-gray-700 dark:text-white"
                                 disabled={creating || namespaces.length === 0}
                             >
-                                {namespaces.length === 0 ? (
+                                {fetchNameSpacesIng === true ? (
+                                    <option value="">获取中...</option>) : (namespaces.length === 0 ? (
                                     <option value="">暂无可用命名空间，请先创建</option>
                                 ) : (
                                     namespaces.map((ns) => (
@@ -714,7 +727,7 @@ export default function HomePage() {
                                             {ns.Namespace}
                                         </option>
                                     ))
-                                )}
+                                ))}
                             </select>
                         </div>
                         <div className="mb-4">
@@ -797,7 +810,7 @@ export default function HomePage() {
                 {createTagRepo && (
                     <CreateTagModal
                         isOpen={!!createTagRepo}
-                        onClose={() => setCreateTagRepo(null)}
+                        onClose={() => handleCloseCreateTagModal()}
                         repoName={createTagRepo.RepoName.split('/')[1]}
                         namespace={createTagRepo.RepoName.split('/')[0]}
                     />
@@ -833,7 +846,7 @@ export default function HomePage() {
                             type="submit"
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
                         >
-                            验证
+                            {verifying ? '验证中...' : '验证'}
                         </button>
                     </div>
                 </form>
