@@ -235,7 +235,7 @@ export default function QuotaPage() {
                                 </td>
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">仓库数量</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">镜像数量</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     <span
                                         className="text-blue-600 font-mono dark:text-blue-400">{usageData.repoCount}</span>
