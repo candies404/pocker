@@ -12,6 +12,7 @@ export default function Navigation() {
         {path: '/namespaces', label: '命名空间'},
         {path: '/github-config', label: 'GitHub配置'},
         {path: '/quota', label: '配额信息'},
+        {path: '/donate', label: '支持项目'},
     ];
 
     const handleLogout = () => {
