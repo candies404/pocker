@@ -824,7 +824,7 @@ export default function HomePage() {
             <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                 <div>
                     <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                        请输入访问密钥
+                        Docker 镜像私服
                     </h2>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -834,7 +834,7 @@ export default function HomePage() {
                             value={key}
                             onChange={(e) => setKey(e.target.value)}
                             className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="请输入密钥"
+                            placeholder="请输入访问密钥"
                             required
                         />
                     </div>

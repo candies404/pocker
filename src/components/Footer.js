@@ -5,8 +5,8 @@ export default function Footer() {
                 <p className="text-sm">版本: 0.1.0</p>
                 <p className="text-sm">作者: scoful</p>
                 <p className="text-sm">
-                    博客: <a href="https://github.com/scoful" target="_blank" rel="noopener noreferrer"
-                             className="underline text-blue-400 hover:text-blue-300">https://github.com/scoful</a>
+                    项目地址: <a href="https://github.com/scoful/pocker" target="_blank" rel="noopener noreferrer"
+                             className="underline text-blue-400 hover:text-blue-300">https://github.com/scoful/pocker</a>
                 </p>
                 <p className="text-sm italic">Slogan: Make Docker Great Again</p>
             </div>
