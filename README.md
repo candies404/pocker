@@ -1,6 +1,7 @@
 # Pocker
+**_让每个人都有自己的 Docker 私服，Make Docker Great Again。_**
 
-一个基于 Next.js 开发的全栈 Docker 镜像仓库管理系统，用于把Docker Hub上的镜像中转到腾讯云容器镜像服务（TCR）个人版中，并提供UI管理。
+一个基于 Next.js 开发的全栈 Docker 镜像仓库管理系统，用于把 Docker Hub 上的镜像，中转到腾讯云容器镜像服务（TCR）个人版中，一键部署，从此告别 Pull 卡顿和数据安全担忧，我的 Docker 我做主。
 
 ## 快速开始
 ### 部署
@@ -13,15 +14,16 @@
 
 - ACCESS_KEY，本系统鉴权密钥，自己设置一个，用来登陆
 - Region，建议直接填：**ap-guangzhou**
-- TENCENTCLOUD_SECRET_ID，腾讯云SecretId，创建一个新的，_**注：仅需要QcloudTCRFullAccess权限**_
-- TENCENTCLOUD_SECRET_KEY，腾讯云SecretKey，创建一个新的，_**注：仅需要QcloudTCRFullAccess权限**_
-- TENCENTCLOUD_PASSWORD，腾讯云镜像容器服务页面设置的login密码，初始化容器镜像服务的时候会要求填。
-- GITHUB_TOKEN，GitHub的密钥，_**注：权限只需要勾选workflow**_
+- TENCENTCLOUD_SECRET_ID，[腾讯云](https://console.cloud.tencent.com/cam) SecretId，创建一个新的，_**注：权限仅需要勾选 QcloudTCRFullAccess**_
+- TENCENTCLOUD_SECRET_KEY，[腾讯云](https://console.cloud.tencent.com/cam) SecretKey，同上
+- TENCENTCLOUD_PASSWORD，[腾讯云](https://console.cloud.tencent.com/tcr) 镜像容器服务页面设置的 login 密码，初始化容器镜像服务的时候会要求填。
+- GITHUB_TOKEN，[GitHub](https://github.com/settings/tokens/new) 的密钥，创建一个新的，有效期建议永久， _**注：权限只需要勾选 workflow**_
 
 ### 设置Vercel环境变量
-- 点上面一键部署后，Settings-Environment Variables，把上面获取的环境变量一个一个填好，然后重新部署一次，over，enjoy
+- 先一键部署[![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker&showOptionalTeamCreation=false)，跑起来后
+- Settings - Environment Variables，把上面获取的环境变量一个一个填好，然后重新部署一次，over，enjoy！！！
 
-## 详细在线文档
+## 详细文档
 - 写作ing
 
 ## 主要功能
@@ -84,3 +86,17 @@ npm start
 ## 许可证
 
 MIT
+
+## ❤️ 支持项目
+
+如果这个项目对你有帮助，欢迎请作者喝杯瑞幸，一杯在手，幸运共有 ☕
+
+<div align="center">
+  <img src="http://scoful-picgo.oss-ap-southeast-1.aliyuncs.com/picgo/wx.jpg" alt="微信" width="300" />
+  <img src="http://scoful-picgo.oss-ap-southeast-1.aliyuncs.com/picgo/zfb.jpg" alt="支付宝" width="300" />
+</div>
+
+## Star 趋势
+[![Stargazers over time](https://starchart.cc/scoful/pocker.svg?variant=adaptive)](https://starchart.cc/scoful/pocker)
+
+You are my ![Visitor Count](https://profile-counter.glitch.me/scoful/count.svg)th visitor
