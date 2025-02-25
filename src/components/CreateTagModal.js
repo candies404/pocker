@@ -163,9 +163,19 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                            Docker Hub 镜像地址
-                        </label>
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Docker Hub 镜像地址
+                            </label>
+                            <a
+                                href="https://hub.docker.com/search"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                                点击跳往Docker Hub获取
+                            </a>
+                        </div>
                         <input
                             type="text"
                             value={sourceImage}
