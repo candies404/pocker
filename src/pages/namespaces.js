@@ -5,8 +5,9 @@ import {useRouter} from 'next/router';
 import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
 import {useTour} from '@/hooks/useTour';
+import withPageAuth from '@/utils/withPageAuth';
 
-export default function NamespacesPage() {
+function NamespacesPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [namespaces, setNamespaces] = useState(null);
@@ -419,4 +420,6 @@ export default function NamespacesPage() {
             </FormModal>
         </div>
     );
-} 
+}
+
+export default withPageAuth(NamespacesPage); 

@@ -1,22 +1,11 @@
 import {useEffect, useState} from 'react';
 import {getAccessKey, isAuthenticated, setAccessKey} from '@/utils/auth';
-import {Geist, Geist_Mono} from "next/font/google";
 import Navigation from '@/components/Navigation';
 import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
 import TagListModal from '@/components/TagListModal';
 import CreateTagModal from '@/components/CreateTagModal';
 import {useTour} from '@/hooks/useTour';
-
-const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
-});
 
 export default function HomePage() {
     const [key, setKey] = useState('');
@@ -110,7 +99,7 @@ export default function HomePage() {
             if (data.success) {
                 setAccessKey(key);
                 setIsAuth(true);
-                
+
                 // 检查是否首次访问首页
                 const hasSeenTour = localStorage.getItem(`tour_home`);
                 if (!hasSeenTour) {

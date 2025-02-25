@@ -3,8 +3,9 @@ import Navigation from '@/components/Navigation';
 import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import {useTour} from '@/hooks/useTour';
+import withPageAuth from '@/utils/withPageAuth';
 
-export default function GithubConfigPage() {
+function GithubConfigPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -241,4 +242,6 @@ export default function GithubConfigPage() {
             </div>
         </div>
     );
-} 
+}
+
+export default withPageAuth(GithubConfigPage); 

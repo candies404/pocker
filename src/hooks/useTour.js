@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { driver } from 'driver.js';
+import {useEffect, useState} from 'react';
+import {driver} from 'driver.js';
 import 'driver.js/dist/driver.css';
-import { tourSteps, defaultOptions } from '../../tourConfig';
-import { isAuthenticated } from '@/utils/auth';
+import {defaultOptions, tourSteps} from '../../tourConfig';
+import {isAuthenticated} from '@/utils/auth';
 
 export function useTour(pageName) {
     const [driverObj, setDriverObj] = useState(null);
@@ -17,7 +17,7 @@ export function useTour(pageName) {
 
         // 检查是否是首次访问该页面
         const hasSeenTour = localStorage.getItem(`tour_${pageName}`);
-        
+
         // 如果是首次访问且页面已加载完成
         if (!hasSeenTour && document.readyState === 'complete') {
             // 首页需要检查登录状态
@@ -25,7 +25,7 @@ export function useTour(pageName) {
                 // 首页且未登录，不显示引导
                 return;
             }
-            
+
             // 稍微延迟启动引导，确保页面元素已完全渲染
             setTimeout(() => {
                 driverInstance.drive();
@@ -48,5 +48,5 @@ export function useTour(pageName) {
         }
     };
 
-    return { startTour };
+    return {startTour};
 }

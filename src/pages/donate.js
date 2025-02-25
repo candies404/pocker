@@ -1,6 +1,7 @@
 import Navigation from '@/components/Navigation';
+import withPageAuth from '@/utils/withPageAuth';
 
-export default function DonatePage() {
+function DonatePage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <Navigation/>
@@ -36,4 +37,6 @@ export default function DonatePage() {
             </div>
         </div>
     );
-} 
+}
+
+export default withPageAuth(DonatePage); 

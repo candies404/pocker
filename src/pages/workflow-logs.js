@@ -3,8 +3,9 @@ import {getAccessKey, isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import Navigation from '@/components/Navigation';
 import {useTour} from '@/hooks/useTour';
+import withPageAuth from '@/utils/withPageAuth';
 
-export default function WorkflowLogsPage() {
+function WorkflowLogsPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -310,4 +311,6 @@ export default function WorkflowLogsPage() {
             </div>
         </div>
     );
-} 
+}
+
+export default withPageAuth(WorkflowLogsPage); 
