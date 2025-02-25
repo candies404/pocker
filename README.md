@@ -26,6 +26,12 @@
 4. 添加完成后，点击 Redeploy 重新部署项目
 5. 部署完成后即可开始使用系统，尽情体验吧！
 
+## 系统截图
+<div align="center">
+  <img src=".github/screenShots/1.png" alt="1" width="1500" />
+  <img src=".github/screenShots/2.png" alt="2" width="1500" />
+</div>
+
 ## 详细文档
 - 写作ing
 
