@@ -173,7 +173,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                                 rel="noopener noreferrer"
                                 className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                             >
-                                点击跳往Docker Hub获取
+                                前往Docker Hub搜索镜像
                             </a>
                         </div>
                         <input
