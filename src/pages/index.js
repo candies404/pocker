@@ -46,7 +46,8 @@ export default function HomePage() {
     const [batchDeleting, setBatchDeleting] = useState(false);
     const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
     const [createTagRepo, setCreateTagRepo] = useState(null);
-    const {startTour} = useTour('home');
+    const {startTour, shouldShowTour} = useTour('home');
+    const [showTour, setShowTour] = useState(false);
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -58,6 +59,12 @@ export default function HomePage() {
             fetchRepositories(currentPage);
         }
     }, [isAuth, currentPage, pageSize]);
+
+    useEffect(() => {
+        if (isAuth && shouldShowTour) {
+            startTour();
+        }
+    }, [isAuth, shouldShowTour]);
 
     const fetchRepositories = async (page, search = searchKey) => {
         setLoading(true);
@@ -103,6 +110,15 @@ export default function HomePage() {
             if (data.success) {
                 setAccessKey(key);
                 setIsAuth(true);
+                
+                // 检查是否首次访问首页
+                const hasSeenTour = localStorage.getItem(`tour_home`);
+                if (!hasSeenTour) {
+                    // 登录成功后延迟一点时间再显示引导，确保页面已经渲染完成
+                    setTimeout(() => {
+                        startTour();
+                    }, 500);
+                }
             } else {
                 setError('密钥无效');
             }
