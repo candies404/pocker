@@ -1,7 +1,7 @@
 # Pocker
 **_让每个人都有自己的 Docker 私服，Make Docker Great Again。_**
 
-一个基于 Next.js 开发的全栈 Docker 镜像仓库管理系统，用于把 Docker Hub 上的镜像，中转到腾讯云容器镜像服务（TCR）个人版中，一键部署，从此告别 Pull 卡顿和数据安全担忧，我的 Docker 我做主。
+一个基于 Next.js 开发的全栈 Docker 镜像仓库管理系统，专为将 Docker Hub 镜像高效转存至腾讯云容器镜像服务（TCR）个人版而设计。支持一键部署，彻底解决镜像拉取缓慢问题，保障数据安全，让您完全掌控自己的 Docker 环境，我的 Docker 我做主。
 
 ## 快速开始
 ### 部署
@@ -12,16 +12,19 @@
 
 ### 获取环境变量
 
-- ACCESS_KEY，本系统鉴权密钥，自己设置一个，用来登陆
+- ACCESS_KEY，系统登录凭证，请设置一个安全的密钥值，用于系统身份验证和访问控制
 - Region，建议直接填：**ap-guangzhou**
-- TENCENTCLOUD_SECRET_ID，[腾讯云](https://console.cloud.tencent.com/cam) SecretId，创建一个新的，_**注：权限仅需要勾选 QcloudTCRFullAccess**_
-- TENCENTCLOUD_SECRET_KEY，[腾讯云](https://console.cloud.tencent.com/cam) SecretKey，同上
-- TENCENTCLOUD_PASSWORD，[腾讯云](https://console.cloud.tencent.com/tcr) 镜像容器服务页面设置的 login 密码，初始化容器镜像服务的时候会要求填。
-- GITHUB_TOKEN，[GitHub](https://github.com/settings/tokens/new) 的密钥，创建一个新的，有效期建议永久， _**注：权限只需要勾选 workflow**_
+- TENCENTCLOUD_SECRET_ID，访问[腾讯云控制台](https://console.cloud.tencent.com/cam)创建并获取SecretId，**_注意：创建时只需授予 QcloudTCRFullAccess 权限即可_**
+- TENCENTCLOUD_SECRET_KEY，访问[腾讯云控制台](https://console.cloud.tencent.com/cam)获取SecretKey，**_注意：与SecretId配套使用，同样只需授予 QcloudTCRFullAccess 权限_**
+- TENCENTCLOUD_PASSWORD，访问[腾讯云容器镜像服务](https://console.cloud.tencent.com/tcr)控制台，填写您在初始化容器镜像服务时设置的登录密码。
+- GITHUB_TOKEN，访问[GitHub令牌设置](https://github.com/settings/tokens/new)创建一个新的访问令牌，有效期建议设置为永久，**_注意：权限仅需勾选 workflow 即可_**
 
 ### 设置Vercel环境变量
-- 先一键部署[![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker&showOptionalTeamCreation=false)，跑起来后
-- Settings - Environment Variables，把上面获取的环境变量一个一个填好，然后重新部署一次，over，enjoy！！！
+1. 点击右边一键部署按钮 [![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker&showOptionalTeamCreation=false) 完成初始部署
+2. 在Vercel项目控制面板中，进入 Settings → Environment Variables 页面
+3. 将上述获取的所有环境变量依次添加到配置中
+4. 添加完成后，点击 Redeploy 重新部署项目
+5. 部署完成后即可开始使用系统，尽情体验吧！
 
 ## 详细文档
 - 写作ing
