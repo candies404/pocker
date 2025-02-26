@@ -1,22 +1,31 @@
-// 在客户端存储密钥
-export const setAccessKey = (key) => {
-    localStorage.setItem('access_key', key);
+// 获取当前域名作为key的前缀
+const getDomainPrefix = () => {
+    if (typeof window !== 'undefined') {
+        return window.location.hostname + '_';
+    }
+    return '';
 };
 
-// 获取存储的密钥
+// 设置访问密钥
+export const setAccessKey = (key) => {
+    const prefix = getDomainPrefix();
+    localStorage.setItem(prefix + 'accessKey', key);
+};
+
+// 获取访问密钥
 export const getAccessKey = () => {
-    if (typeof window !== 'undefined') {
-        return localStorage.getItem('access_key');
-    }
-    return null;
+    const prefix = getDomainPrefix();
+    return localStorage.getItem(prefix + 'accessKey');
+};
+
+// 清除访问密钥
+export const clearAuth = () => {
+    const prefix = getDomainPrefix();
+    localStorage.removeItem(prefix + 'accessKey');
 };
 
 // 检查是否已认证
 export const isAuthenticated = () => {
-    return !!getAccessKey();
+    const prefix = getDomainPrefix();
+    return !!localStorage.getItem(prefix + 'accessKey');
 };
-
-// 清除认证
-export const clearAuth = () => {
-    localStorage.removeItem('access_key');
-}; 
