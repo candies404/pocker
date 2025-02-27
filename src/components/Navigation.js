@@ -35,7 +35,7 @@ export default function Navigation() {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex-shrink-0 flex flex-col items-start">
-                        <span className="text-xl font-bold text-gray-800 dark:text-white">Docker 镜像私服</span>
+                        <span className="text-xl font-bold text-gray-800 dark:text-white">Docker 镜像私服 - Pocker</span>
                     </div>
                     <div className="flex items-center space-x-4">
                         <div className="flex space-x-4">
