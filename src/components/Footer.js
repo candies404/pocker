@@ -12,8 +12,8 @@ export default function Footer() {
                              className="text-blue-600 hover:text-blue-700 dark:text-blue-400">{APP_CONFIG.author}</a>
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                    <a href={APP_CONFIG.github} target="_blank" rel="noopener noreferrer"
-                       className="text-blue-600 hover:text-blue-700 dark:text-blue-400">GitHub</a>
+                    项目地址：<a href={APP_CONFIG.github} target="_blank" rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-700 dark:text-blue-400">GitHub</a>
                 </p>
                 <p className="text-sm italic text-gray-500 dark:text-gray-400 mt-1">
                     {APP_CONFIG.description}

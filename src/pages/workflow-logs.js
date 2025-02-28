@@ -4,6 +4,7 @@ import {useRouter} from 'next/router';
 import Navigation from '@/components/Navigation';
 import {useTour} from '@/hooks/useTour';
 import withPageAuth from '@/utils/withPageAuth';
+import {APP_CONFIG} from '@/config/version';
 
 function WorkflowLogsPage() {
     const router = useRouter();
@@ -125,12 +126,23 @@ function WorkflowLogsPage() {
                                     <option value="50">50</option>
                                 </select>
                             </div>
-                            <button
-                                onClick={startTour}
-                                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                            >
-                                查看引导
-                            </button>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={startTour}
+                                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                                >
+                                    查看引导
+                                </button>
+                                <span className="text-gray-300 dark:text-gray-600">|</span>
+                                <a
+                                    href={APP_CONFIG.docs}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                                >
+                                    查看文档
+                                </a>
+                            </div>
                         </div>
                     </div>
 
