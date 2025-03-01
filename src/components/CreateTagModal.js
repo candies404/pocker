@@ -18,6 +18,16 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         };
     }, [checkInterval]);
 
+    const handleSourceImageChange = (e) => {
+        setSourceImage(e.target.value);
+    };
+
+    // 在焦点丢失时触发的函数
+    const handleBlur = (e) => {
+        // 这里可以添加触发的逻辑，比如验证或保存数据
+        checkSourceImageChange(e);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!sourceImage.trim() || !targetTag.trim()) {
@@ -121,7 +131,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
     };
 
     // 添加处理 docker pull 命令的函数
-    const handleSourceImageChange = (e) => {
+    const checkSourceImageChange = (e) => {
         const value = e.target.value;
 
         // 检查是否是 docker pull 格式
@@ -150,6 +160,12 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             if (value && !value.includes(':')) {
                 setSourceImage(`${value}:latest`);
                 setTargetTag('latest');
+            } else {
+                // 提取标签
+                const tagMatch = value.match(/:([^/]+)$/);
+                if (tagMatch) {
+                    setTargetTag(tagMatch[1]);
+                }
             }
         }
     };
@@ -180,6 +196,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             type="text"
                             value={sourceImage}
                             onChange={handleSourceImageChange}
+                            onBlur={handleBlur}
                             placeholder="例如：nginx:alpine 或 docker pull nginx:alpine"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-400 dark:focus:border-blue-400"
                             disabled={creating}
