@@ -140,7 +140,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
 
             // 如果没有标签，自动添加 latest
             if (!imageAddress.includes(':')) {
-                setSourceImage(`${imageAddress}:latest`);
+                setSourceImage(`${imageAddress}`);
                 setTargetTag('latest');
             } else {
                 // 设置源镜像地址
@@ -158,7 +158,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
 
             // 如果输入的是不带标签的镜像名，自动添加 latest
             if (value && !value.includes(':')) {
-                setSourceImage(`${value}:latest`);
+                setSourceImage(`${value}`);
                 setTargetTag('latest');
             } else {
                 // 提取标签
