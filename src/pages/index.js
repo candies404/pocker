@@ -132,19 +132,14 @@ export default function HomePage() {
     const handleSearch = (e) => {
         const value = e.target.value;
         setSearchKey(value);
+    };
 
-        // 清除之前的定时器
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
-        }
-
-        // 设置新的定时器，300ms 后执行搜索
-        const timeoutId = setTimeout(() => {
+    // 新增处理回车事件的函数
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            fetchRepositories(1, searchKey); // 触发搜索
             setCurrentPage(1); // 重置到第一页
-            fetchRepositories(1, value);
-        }, 300);
-
-        setSearchTimeout(timeoutId);
+        }
     };
 
     const fetchNamespaces = async () => {
@@ -410,6 +405,7 @@ export default function HomePage() {
                                         type="text"
                                         value={searchKey}
                                         onChange={handleSearch}
+                                        onKeyPress={handleKeyPress}
                                         placeholder="搜索镜像名称"
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                                     />
