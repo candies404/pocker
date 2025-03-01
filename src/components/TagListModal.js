@@ -24,7 +24,6 @@ export default function TagListModal({isOpen, onClose, repoName}) {
         repoName: null
     });
     const [searchKey, setSearchKey] = useState('');
-    const [searchTimeout, setSearchTimeout] = useState(null);
 
     useEffect(() => {
         if (isOpen && repoName) {
@@ -216,19 +215,18 @@ export default function TagListModal({isOpen, onClose, repoName}) {
     const handleSearch = (e) => {
         const value = e.target.value;
         setSearchKey(value);
+    };
 
-        // 清除之前的定时器
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            fetchTags(1);
+            setCurrentPage(1);
         }
+    };
 
-        // 设置新的定时器，300ms 后执行搜索
-        const timeoutId = setTimeout(() => {
-            setCurrentPage(1); // 重置到第一页
-            fetchTags(1, value);
-        }, 300);
-
-        setSearchTimeout(timeoutId);
+    const handleSearchClick = () => {
+        fetchTags(1);
+        setCurrentPage(1);
     };
 
     const handleClearSearch = () => {
@@ -281,6 +279,7 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                         type="text"
                                         value={searchKey}
                                         onChange={handleSearch}
+                                        onKeyPress={handleKeyPress}
                                         placeholder="搜索标签"
                                         className="w-48 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400"
                                     />
@@ -297,19 +296,22 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                                             </svg>
                                         </button>
                                     ) : null}
-                                    <svg
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                        />
-                                    </svg>
+                                    <button onClick={handleSearchClick}
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                        <svg
+                                            className="w-4 h-4 text-gray-400 dark:text-gray-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                            />
+                                        </svg>
+                                    </button>
                                 </div>
                                 <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
                                 <select
