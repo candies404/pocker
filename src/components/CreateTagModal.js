@@ -36,8 +36,19 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         }
 
         setCreating(true);
-        setStatus('updating');
+        setStatus('checking'); // 设置状态为检查中
         setError(null);
+
+        // 检查源镜像地址是否存在
+        const exists = await checkSourceImageExists(sourceImage.trim());
+        if (!exists) {
+            setError('Docker Hub 镜像地址输入错误，请检查，建议去 Docker Hub 复制指令。');
+            setCreating(false); // 结束创建状态
+            setStatus('initial'); // 重置状态
+            return;
+        }
+
+        setStatus('updating'); // 更新状态
 
         try {
             // 构建目标镜像地址
@@ -57,11 +68,14 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             });
 
             if (!updateResponse.ok) {
-                throw new Error('更新工作流文件失败');
+                setError('更新工作流文件失败');
+                setCreating(false); // 结束创建状态
+                setStatus('initial'); // 重置状态
+                return;
             }
 
             // 2. 触发工作流
-            setStatus('triggering');
+            setStatus('triggering'); // 更新状态
             const triggerResponse = await fetch('/api/github/trigger-workflow', {
                 method: 'POST',
                 headers: {
@@ -70,11 +84,14 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             });
 
             if (!triggerResponse.ok) {
-                throw new Error('触发工作流失败');
+                setError('触发工作流失败');
+                setCreating(false); // 结束创建状态
+                setStatus('initial'); // 重置状态
+                return;
             }
 
             // 3. 开始检查工作流状态
-            setStatus('checking');
+            setStatus('checking'); // 更新状态
             const interval = setInterval(async () => {
                 const checkResponse = await fetch('/api/github/check-workflow-run', {
                     headers: {
@@ -84,7 +101,10 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
 
                 if (!checkResponse.ok) {
                     clearInterval(interval);
-                    throw new Error('检查工作流状态失败');
+                    setError('检查工作流状态失败');
+                    setCreating(false); // 结束创建状态
+                    setStatus('initial'); // 重置状态
+                    return;
                 }
 
                 const data = await checkResponse.json();
@@ -98,7 +118,9 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                                 onClose();
                             }, 1000);
                         } else {
-                            throw new Error(`工作流执行失败: ${conclusion}`);
+                            setError(`工作流执行失败: ${conclusion}，具体错误日志请看《构建日志》`);
+                            setCreating(false); // 结束创建状态
+                            setStatus('initial'); // 重置状态
                         }
                     }
                 }
@@ -109,7 +131,23 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             setError(error.message);
             setStatus('error');
         } finally {
-            setCreating(false);
+            setCreating(false); // 结束创建状态
+        }
+    };
+
+    // 检查源镜像地址是否存在的函数
+    const checkSourceImageExists = async (image) => {
+        try {
+            const response = await fetch(`/api/dockerHub/check-repository-tag?image=${encodeURIComponent(image)}`, {
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const data = await response.json();
+            return data.exists; // 假设 API 返回 { exists: true/false }
+        } catch (error) {
+            console.error('检查源镜像地址失败:', error);
+            return false; // 网络错误处理
         }
     };
 
@@ -140,7 +178,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
 
             // 如果没有标签，自动添加 latest
             if (!imageAddress.includes(':')) {
-                setSourceImage(`${imageAddress}`);
+                setSourceImage(`${imageAddress}:latest`);
                 setTargetTag('latest');
             } else {
                 // 设置源镜像地址
@@ -158,7 +196,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
 
             // 如果输入的是不带标签的镜像名，自动添加 latest
             if (value && !value.includes(':')) {
-                setSourceImage(`${value}`);
+                setSourceImage(`${value}:latest`);
                 setTargetTag('latest');
             } else {
                 // 提取标签
@@ -189,7 +227,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                                 rel="noopener noreferrer"
                                 className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                             >
-                                前往Docker Hub搜索镜像
+                                前往 Docker Hub 搜索镜像
                             </a>
                         </div>
                         <input
