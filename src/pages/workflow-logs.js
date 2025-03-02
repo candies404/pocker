@@ -57,6 +57,11 @@ function WorkflowLogsPage() {
         }
     };
 
+    const convertUTCToLocal = (utcDate) => {
+        const date = new Date(utcDate);
+        return date.toLocaleString();
+    };
+
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -234,7 +239,7 @@ function WorkflowLogsPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {run.created_at}
+                                            {convertUTCToLocal(run.created_at)}
                                         </td>
                                     </tr>
                                 ))}
