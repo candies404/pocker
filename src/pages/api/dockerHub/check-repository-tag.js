@@ -28,6 +28,9 @@ const handler = async (req, res) => {
         repository = image;
     }
 
+    // 判断是否为官方镜像
+    const isOfficial = namespace === 'library';
+
     // API URL
     const apiUrl = `https://hub.docker.com/v2/namespaces/${namespace}/repositories/${repository}/tags/${tag}`;
 
@@ -43,9 +46,9 @@ const handler = async (req, res) => {
         });
 
         if (response.status === 200) {
-            return res.status(200).json({exists: true});
+            return res.status(200).json({exists: true, isOfficial});
         } else if (response.status === 404) {
-            return res.status(404).json({exists: false});
+            return res.status(404).json({exists: false, isOfficial});
         } else {
             return res.status(500).json({error: '请求失败'});
         }

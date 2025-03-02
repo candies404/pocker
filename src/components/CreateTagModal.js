@@ -36,11 +36,11 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         }
 
         setCreating(true);
-        setStatus('checking'); // 设置状态为检查中
+        setStatus('examining'); // 设置状态为检查中
         setError(null);
 
         // 检查源镜像地址是否存在
-        const exists = await checkSourceImageExists(sourceImage.trim());
+        const {exists, isOfficial: official} = await checkSourceImageExists(sourceImage.trim());
         if (!exists) {
             setError('Docker Hub 镜像地址输入错误，请检查，建议去 Docker Hub 复制指令。');
             setCreating(false); // 结束创建状态
@@ -144,15 +144,17 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                 },
             });
             const data = await response.json();
-            return data.exists; // 假设 API 返回 { exists: true/false }
+            return {exists: data.exists, isOfficial: data.isOfficial}; // 返回存在性和是否为官方镜像
         } catch (error) {
             console.error('检查源镜像地址失败:', error);
-            return false; // 网络错误处理
+            return {exists: false, isOfficial: false}; // 网络错误处理
         }
     };
 
     const getStatusText = () => {
         switch (status) {
+            case 'examining':
+                return '正在检查源镜像地址...';
             case 'updating':
                 return '正在更新工作流文件...';
             case 'triggering':
