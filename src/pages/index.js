@@ -38,6 +38,7 @@ export default function HomePage() {
     const [createTagRepo, setCreateTagRepo] = useState(null);
     const {startTour, shouldShowTour} = useTour('home');
     const [showTour, setShowTour] = useState(false);
+    const [server, setServer] = useState(false);
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -68,6 +69,7 @@ export default function HomePage() {
             const data = await response.json();
             if (data.Data) {
                 setRepositories(data.Data);
+                setServer(data.Data.Server)
                 const total = data.Data.TotalCount;
                 setTotalPages(Math.ceil(total / pageSize));
             } else if (data.code === "ResourceNotFound.ErrNoUser") {
@@ -812,6 +814,7 @@ export default function HomePage() {
                     isOpen={!!selectedRepo}
                     onClose={() => setSelectedRepo(null)}
                     repoName={selectedRepo}
+                    server={server}
                 />
 
                 {/* 批量删除确认模态框 */}

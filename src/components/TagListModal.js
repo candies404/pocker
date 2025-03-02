@@ -3,7 +3,7 @@ import FormModal from '@/components/FormModal';
 import {getAccessKey} from '@/utils/auth';
 import ConfirmModal from '@/components/ConfirmModal';
 
-export default function TagListModal({isOpen, onClose, repoName}) {
+export default function TagListModal({isOpen, onClose, repoName, server}) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [tags, setTags] = useState(null);
@@ -24,10 +24,12 @@ export default function TagListModal({isOpen, onClose, repoName}) {
         repoName: null
     });
     const [searchKey, setSearchKey] = useState('');
+    const [username, setUsername] = useState('');
 
     useEffect(() => {
         if (isOpen && repoName) {
             fetchTags(currentPage);
+            fetchUsername();
         }
     }, [isOpen, repoName, currentPage, pageSize]);
 
@@ -56,6 +58,22 @@ export default function TagListModal({isOpen, onClose, repoName}) {
             setError('获取标签列表失败');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchUsername = async () => {
+        try {
+            const response = await fetch('/api/tcr/quota', {
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const data = await response.json();
+            if (data && data.Data.LimitInfo[0].Username) {
+                setUsername(data.Data.LimitInfo[0].Username);
+            }
+        } catch (error) {
+            console.error('获取用户名失败:', error);
         }
     };
 
@@ -255,6 +273,13 @@ export default function TagListModal({isOpen, onClose, repoName}) {
                     </div>
                 ) : (
                     <div>
+                        <p className="text-sm text-yellow-600 font-bold mt-4">
+                            <span className="font-semibold">💡</span> 请确保在首次使用前运行以下命令：
+                            <code className="font-mono text-yellow-700 dark:text-yellow-500">
+                                docker login {server} --username={username}
+                            </code><br/>
+                            <span className="font-semibold">🔑</span> 密码就是环境变量 TENCENTCLOUD_PASSWORD 的值
+                        </p>
                         <div className="mb-4 flex justify-between items-center">
                             <div className="flex items-center space-x-4">
                                 {selectedTags.size > 0 && (
