@@ -370,6 +370,11 @@ export default function HomePage() {
         await fetchRepositories(currentPage);
     }
 
+    const handleCloseTagListModal = async (repo) => {
+        setSelectedRepo(null);
+        await fetchRepositories(currentPage);
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -812,7 +817,7 @@ export default function HomePage() {
                 {/* 标签列表模态框 */}
                 <TagListModal
                     isOpen={!!selectedRepo}
-                    onClose={() => setSelectedRepo(null)}
+                    onClose={() => handleCloseTagListModal()}
                     repoName={selectedRepo}
                     server={server}
                 />
