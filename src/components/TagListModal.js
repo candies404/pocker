@@ -553,8 +553,6 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                 message={`确定要删除标签 "${deleteConfirm.tag?.TagName}" 吗？此操作不可恢复。`}
                 confirmText="删除"
                 cancelText="取消"
-                confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-                cancelButtonClass="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
                 isLoading={!!deletingTag}
             />
 
@@ -570,8 +568,6 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                 message={`确定要从仓库 "${batchDeleteConfirm.repoName}" 中删除选中的 ${selectedTags.size} 个标签吗？此操作不可恢复。`}
                 confirmText="删除"
                 cancelText="取消"
-                confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-                cancelButtonClass="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
                 isLoading={batchDeleting}
             />
         </>

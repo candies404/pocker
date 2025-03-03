@@ -385,8 +385,6 @@ function NamespacesPage() {
                 message={`确定要删除命名空间 "${deleteConfirm.namespace}" 吗？此操作不可恢复。`}
                 confirmText="删除"
                 cancelText="取消"
-                confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-                cancelButtonClass="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300"
                 isLoading={!!deletingNamespace}
             />
 
