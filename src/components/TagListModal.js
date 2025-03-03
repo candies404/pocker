@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import FormModal from '@/components/FormModal';
+import Modal from '@/components/Modal';
 import {getAccessKey} from '@/utils/auth';
 import ConfirmModal from '@/components/ConfirmModal';
 
@@ -255,7 +255,7 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
 
     return (
         <>
-            <FormModal
+            <Modal
                 isOpen={isOpen}
                 onClose={onClose}
                 title={`镜像标签列表 - ${repoName}`}
@@ -542,7 +542,7 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                         )}
                     </div>
                 )}
-            </FormModal>
+            </Modal>
 
             {/* 删除确认模态框 */}
             <ConfirmModal

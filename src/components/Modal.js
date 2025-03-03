@@ -1,19 +1,27 @@
 import React, {useEffect} from 'react';
 import ReactDOM from 'react-dom';
 
+// 用于追踪打开的模态框数量
+let openModalsCount = 0;
+
 const Modal = ({isOpen, onClose, title, onOverlayClick, maxWidth = "md:w-1/2", children}) => {
     useEffect(() => {
         if (isOpen) {
-            // 禁用背景滚动
-            document.body.style.overflow = 'hidden';
-        } else {
-            // 恢复背景滚动
-            document.body.style.overflow = 'unset';
+            // 第一个模态框打开时禁用滚动
+            if (openModalsCount === 0) {
+                document.body.style.overflow = 'hidden';
+            }
+            openModalsCount++;
         }
 
-        // 清理函数，确保在组件卸载时恢复滚动
         return () => {
-            document.body.style.overflow = 'unset';
+            if (isOpen) {
+                openModalsCount--;
+                // 最后一个模态框关闭时恢复滚动
+                if (openModalsCount === 0) {
+                    document.body.style.overflow = 'unset';
+                }
+            }
         };
     }, [isOpen]);
 
