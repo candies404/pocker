@@ -25,7 +25,11 @@ const handler = async (req, res) => {
             tag = repoParts[1];
         }
     } else {
-        repository = image;
+        const repoParts = image.split(':');
+        repository = repoParts[0];
+        if (repoParts.length > 1) {
+            tag = repoParts[1];
+        }
     }
 
     // 判断是否为官方镜像
