@@ -260,6 +260,7 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                 onClose={onClose}
                 title={`镜像标签列表 - ${repoName}`}
                 maxWidth="max-w-4xl"
+                maxHeight="max-h-[93vh]"
             >
                 {loading ? (
                     <div className="flex justify-center py-8">

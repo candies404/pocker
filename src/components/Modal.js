@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 // 用于追踪打开的模态框数量
 let openModalsCount = 0;
 
-const Modal = ({isOpen, onClose, title, onOverlayClick, maxWidth = "md:w-1/2", children}) => {
+const Modal = ({isOpen, onClose, title, onOverlayClick, maxWidth = "md:w-1/2", maxHeight = "max-h-[80vh]", children}) => {
     useEffect(() => {
         if (isOpen) {
             // 第一个模态框打开时禁用滚动
@@ -40,7 +40,7 @@ const Modal = ({isOpen, onClose, title, onOverlayClick, maxWidth = "md:w-1/2", c
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-80"
             onClick={handleOverlayClick}>
             <div
-                className={`relative bg-white rounded-lg p-6 dark:bg-gray-800 overflow-hidden max-h-[80vh] w-full ${maxWidth}`}
+                className={`relative bg-white rounded-lg p-6 dark:bg-gray-800 overflow-hidden w-full ${maxWidth} ${maxHeight}`}
                 onClick={(e) => e.stopPropagation()}>
                 {title && <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{title}</h2>}
                 <button
