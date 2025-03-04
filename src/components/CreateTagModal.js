@@ -70,10 +70,12 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         await handleCreateTag(); // 确认后继续执行创建标签的逻辑
     };
 
-    const handleCancle = async (e) => {
-        e.stopPropagation(); // 阻止事件冒泡
+    const handleCancel = (e) => {
+        if (e) {
+            e.stopPropagation(); // 只在事件存在时阻止冒泡
+        }
         setShowConfirm(false); // 关闭确认模态框
-        setStatus('initial')
+        setStatus('initial');
     };
 
     const handleCreateTag = async () => {
@@ -328,7 +330,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                 {/* 确认模态框 */}
                 <ConfirmModal
                     isOpen={showConfirm}
-                    onClose={handleCancle}
+                    onClose={handleCancel}
                     onConfirm={handleConfirm}
                     title="确认风险"
                     message="您正在 pull 非 Docker 官方镜像，继续操作可能存在风险。您确定要继续吗？"
