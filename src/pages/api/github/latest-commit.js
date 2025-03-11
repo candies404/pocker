@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import fetch from 'node-fetch';
+import {getLatestCommit} from '@/utils/github';
 
 async function handler(req, res) {
     if (req.method !== 'GET') {
@@ -7,13 +7,8 @@ async function handler(req, res) {
     }
 
     try {
-        const response = await fetch('https://api.github.com/repos/scoful/pocker/commits/master');
-        const data = await response.json();
-        console.log(data)
-        return res.status(200).json({
-            currentVersion: process.env.VERCEL_GIT_COMMIT_SHA || null,
-            latestVersion: data.sha || null
-        });
+        const versionInfo = await getLatestCommit();
+        return res.status(200).json(versionInfo);
     } catch (error) {
         console.error('Failed to fetch version:', error);
         return res.status(500).json({error: 'Failed to fetch version information'});

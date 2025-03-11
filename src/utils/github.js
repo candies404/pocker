@@ -322,3 +322,23 @@ export const getWorkflowList = async ({page = 1, per_page = 10} = {}) => {
         throw error;
     }
 };
+
+export const getLatestCommit = async () => {
+    try {
+        const response = await fetch('https://api.github.com/repos/scoful/pocker/commits/master', {
+            headers: {
+                'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        const data = await response.json();
+
+        return {
+            currentVersion: process.env.VERCEL_GIT_COMMIT_SHA || null,
+            latestVersion: data.sha || null
+        };
+    } catch (error) {
+        console.error('Failed to fetch version:', error);
+        throw error;
+    }
+}
