@@ -41,7 +41,6 @@ export default function HomePage() {
     const [server, setServer] = useState(false);
 
     useEffect(() => {
-        console.log("Frontend:", process.env);
         setIsAuth(isAuthenticated());
         setLoading(false);
     }, []);

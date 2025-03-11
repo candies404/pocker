@@ -7,13 +7,12 @@ export function useVersionCheck() {
     useEffect(() => {
         const checkVersion = async () => {
             try {
-                const response = await fetch('/api/github/version',{
+                const response = await fetch('/api/github/version', {
                     headers: {
                         'x-access-key': getAccessKey(),
                     },
                 });
                 const data = await response.json();
-                console.log(data)
                 if (data.currentVersion && data.latestVersion && data.currentVersion !== data.latestVersion) {
                     setNeedsUpdate(true);
                 }
