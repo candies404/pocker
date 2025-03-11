@@ -22,10 +22,9 @@ export function useVersionCheck() {
             }
         };
 
-        // 每5分钟检查一次
+        // 每24小时检查一次
         checkVersion();
-        // const interval = setInterval(checkVersion, 5 * 60 * 1000);
-        const interval = setInterval(checkVersion, 10 * 1000);
+        const interval = setInterval(checkVersion, 24 * 60 * 60 * 1000);
 
         return () => clearInterval(interval);
     }, []);
