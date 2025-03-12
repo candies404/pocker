@@ -1,14 +1,29 @@
 import {useEffect, useState} from 'react';
+import {VERSION_CONSTANTS} from '@/utils/constants';
 
 export function UpdateNotification({show}) {
-    const [isVisible, setIsVisible] = useState(show);
+    const [isVisible, setIsVisible] = useState(false);
 
-    // 当 show 状态改变时，更新 isVisible
     useEffect(() => {
-        if (show) {
-            setIsVisible(true);
+        if (!show) return;
+
+        // 检查是否在24小时内关闭过
+        const dismissedAt = localStorage.getItem(VERSION_CONSTANTS.NOTIFICATION_DISMISS_KEY);
+        if (dismissedAt) {
+            const dismissedTime = parseInt(dismissedAt, 10);
+            const now = Date.now();
+            if (now - dismissedTime < VERSION_CONSTANTS.DISMISS_DURATION) {
+                setIsVisible(false);
+                return;
+            }
         }
+        setIsVisible(true);
     }, [show]);
+
+    const handleDismiss = () => {
+        setIsVisible(false);
+        localStorage.setItem(VERSION_CONSTANTS.NOTIFICATION_DISMISS_KEY, Date.now().toString());
+    };
 
     if (!show || !isVisible) return null;
 
@@ -26,9 +41,9 @@ export function UpdateNotification({show}) {
                 </div>
             </div>
             <button
-                onClick={() => setIsVisible(false)}
+                onClick={handleDismiss}
                 className="p-1 hover:bg-blue-600 dark:hover:bg-blue-700 rounded-full transition-colors duration-200"
-                title="关闭提示"
+                title="24小时内不再提示"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd"

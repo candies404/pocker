@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {getAccessKey} from "@/utils/auth";
+import {VERSION_CONSTANTS} from '@/utils/constants';
 
 export function useVersionCheck() {
     const [needsUpdate, setNeedsUpdate] = useState(false);
@@ -9,6 +10,16 @@ export function useVersionCheck() {
         const checkVersion = async () => {
             // 如果已经在检查中，则跳过
             if (isChecking.current) return;
+
+            // 检查是否在24小时内关闭过
+            const dismissedAt = localStorage.getItem(VERSION_CONSTANTS.NOTIFICATION_DISMISS_KEY);
+            if (dismissedAt) {
+                const dismissedTime = parseInt(dismissedAt, 10);
+                const now = Date.now();
+                if (now - dismissedTime < VERSION_CONSTANTS.DISMISS_DURATION) {
+                    return; // 在禁止提醒时间内，直接返回
+                }
+            }
 
             try {
                 isChecking.current = true;
@@ -28,11 +39,7 @@ export function useVersionCheck() {
             }
         };
 
-        // 每24小时检查一次
         checkVersion();
-        const interval = setInterval(checkVersion, 24 * 60 * 60 * 1000);
-
-        return () => clearInterval(interval);
     }, []);
 
     return {needsUpdate};
