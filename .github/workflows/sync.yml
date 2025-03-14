@@ -1,0 +1,91 @@
+name: Upstream Sync
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # every 6 hours
+  workflow_dispatch:
+
+jobs:
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/scoful/pocker.git || true
+          git fetch upstream
+
+      - name: Check if sync is needed
+        id: check
+        run: |
+          git fetch upstream master
+          LOCAL_HASH=$(git rev-parse master)
+          UPSTREAM_HASH=$(git rev-parse upstream/master)
+          if [ "$LOCAL_HASH" = "$UPSTREAM_HASH" ]; then
+            echo "No sync needed, hashes match."
+            echo "needs_sync=false" >> $GITHUB_OUTPUT
+          else
+            echo "Sync needed."
+            echo "needs_sync=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Clean issue notice
+        if: steps.check.outputs.needs_sync == 'true'
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issues'
+          labels: '🚨 Sync Fail'
+
+      - name: Sync upstream changes
+        id: sync
+        if: steps.check.outputs.needs_sync == 'true'
+        run: |
+          git checkout master
+          if ! git pull upstream master --rebase; then
+            echo "Sync failed. Capturing error logs..."
+            git pull upstream master --rebase > sync_error.log 2>&1 || true
+            echo "error_logs=$(cat sync_error.log)" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          git push origin master
+
+      - name: Sync check
+        if: steps.check.outputs.needs_sync == 'true' && failure()
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-issue'
+          title: '🚨 同步失败 | Sync Fail'
+          labels: '🚨 Sync Fail'
+          body: |
+            Failed to sync with upstream repository [scoful][pocker]. Please check the error logs below and manually sync if necessary.
+
+            无法与上游仓库 [scoful][pocker] 同步。请查看下面的错误日志，并根据需要手动同步。
+
+            **Error Logs:**
+            ```
+            ${{ steps.sync.outputs.error_logs || 'No detailed logs captured.' }}
+            ```
+
+            [pocker]: https://github.com/scoful/pocker
+
+      - name: Upload error logs (if any)
+        if: steps.check.outputs.needs_sync == 'true' && failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: sync-error-logs
+          path: sync_error.log
