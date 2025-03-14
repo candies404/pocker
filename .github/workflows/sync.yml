@@ -84,8 +84,9 @@ jobs:
             [pocker]: https://github.com/scoful/pocker
 
       - name: Upload error logs (if any)
-        if: steps.check.outputs.needs_sync == 'true' && failure()
+        if: steps.check.outputs.needs_sync == 'true' && failure() && exists('sync_error.log')
         uses: actions/upload-artifact@v3
         with:
           name: sync-error-logs
           path: sync_error.log
+        continue-on-error: true
