@@ -2,12 +2,16 @@ import {useRouter} from 'next/router';
 import {clearAuth} from '@/utils/auth';
 import {useTheme} from '@/utils/themeContext';
 import {useVersionCheck} from '@/hooks/useVersionCheck';
+import {useHeartbeat} from '@/hooks/useHeartbeat';
 import {UpdateNotification} from './UpdateNotification';
 
 export default function Navigation() {
     const router = useRouter();
     const {isDark, toggleTheme} = useTheme();
     const {needsUpdate} = useVersionCheck();
+    
+    // 添加心跳检测
+    useHeartbeat();
 
     const menuItems = [
         {path: '/', label: '镜像仓库'},
