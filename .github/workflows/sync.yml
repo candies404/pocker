@@ -29,12 +29,13 @@ jobs:
         run: |
           git remote add upstream https://github.com/scoful/pocker.git || true
           git fetch upstream
+          git fetch origin
 
       - name: Check if sync is needed
         id: check
         run: |
           git fetch upstream master
-          LOCAL_HASH=$(git rev-parse master)
+          LOCAL_HASH=$(git rev-parse main)
           UPSTREAM_HASH=$(git rev-parse upstream/master)
           if [ "$LOCAL_HASH" = "$UPSTREAM_HASH" ]; then
             echo "No sync needed, hashes match."
@@ -55,14 +56,23 @@ jobs:
         id: sync
         if: steps.check.outputs.needs_sync == 'true'
         run: |
-          git checkout master
+          git checkout main
+          # Pull from origin to integrate remote changes
+          git pull origin main --rebase || true
+          # Pull from upstream and rebase
           if ! git pull upstream master --rebase; then
-            echo "Sync failed. Capturing error logs..."
+            echo "Sync failed with upstream. Capturing error logs..."
             git pull upstream master --rebase > sync_error.log 2>&1 || true
             echo "error_logs=$(cat sync_error.log)" >> $GITHUB_OUTPUT
             exit 1
           fi
-          git push origin master
+          # Push the integrated changes
+          if ! git push origin main; then
+            echo "Push failed. Capturing error logs..."
+            git push origin main > push_error.log 2>&1 || true
+            echo "error_logs=$(cat push_error.log)" >> $GITHUB_OUTPUT
+            exit 1
+          fi
 
       - name: Sync check
         if: steps.check.outputs.needs_sync == 'true' && failure()
