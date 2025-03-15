@@ -16,22 +16,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check for self-reference
+        id: self_check
+        run: |
+          UPSTREAM_REPO="scoful/pocker"  # 上游仓库的 owner/repo 格式
+          CURRENT_REPO="${{ github.repository }}"  # 当前仓库的 owner/repo
+          if [ "$UPSTREAM_REPO" = "$CURRENT_REPO" ]; then
+            echo "Self-reference detected: upstream ($UPSTREAM_REPO) matches current repository ($CURRENT_REPO). Aborting workflow."
+            echo "abort=true" >> $GITHUB_OUTPUT
+          else
+            echo "No self-reference detected."
+            echo "abort=false" >> $GITHUB_OUTPUT
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.self_check.outputs.abort == 'false'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Git
+        if: steps.self_check.outputs.abort == 'false'
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
 
       - name: Add upstream remote
+        if: steps.self_check.outputs.abort == 'false'
         run: |
           git remote add upstream https://github.com/scoful/pocker.git || true
           git fetch upstream
           git fetch origin
 
       - name: Check if sync is needed
+        if: steps.self_check.outputs.abort == 'false'
         id: check
         run: |
           git fetch upstream master
@@ -46,27 +63,24 @@ jobs:
           fi
 
       - name: Clean issue notice
-        if: steps.check.outputs.needs_sync == 'true'
+        if: steps.self_check.outputs.abort == 'false' && steps.check.outputs.needs_sync == 'true'
         uses: actions-cool/issues-helper@v3
         with:
           actions: 'close-issues'
           labels: '🚨 Sync Fail'
 
       - name: Sync upstream changes
+        if: steps.self_check.outputs.abort == 'false' && steps.check.outputs.needs_sync == 'true'
         id: sync
-        if: steps.check.outputs.needs_sync == 'true'
         run: |
           git checkout main
-          # Pull from origin to integrate remote changes
           git pull origin main --rebase || true
-          # Pull from upstream and rebase
           if ! git pull upstream master --rebase; then
             echo "Sync failed with upstream. Capturing error logs..."
             git pull upstream master --rebase > sync_error.log 2>&1 || true
             echo "error_logs=$(cat sync_error.log)" >> $GITHUB_OUTPUT
             exit 1
           fi
-          # Push the integrated changes
           if ! git push origin main; then
             echo "Push failed. Capturing error logs..."
             git push origin main > push_error.log 2>&1 || true
@@ -75,7 +89,7 @@ jobs:
           fi
 
       - name: Sync check
-        if: steps.check.outputs.needs_sync == 'true' && failure()
+        if: steps.self_check.outputs.abort == 'false' && steps.check.outputs.needs_sync == 'true' && failure()
         uses: actions-cool/issues-helper@v3
         with:
           actions: 'create-issue'
