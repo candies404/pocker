@@ -8,7 +8,7 @@
 
 本项目支持通过 Vercel 一键部署。
 
-[![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker&showOptionalTeamCreation=false)
+[![](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker)
 
 ### 获取环境变量
 
@@ -20,7 +20,7 @@
 - GITHUB_TOKEN，访问[GitHub令牌设置](https://github.com/settings/tokens/new)创建一个新的访问令牌，有效期建议设置为永久，**_注意：权限仅需勾选 workflow 即可_**
 
 ### 设置Vercel环境变量
-1. 点击右边一键部署按钮 [![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker&showOptionalTeamCreation=false) 完成初始部署
+1. 点击右边一键部署按钮 [![](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker)完成初始部署
 2. 在Vercel项目控制面板中，进入 Settings → Environment Variables 页面
 3. 将上述获取的所有环境变量依次添加到配置中
 4. 添加完成后，点击 Redeploy 重新部署项目
