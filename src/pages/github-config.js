@@ -183,13 +183,13 @@ function GithubConfigPage() {
 
                     {repoExists ? (
                         <div className="space-y-4">
-                            <h3 id="repo-status" className="text-lg font-medium dark:text-white">GitHub Repo 配置</h3>
+                            <h3 id="repo-status" className="text-lg font-medium dark:text-white">GitHub 中转仓库配置</h3>
                             <div
                                 className="bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-gray-300 text-green-700 dark:text-emerald-400 px-4 py-3 rounded-lg">
-                                <p className="font-semibold">配置仓库已存在</p>
+                                <p className="font-semibold">中转仓库已存在</p>
                                 <p className="font-medium text-red-600 dark:text-red-300 mt-1">注：千万不要公开这个项目</p>
                                 <div className="space-y-1 mt-2 text-sm">
-                                    <p className="dark:text-gray-300">仓库名称：{repoData.full_name}</p>
+                                    <p className="dark:text-gray-300">中转仓库名称：{repoData.full_name}</p>
                                     <p className="text-green-600 dark:text-gray-400">创建时间：{new Date(repoData.created_at).toLocaleString()}</p>
                                     <p className="text-green-600 dark:text-gray-400">最后更新：{new Date(repoData.updated_at).toLocaleString()}</p>
                                 </div>
@@ -200,28 +200,27 @@ function GithubConfigPage() {
                                 rel="noopener noreferrer"
                                 className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white dark:hover:text-white"
                             >
-                                查看仓库
+                                查看中转仓库
                             </a>
                         </div>
                     ) : (
                         <div className="space-y-4">
                             <p className="text-gray-600 dark:text-gray-300">
-                                未检测到GitHub配置仓库，点击下方按钮创建一个名为 "myDockerHub" 的私有仓库。
+                                未检测到 GitHub 中转仓库，点击下方按钮创建一个名为 "myDockerHub" 的私有中转仓库。
                             </p>
                             <button
                                 onClick={handleCreateRepo}
                                 disabled={creating}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-300"
                             >
-                                {creating ? '创建中...' : '创建配置仓库'}
+                                {creating ? '创建中...' : '创建中转仓库'}
                             </button>
                         </div>
                     )}
 
                     {repoExists && (
                         <div className="mt-8 space-y-4">
-                            <h3 id="workflow-status" className="text-lg font-medium dark:text-white">GitHub Actions
-                                配置</h3>
+                            <h3 id="workflow-status" className="text-lg font-medium dark:text-white">GitHub 中转仓库工作流</h3>
                             {workflowExists ? (
                                 <div className="space-y-4">
                                     <p className="text-sm text-gray-500 dark:text-gray-300">
@@ -237,14 +236,14 @@ function GithubConfigPage() {
                             ) : (
                                 <div className="space-y-4">
                                     <p className="text-gray-600 dark:text-gray-300">
-                                        未检测到 Docker 发布工作流文件，点击下方按钮创建。
+                                        未检测到中转仓库工作流文件，点击下方按钮创建。
                                     </p>
                                     <button
                                         onClick={handleCreateWorkflow}
                                         disabled={creatingWorkflow}
                                         className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 dark:text-white dark:hover:text-white disabled:bg-green-400 dark:disabled:bg-green-300"
                                     >
-                                        {creatingWorkflow ? '创建中...' : '创建工作流文件'}
+                                        {creatingWorkflow ? '创建中...' : '创建中转仓库工作流文件'}
                                     </button>
                                 </div>
                             )}
