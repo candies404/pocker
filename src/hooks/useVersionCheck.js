@@ -23,7 +23,7 @@ export function useVersionCheck() {
 
             try {
                 isChecking.current = true;
-                const response = await fetch('/api/github/latest-commit', {
+                const response = await fetch('/api/github/latest-tag', {
                     headers: {
                         'x-access-key': getAccessKey(),
                     },

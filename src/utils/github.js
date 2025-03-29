@@ -1,3 +1,5 @@
+import {APP_CONFIG} from "@/config/version";
+
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_NAME = 'myDockerHub';
 
@@ -336,6 +338,26 @@ export const getLatestCommit = async () => {
         return {
             currentVersion: process.env.VERCEL_GIT_COMMIT_SHA || null,
             latestVersion: data.sha || null
+        };
+    } catch (error) {
+        console.error('Failed to fetch version:', error);
+        throw error;
+    }
+}
+
+export const getLatestTag = async () => {
+    try {
+        const response = await fetch('https://api.github.com/repos/scoful/pocker/tags', {
+            headers: {
+                'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        const data = await response.json();
+
+        return {
+            currentVersion: APP_CONFIG.version,
+            latestVersion: data[0].name || null
         };
     } catch (error) {
         console.error('Failed to fetch version:', error);

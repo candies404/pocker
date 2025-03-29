@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import {getLatestCommit} from '@/utils/github';
+import {getLatestTag} from '@/utils/github';
 
 async function handler(req, res) {
     if (req.method !== 'GET') {
@@ -7,7 +7,7 @@ async function handler(req, res) {
     }
 
     try {
-        const versionInfo = await getLatestCommit();
+        const versionInfo = await getLatestTag();
         return res.status(200).json(versionInfo);
     } catch (error) {
         console.error('Failed to fetch version:', error);

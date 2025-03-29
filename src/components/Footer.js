@@ -5,7 +5,7 @@ export default function Footer() {
         <footer className="bg-gray-50 dark:bg-gray-900 py-4 mt-0">
             <div className="container mx-auto text-center">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {APP_CONFIG.name} v{APP_CONFIG.version}
+                    {APP_CONFIG.name} {APP_CONFIG.version}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                     作者: <a href={APP_CONFIG.blog} target="_blank" rel="noopener noreferrer"
