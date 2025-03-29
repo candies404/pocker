@@ -187,7 +187,7 @@ function GithubConfigPage() {
                             <div
                                 className="bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-gray-300 text-green-700 dark:text-emerald-400 px-4 py-3 rounded-lg">
                                 <p className="font-semibold">中转仓库已存在</p>
-                                <p className="font-medium text-red-600 dark:text-red-300 mt-1">注：千万不要公开这个项目</p>
+                                <p className="font-medium text-red-600 dark:text-red-300 mt-1">注：千万不要公开这个中转仓库项目</p>
                                 <div className="space-y-1 mt-2 text-sm">
                                     <p className="dark:text-gray-300">中转仓库名称：{repoData.full_name}</p>
                                     <p className="text-green-600 dark:text-gray-400">创建时间：{new Date(repoData.created_at).toLocaleString()}</p>
