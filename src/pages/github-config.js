@@ -5,6 +5,8 @@ import {useRouter} from 'next/router';
 import {useTour} from '@/hooks/useTour';
 import withPageAuth from '@/utils/withPageAuth';
 import {APP_CONFIG} from '@/config/version';
+import FormModal from '@/components/FormModal';
+import {GITHUB_CONSTANTS} from '@/utils/constants';
 
 function GithubConfigPage() {
     const router = useRouter();
@@ -17,6 +19,9 @@ function GithubConfigPage() {
     const [workflowContent, setWorkflowContent] = useState(null);
     const [creatingWorkflow, setCreatingWorkflow] = useState(false);
     const [isAuth, setIsAuth] = useState(false);
+    const [isAutoUpdateModalOpen, setIsAutoUpdateModalOpen] = useState(false);
+    const [autoUpdateRepo, setAutoUpdateRepo] = useState('');
+    const [configuringAutoUpdate, setConfiguringAutoUpdate] = useState(false);
     const {startTour} = useTour('github-config');
 
     useEffect(() => {
@@ -130,6 +135,80 @@ function GithubConfigPage() {
         }
     };
 
+    const handleOpenAutoUpdateModal = () => {
+        const savedRepo = localStorage.getItem(GITHUB_CONSTANTS.VERCEL_REPO_NAME_KEY);
+        if (savedRepo) {
+            setAutoUpdateRepo(savedRepo);
+        }
+        setIsAutoUpdateModalOpen(true);
+    };
+
+    // 自动更新工作流
+    const AUTO_UPDATE_WORKFLOW_FILE = '.github/workflows/auto-update.yml';
+
+    const handleConfigureAutoUpdate = async () => {
+        setConfiguringAutoUpdate(true);
+        try {
+            // 1. 先检查仓库是否存在
+            const repoResponse = await fetch(`/api/github/check-repo?repoName=${encodeURIComponent(autoUpdateRepo.trim())}`, {
+                method: 'GET',
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const repoData = await repoResponse.json();
+
+            if (!repoData.success || !repoData.exists) {
+                setError(`仓库 ${autoUpdateRepo.trim()} 不存在，请确认仓库名称是否正确`);
+                return;
+            }
+
+            // 2. 检查工作流是否已配置
+            const workflowResponse = await fetch(`/api/github/check-workflow?repo=${encodeURIComponent(autoUpdateRepo.trim())}&workflowFile=${AUTO_UPDATE_WORKFLOW_FILE}`, {
+                headers: {
+                    'x-access-key': getAccessKey(),
+                },
+            });
+            const workflowData = await workflowResponse.json();
+
+            if (workflowData.success && workflowData.exists) {
+                // 工作流已存在，直接保存并关闭
+                localStorage.setItem(GITHUB_CONSTANTS.VERCEL_REPO_NAME_KEY, autoUpdateRepo.trim());
+                setIsAutoUpdateModalOpen(false);
+                setAutoUpdateRepo('');
+                setError(null);
+                return;
+            }
+
+            // 3. 配置自动更新工作流
+            const response = await fetch('/api/github/configure-auto-update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-key': getAccessKey(),
+                },
+                body: JSON.stringify({
+                    repoName: autoUpdateRepo.trim()
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                localStorage.setItem(GITHUB_CONSTANTS.VERCEL_REPO_NAME_KEY, autoUpdateRepo.trim());
+                setIsAutoUpdateModalOpen(false);
+                setAutoUpdateRepo('');
+                setError(null);
+            } else {
+                setError(data.message);
+            }
+        } catch (error) {
+            setError('配置自动更新失败');
+        } finally {
+            setConfiguringAutoUpdate(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -183,25 +262,34 @@ function GithubConfigPage() {
 
                     {repoExists ? (
                         <div className="space-y-4">
-                            <h3 id="repo-status" className="text-lg font-medium dark:text-white">GitHub 中转仓库配置</h3>
+                            <h3 id="repo-status" className="text-lg font-medium dark:text-white">GitHub
+                                中转仓库配置</h3>
                             <div
                                 className="bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-gray-300 text-green-700 dark:text-emerald-400 px-4 py-3 rounded-lg">
                                 <p className="font-semibold">中转仓库已存在</p>
-                                <p className="font-medium text-red-600 dark:text-red-300 mt-1">注：千万不要公开这个中转仓库项目</p>
+                                <p className="font-medium text-red-600 dark:text-red-300 mt-1">警告：请务必保持此中转仓库为私有状态，切勿公开</p>
                                 <div className="space-y-1 mt-2 text-sm">
                                     <p className="dark:text-gray-300">中转仓库名称：{repoData.full_name}</p>
                                     <p className="text-green-600 dark:text-gray-400">创建时间：{new Date(repoData.created_at).toLocaleString()}</p>
                                     <p className="text-green-600 dark:text-gray-400">最后更新：{new Date(repoData.updated_at).toLocaleString()}</p>
                                 </div>
                             </div>
-                            <a
-                                href={repoData.html_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white dark:hover:text-white"
-                            >
-                                查看中转仓库
-                            </a>
+                            <div className="flex space-x-3">
+                                <a
+                                    href={repoData.html_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white dark:hover:text-white"
+                                >
+                                    查看中转仓库
+                                </a>
+                                <button
+                                    onClick={handleOpenAutoUpdateModal}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white dark:hover:text-white"
+                                >
+                                    配置自动更新
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -249,6 +337,55 @@ function GithubConfigPage() {
                             )}
                         </div>
                     )}
+
+                    <FormModal
+                        isOpen={isAutoUpdateModalOpen}
+                        onClose={() => {
+                            setIsAutoUpdateModalOpen(false);
+                            setAutoUpdateRepo('');
+                        }}
+                        title="配置自动更新"
+                        isLoading={configuringAutoUpdate}
+                    >
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            handleConfigureAutoUpdate();
+                        }}>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
+                                    关联 Vercel 的私有仓库名
+                                </label>
+                                <input
+                                    type="text"
+                                    value={autoUpdateRepo}
+                                    onChange={(e) => setAutoUpdateRepo(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-600 dark:focus:border-blue-600 dark:bg-gray-700 dark:text-white"
+                                    placeholder="请输入你关联的 Vercel 私有仓库名，例如：my-pocker"
+                                    disabled={configuringAutoUpdate}
+                                />
+                            </div>
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsAutoUpdateModalOpen(false);
+                                        setAutoUpdateRepo('');
+                                    }}
+                                    className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white dark:hover:text-white"
+                                    disabled={configuringAutoUpdate}
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-500 dark:text-white"
+                                    disabled={!autoUpdateRepo.trim() || configuringAutoUpdate}
+                                >
+                                    {configuringAutoUpdate ? '配置中...' : '确认'}
+                                </button>
+                            </div>
+                        </form>
+                    </FormModal>
                 </div>
             </div>
         </div>

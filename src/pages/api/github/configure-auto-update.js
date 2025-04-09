@@ -1,17 +1,25 @@
-import {checkGithubRepo} from '@/utils/github';
+import {configureAutoUpdate} from '@/utils/github';
 import {withAuth} from '@/utils/withAuth';
 
 const handler = async (req, res) => {
-    if (req.method !== 'GET') {
+    if (req.method !== 'POST') {
         return res.status(405).json({message: '方法不允许'});
     }
 
+    const {repoName} = req.body;
+
+    if (!repoName) {
+        return res.status(400).json({
+            success: false,
+            message: '仓库名不能为空'
+        });
+    }
+
     try {
-        const {repoName} = req.query;
-        const result = await checkGithubRepo(repoName);
+        const result = await configureAutoUpdate(repoName);
         res.status(200).json({
             success: true,
-            ...result
+            data: result
         });
     } catch (error) {
         res.status(500).json({
