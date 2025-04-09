@@ -22,6 +22,7 @@ function GithubConfigPage() {
     const [isAutoUpdateModalOpen, setIsAutoUpdateModalOpen] = useState(false);
     const [autoUpdateRepo, setAutoUpdateRepo] = useState('');
     const [configuringAutoUpdate, setConfiguringAutoUpdate] = useState(false);
+    const [modalError, setModalError] = useState(null);
     const {startTour} = useTour('github-config');
 
     useEffect(() => {
@@ -140,7 +141,14 @@ function GithubConfigPage() {
         if (savedRepo) {
             setAutoUpdateRepo(savedRepo);
         }
+        setModalError(null);
         setIsAutoUpdateModalOpen(true);
+    };
+
+    const handleCloseAutoUpdateModal = () => {
+        setIsAutoUpdateModalOpen(false);
+        setAutoUpdateRepo('');
+        setModalError(null);
     };
 
     // 自动更新工作流
@@ -148,6 +156,7 @@ function GithubConfigPage() {
 
     const handleConfigureAutoUpdate = async () => {
         setConfiguringAutoUpdate(true);
+        setModalError(null);
         try {
             // 1. 先检查仓库是否存在
             const repoResponse = await fetch(`/api/github/check-repo?repoName=${encodeURIComponent(autoUpdateRepo.trim())}`, {
@@ -159,7 +168,7 @@ function GithubConfigPage() {
             const repoData = await repoResponse.json();
 
             if (!repoData.success || !repoData.exists) {
-                setError(`仓库 ${autoUpdateRepo.trim()} 不存在，请确认仓库名称是否正确`);
+                setModalError(`仓库 ${autoUpdateRepo.trim()} 不存在，请确认仓库名称是否正确`);
                 return;
             }
 
@@ -174,9 +183,7 @@ function GithubConfigPage() {
             if (workflowData.success && workflowData.exists) {
                 // 工作流已存在，直接保存并关闭
                 localStorage.setItem(GITHUB_CONSTANTS.VERCEL_REPO_NAME_KEY, autoUpdateRepo.trim());
-                setIsAutoUpdateModalOpen(false);
-                setAutoUpdateRepo('');
-                setError(null);
+                handleCloseAutoUpdateModal();
                 return;
             }
 
@@ -196,14 +203,12 @@ function GithubConfigPage() {
 
             if (data.success) {
                 localStorage.setItem(GITHUB_CONSTANTS.VERCEL_REPO_NAME_KEY, autoUpdateRepo.trim());
-                setIsAutoUpdateModalOpen(false);
-                setAutoUpdateRepo('');
-                setError(null);
+                handleCloseAutoUpdateModal();
             } else {
-                setError(data.message);
+                setModalError(data.message);
             }
         } catch (error) {
-            setError('配置自动更新失败');
+            setModalError('配置自动更新失败');
         } finally {
             setConfiguringAutoUpdate(false);
         }
@@ -340,10 +345,7 @@ function GithubConfigPage() {
 
                     <FormModal
                         isOpen={isAutoUpdateModalOpen}
-                        onClose={() => {
-                            setIsAutoUpdateModalOpen(false);
-                            setAutoUpdateRepo('');
-                        }}
+                        onClose={handleCloseAutoUpdateModal}
                         title="配置自动更新"
                         isLoading={configuringAutoUpdate}
                     >
@@ -351,6 +353,11 @@ function GithubConfigPage() {
                             e.preventDefault();
                             handleConfigureAutoUpdate();
                         }}>
+                            {modalError && (
+                                <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md">
+                                    <p className="text-sm">{modalError}</p>
+                                </div>
+                            )}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
                                     关联 Vercel 的私有仓库名
@@ -367,10 +374,7 @@ function GithubConfigPage() {
                             <div className="flex justify-end space-x-3">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setIsAutoUpdateModalOpen(false);
-                                        setAutoUpdateRepo('');
-                                    }}
+                                    onClick={handleCloseAutoUpdateModal}
                                     className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white dark:hover:text-white"
                                     disabled={configuringAutoUpdate}
                                 >
