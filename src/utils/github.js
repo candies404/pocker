@@ -1,7 +1,8 @@
 import {APP_CONFIG} from "@/config/version";
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const REPO_NAME = 'myDockerHub';
+// 系统默认中转仓库名
+const TRANSFER_REPO_NAME = 'myDockerHub';
 
 // 获取当前github用户信息
 const getUsername = async () => {
@@ -27,12 +28,12 @@ const getUsername = async () => {
     }
 };
 
-export const checkGithubRepo = async () => {
+export const checkGithubRepo = async (repoName = TRANSFER_REPO_NAME) => {
     try {
         // 先获取用户名
         const username = await getUsername();
 
-        const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`, {
+        const response = await fetch(`https://api.github.com/repos/${username}/${repoName}`, {
             headers: {
                 'Authorization': `Bearer ${GITHUB_TOKEN}`,
                 'Accept': 'application/vnd.github.v3+json'
@@ -64,10 +65,10 @@ export const createGithubRepo = async () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                name: REPO_NAME,
+                name: TRANSFER_REPO_NAME,
                 private: true,
                 auto_init: true,
-                description: '我的Docker Hub镜像私服中转仓库'
+                description: '我的Docker Hub镜像私服中转仓库 - by pocker'
             })
         });
 
@@ -81,12 +82,16 @@ export const createGithubRepo = async () => {
     }
 };
 
-const WORKFLOW_FILE = '.github/workflows/docker-publish.yml';
+// 系统默认中转工作流
+const TRANSFER_WORKFLOW_FILE = '.github/workflows/docker-publish.yml';
+// 自动更新工作流
+const AUTO_UPDATE_WORKFLOW_FILE = '.github/workflows/auto-update.yml';
 
-export const checkWorkflowFile = async () => {
+
+export const checkWorkflowFile = async (workflowFile = TRANSFER_WORKFLOW_FILE, repo = TRANSFER_REPO_NAME) => {
     try {
         const username = await getUsername();
-        const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}/contents/${WORKFLOW_FILE}`, {
+        const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${workflowFile}`, {
             headers: {
                 'Authorization': `Bearer ${GITHUB_TOKEN}`,
                 'Accept': 'application/vnd.github.v3+json'
@@ -110,16 +115,14 @@ export const checkWorkflowFile = async () => {
     }
 };
 
-export const createWorkflowFile = async () => {
-    try {
-        const username = await getUsername();
-        const workflowContent = `
+// 默认工作流内容
+const DEFAULT_WORKFLOW_CONTENT = `
 name: Docker Image CI
 
 on:
   repository_dispatch:
     types:
-      - createTag
+      - startTransfer
   workflow_dispatch:
 
 jobs:
@@ -146,7 +149,11 @@ jobs:
           docker push 目标容器镜像地址
 `;
 
-        const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}/contents/${WORKFLOW_FILE}`, {
+// 创建工作流文件
+export const createWorkflowFile = async (workflowContent = DEFAULT_WORKFLOW_CONTENT, repo = TRANSFER_REPO_NAME, workflowFile = TRANSFER_WORKFLOW_FILE, message = 'Add Docker publish workflow') => {
+    try {
+        const username = await getUsername();
+        const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${workflowFile}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -154,7 +161,7 @@ jobs:
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                message: 'Add Docker publish workflow',
+                message,
                 content: Buffer.from(workflowContent).toString('base64')
             })
         });
@@ -169,6 +176,133 @@ jobs:
     }
 };
 
+// 自动更新工作流内容
+const AUTO_UPDATE_WORKFLOW_CONTENT =
+`name: Upstream Sync
+
+permissions:
+  contents: write
+  issues: write
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # every 6 hours
+  workflow_dispatch:
+
+jobs:
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for self-reference
+        id: self_check
+        run: |
+          UPSTREAM_REPO="scoful/pocker"
+          CURRENT_REPO="\${{github.repository}}"
+          if [ "$UPSTREAM_REPO" = "$CURRENT_REPO" ]; then
+            echo "Self-reference detected: upstream ($UPSTREAM_REPO) matches current repository ($CURRENT_REPO). Aborting workflow."
+            echo "abort=true" >> $GITHUB_OUTPUT
+          else
+            echo "No self-reference detected."
+            echo "abort=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.self_check.outputs.abort == 'false'
+        with:
+          token: \${{secrets.GITHUB_TOKEN}}
+
+      - name: Set up Git
+        if: steps.self_check.outputs.abort == 'false'
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
+      - name: Check if sync is needed
+        if: steps.self_check.outputs.abort == 'false'
+        id: check
+        run: |
+          # Clone upstream repository
+          git clone https://github.com/scoful/pocker.git temp
+          # Calculate hash of upstream src/config/version.js
+          if [ -f temp/src/config/version.js ]; then
+            UPSTREAM_HASH=$(sha256sum temp/src/config/version.js | awk '{print $1}')
+          else
+            echo "Warning: src/config/version.js not found in upstream. Assuming no sync needed."
+            UPSTREAM_HASH=""
+          fi
+          # Calculate hash of local src/config/version.js
+          if [ -f src/config/version.js ]; then
+            LOCAL_HASH=$(sha256sum src/config/version.js | awk '{print $1}')
+          else
+            echo "Warning: src/config/version.js not found locally. Triggering sync."
+            LOCAL_HASH=""
+          fi
+          # Compare hashes
+          if [ "$UPSTREAM_HASH" = "$LOCAL_HASH" ] && [ -n "$UPSTREAM_HASH" ]; then
+            echo "No sync needed, src/config/version.js contents match."
+            echo "needs_sync=false" >> $GITHUB_OUTPUT
+          else
+            echo "Sync needed, src/config/version.js differs (upstream=$UPSTREAM_HASH, local=$LOCAL_HASH)."
+            echo "needs_sync=true" >> $GITHUB_OUTPUT
+          fi
+          # Cleanup
+          rm -rf temp
+
+      - name: Clean issue notice
+        if: steps.self_check.outputs.abort == 'false' && steps.check.outputs.needs_sync == 'true'
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issues'
+          labels: '🚨 Sync Fail'
+
+      - name: Sync upstream changes
+        if: steps.self_check.outputs.abort == 'false' && steps.check.outputs.needs_sync == 'true'
+        id: sync
+        run: |
+          cp -r .github/workflows/auto-update.yml /tmp/auto-update.yml
+          find . -maxdepth 1 -not -path './.git' -not -path . -exec rm -rf {} \\;
+          git clone https://github.com/scoful/pocker.git temp
+          rsync -av --exclude='.git' --exclude='.github/workflows/auto-update.yml' temp/ .
+          rm -rf temp
+          mkdir -p .github/workflows && mv /tmp/auto-update.yml .github/workflows/auto-update.yml
+          git add .
+          git commit -m "Sync with scoful/pocker" || true
+          if ! git push origin main; then
+            echo "Push failed."
+            echo "error_logs=$(git push origin main 2>&1)" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Sync check
+        if: steps.self_check.outputs.abort == 'false' && steps.check.outputs.needs_sync == 'true' && failure()
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-issue'
+          title: '🚨 同步失败 | Sync Fail'
+          labels: '🚨 Sync Fail'
+          body: |
+            Failed to sync with upstream repository [scoful][pocker]. Please check the error logs below and manually sync if necessary.
+
+            无法与上游仓库 [scoful][pocker] 同步。请查看下面的错误日志，并根据需要手动同步。
+
+            **Error Logs:**
+            \`\`\`
+            \${{steps.sync.outputs.error_logs || 'No detailed logs captured.'}}
+            \`\`\`
+
+            [pocker]: https://github.com/scoful/pocker
+
+      - name: Cleanup
+        if: always()
+        run: rm -f sync_error.log push_error.log
+`;
+
+export const configureAutoUpdate = async (repo) => {
+    await createWorkflowFile(AUTO_UPDATE_WORKFLOW_CONTENT, repo, AUTO_UPDATE_WORKFLOW_FILE, "Add auto update workflow")
+};
+
 // 更新工作流文件
 export const updateWorkflowFile = async (sourceImage, targetImage, tenCentUserName) => {
     try {
@@ -179,7 +313,7 @@ name: Docker Image CI
 on:
   repository_dispatch:
     types:
-      - createTag
+      - startTransfer
   workflow_dispatch:
 
 jobs:
@@ -219,7 +353,7 @@ jobs:
             body.sha = checkResult.sha;
         }
 
-        const response = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}/contents/${WORKFLOW_FILE}`, {
+        const response = await fetch(`https://api.github.com/repos/${username}/${TRANSFER_REPO_NAME}/contents/${TRANSFER_WORKFLOW_FILE}`, {
             method,
             headers: {
                 'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -240,11 +374,11 @@ jobs:
 };
 
 // 触发工作流
-export const triggerWorkflow = async () => {
+export const triggerWorkflow = async (eventType = 'startTransfer') => {
     try {
         const username = await getUsername();
         const response = await fetch(
-            `https://api.github.com/repos/${username}/${REPO_NAME}/dispatches`,
+            `https://api.github.com/repos/${username}/${TRANSFER_REPO_NAME}/dispatches`,
             {
                 method: 'POST',
                 headers: {
@@ -253,7 +387,7 @@ export const triggerWorkflow = async () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    event_type: 'createTag'
+                    event_type: eventType
                 })
             }
         );
@@ -273,7 +407,7 @@ export const checkWorkflowRun = async () => {
     try {
         const username = await getUsername();
         const response = await fetch(
-            `https://api.github.com/repos/${username}/${REPO_NAME}/actions/runs?event=repository_dispatch&page=1&per_page=1&exclude_pull_requests=false`,
+            `https://api.github.com/repos/${username}/${TRANSFER_REPO_NAME}/actions/runs?event=repository_dispatch&page=1&per_page=1&exclude_pull_requests=false`,
             {
                 headers: {
                     'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -306,7 +440,7 @@ export const getWorkflowList = async ({page = 1, per_page = 10} = {}) => {
     try {
         const username = await getUsername();
         const response = await fetch(
-            `https://api.github.com/repos/${username}/${REPO_NAME}/actions/runs?event=repository_dispatch&exclude_pull_requests=false&page=${page}&per_page=${per_page}`,
+            `https://api.github.com/repos/${username}/${TRANSFER_REPO_NAME}/actions/runs?event=repository_dispatch&exclude_pull_requests=false&page=${page}&per_page=${per_page}`,
             {
                 headers: {
                     'Authorization': `Bearer ${GITHUB_TOKEN}`,

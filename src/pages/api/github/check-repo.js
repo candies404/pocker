@@ -7,7 +7,8 @@ const handler = async (req, res) => {
     }
 
     try {
-        const result = await checkGithubRepo();
+        const { repoName } = req.query;
+        const result = await checkGithubRepo(repoName);
         res.status(200).json({
             success: true,
             ...result

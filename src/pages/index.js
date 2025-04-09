@@ -850,7 +850,7 @@ export default function HomePage() {
             <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                 <div>
                     <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                        Docker 镜像私服 - Pocker
+                        Pocker - 镜像私服
                     </h2>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

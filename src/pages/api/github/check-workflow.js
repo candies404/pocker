@@ -7,7 +7,8 @@ const handler = async (req, res) => {
     }
 
     try {
-        const result = await checkWorkflowFile();
+        const {workflowFile, repo} = req.query;
+        const result = await checkWorkflowFile(workflowFile, repo);
         res.status(200).json({
             success: true,
             ...result
