@@ -10,6 +10,9 @@
 
 [![](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker)
 
+### 配置自动更新
+- 路径：进入"GitHub 配置"菜单下的"配置自动更新"，填写您在 Vercel 上部署的项目名称（例如：my-pocker）。该项目名可在 Vercel 控制台查看，它对应着您 GitHub 账号下的一个私有仓库。
+
 ### 获取环境变量
 
 - ACCESS_KEY，系统登录凭证，请设置一个安全的密钥值，用于系统身份验证和访问控制
