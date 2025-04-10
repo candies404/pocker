@@ -8,7 +8,7 @@
 
 本项目支持通过 Vercel 一键部署。
 
-[![](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker)
+[![](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker&env=ACCESS_KEY,Region,TENCENTCLOUD_SECRET_ID,TENCENTCLOUD_SECRET_KEY,GITHUB_TOKEN,TENCENTCLOUD_PASSWORD&envDescription=%E4%B8%8A%E9%9D%A2%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%8E%B7%E5%8F%96%E6%96%B9%E6%B3%95%E8%AF%B7%E7%9C%8B-%3E&envLink=https%3A%2F%2Fpocker-doc.vercel.app%2FquickStart%2FstepTwo&project-name=pocker&repository-name=pocker)
 
 ### 配置自动更新
 - 路径：进入"GitHub 配置"菜单下的"配置自动更新"，填写您在 Vercel 上部署的项目名称（例如：my-pocker）。该项目名可在 Vercel 控制台查看，它对应着您 GitHub 账号下的一个私有仓库。
@@ -23,7 +23,7 @@
 - GITHUB_TOKEN，访问[GitHub令牌设置](https://github.com/settings/tokens/new)创建一个新的访问令牌，有效期建议设置为永久，**_注意：权限仅需勾选 workflow 即可_**
 
 ### 设置Vercel环境变量
-1. 点击右边一键部署按钮 [![](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker)完成初始部署
+1. 点击右边一键部署按钮 [![](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker&env=ACCESS_KEY,Region,TENCENTCLOUD_SECRET_ID,TENCENTCLOUD_SECRET_KEY,GITHUB_TOKEN,TENCENTCLOUD_PASSWORD&envDescription=%E4%B8%8A%E9%9D%A2%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%8E%B7%E5%8F%96%E6%96%B9%E6%B3%95%E8%AF%B7%E7%9C%8B-%3E&envLink=https%3A%2F%2Fpocker-doc.vercel.app%2FquickStart%2FstepTwo&project-name=pocker&repository-name=pocker)完成初始部署
 2. 在Vercel项目控制面板中，进入 Settings → Environment Variables 页面
 3. 将上述获取的所有环境变量依次添加到配置中
 4. 添加完成后，点击 Redeploy 重新部署项目
@@ -59,12 +59,12 @@
 - 📊 配额信息查看
   - 查看命名空间、镜像仓库、标签的已用数和总可用数对比
 - ⚙️ GitHub Actions 自动化
-    - 自动创建/配置 GitHub 仓库
-    - 自动配置工作流
+    - 自动创建/配置用于中转的 GitHub 仓库
+    - 自动配置用于中转的工作流
     - 查看构建日志
 - 🌓 支持暗黑模式
 - 🎯 新手引导功能
-- 🔄 自动检测新版本并提醒更新(可不管更新提示，支持定时工作流自动更新or手动工作流更新)
+- 🔄 自动版本检测与更新：支持新版本提醒，可选择自动更新模式，开启后系统将自动静默完成更新
 
 ## 技术栈
 
