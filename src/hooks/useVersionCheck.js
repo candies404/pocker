@@ -29,8 +29,20 @@ export function useVersionCheck() {
                     },
                 });
                 const data = await response.json();
-                if (data.currentVersion && data.latestVersion && data.currentVersion !== data.latestVersion) {
-                    setNeedsUpdate(true);
+                if (data.currentVersion && data.latestVersion) {
+                    const currentParts = data.currentVersion.replace('v', '').split('.');
+                    const latestParts = data.latestVersion.replace('v', '').split('.');
+                    
+                    for (let i = 0; i < 3; i++) {
+                        const current = parseInt(currentParts[i], 10);
+                        const latest = parseInt(latestParts[i], 10);
+                        if (current < latest) {
+                            setNeedsUpdate(true);
+                            break;
+                        } else if (current > latest) {
+                            break;
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Failed to check version:', error);

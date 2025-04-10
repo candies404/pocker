@@ -37,7 +37,7 @@ export function UpdateNotification({show}) {
                 </svg>
                 <div>
                     <p className="font-medium">有新版本可用</p>
-                    <p className="text-sm">请拉取最新代码获取最新更新</p>
+                    <p className="text-sm">请到“GitHub 配置”-“配置自动更新”，配置一下</p>
                 </div>
             </div>
             <button
