@@ -367,7 +367,7 @@ function GithubConfigPage() {
                                     value={autoUpdateRepo}
                                     onChange={(e) => setAutoUpdateRepo(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-600 dark:focus:border-blue-600 dark:bg-gray-700 dark:text-white"
-                                    placeholder="请输入你关联的 Vercel 私有仓库名，例如：my-pocker"
+                                    placeholder="请输入你关联的 Vercel 私有仓库名，例如：pocker"
                                     disabled={configuringAutoUpdate}
                                 />
                             </div>
