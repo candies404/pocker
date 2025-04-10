@@ -11,7 +11,7 @@
 [![](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fscoful%2Fpocker&env=ACCESS_KEY,Region,TENCENTCLOUD_SECRET_ID,TENCENTCLOUD_SECRET_KEY,GITHUB_TOKEN,TENCENTCLOUD_PASSWORD&envDescription=%E4%B8%8A%E9%9D%A2%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%8E%B7%E5%8F%96%E6%96%B9%E6%B3%95%E8%AF%B7%E7%9C%8B-%3E&envLink=https%3A%2F%2Fpocker-doc.vercel.app%2FquickStart%2FstepTwo&project-name=pocker&repository-name=pocker)
 
 ### 配置自动更新
-- 路径：进入"GitHub 配置"菜单下的"配置自动更新"，填写您在 Vercel 上部署的项目名称（例如：my-pocker）。该项目名可在 Vercel 控制台查看，它对应着您 GitHub 账号下的一个私有仓库。
+- 路径：进入"GitHub 配置"菜单下的"配置自动更新"，填写您在 Vercel 上部署的项目名称（例如：pocker）。该项目名可在 Vercel 控制台查看，它对应着您 GitHub 账号下的一个私有仓库。
 
 ### 获取环境变量
 
