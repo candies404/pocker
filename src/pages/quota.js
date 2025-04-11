@@ -11,16 +11,6 @@ function QuotaPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [quotaData, setQuotaData] = useState(null);
-    const [usageData, setUsageData] = useState({
-        namespaceCount: 0,
-        repoCount: 0,
-        tagCount: 0,
-        loading: {
-            namespace: true,
-            repo: true,
-            tag: true,
-        }
-    });
     const [isAuth, setIsAuth] = useState(false);
     const {startTour} = useTour('quota');
 
@@ -31,141 +21,35 @@ function QuotaPage() {
 
     useEffect(() => {
         if (isAuth) {
-            // 检查命名空间是否已初始化
-            checkNamespaceInitialization();
+            fetchQuotaData();
         }
     }, [isAuth]);
 
-    const checkNamespaceInitialization = async () => {
+    const fetchQuotaData = async () => {
         try {
-            const response = await fetch('/api/tcr/namespaces?pageSize=1', {
+            const response = await fetch('/api/swr/quota', {
                 headers: {
                     'x-access-key': getAccessKey(),
                 },
             });
             const data = await response.json();
-            if (data.Data) {
-                // 并行发起所有请求
-                setLoading(true);
-                setError("");
-                Promise.all([
-                    fetchQuotaData(),
-                    fetchNamespaceCount(),
-                    fetchRepoAndTagCount(),
-                ]).finally(() => {
-                    setLoading(false);
-                });
-            } else if (data.code === "ResourceNotFound.ErrNoUser") {
-                setError('获取命名空间失败：ResourceNotFound.ErrNoUser');
-                setUsageData(prev => ({
-                    ...prev,
-                    loading: {...prev.loading, namespace: false, repo: false, tag: false}
-                }));
+            if (data.success) {
+                setQuotaData(data.data);
             } else {
-                setError('获取命名空间列表失败');
+                setError(data.message || '获取配额信息失败');
             }
         } catch (error) {
-            setError('获取命名空间信息失败');
+            setError(error.message || '获取配额信息失败');
+        } finally {
             setLoading(false);
         }
     };
 
-    // 获取配额信息
-    const fetchQuotaData = async () => {
-        try {
-            const response = await fetch('/api/tcr/quota', {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
-            const data = await response.json();
-            setQuotaData(data.Data);
-        } catch (error) {
-            setError('获取配额信息失败');
-        }
-    };
-
-    // 获取命名空间数量
-    const fetchNamespaceCount = async () => {
-        try {
-            const response = await fetch('/api/tcr/namespaces?pageSize=1', {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
-            const data = await response.json();
-            setUsageData(prev => ({
-                ...prev,
-                namespaceCount: data.Data.NamespaceCount,
-                loading: {...prev.loading, namespace: false}
-            }));
-        } catch (error) {
-            console.error('获取命名空间数量失败:', error);
-        }
-    };
-
-    // 获取仓库数量和标签数量
-    const fetchRepoAndTagCount = async () => {
-        try {
-            // 先获取仓库总数
-            const repoResponse = await fetch('/api/tcr/repositories?pageSize=1', {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
-            const repoData = await repoResponse.json();
-            const totalRepos = repoData.Data.TotalCount;
-            setUsageData(prev => ({
-                ...prev,
-                repoCount: totalRepos,
-                loading: {...prev.loading, repo: false}
-            }));
-
-            // 如果有仓库，则分批获取所有仓库的标签数
-            if (totalRepos > 0) {
-                // 使用较大的 pageSize 减少请求次数
-                const pageSize = 100;
-                const pages = Math.ceil(totalRepos / pageSize);
-                let totalTags = 0;
-
-                // 分批请求所有仓库信息
-                for (let page = 1; page <= pages; page++) {
-                    const response = await fetch(`/api/tcr/repositories?page=${page}&pageSize=${pageSize}`, {
-                        headers: {
-                            'x-access-key': getAccessKey(),
-                        },
-                    });
-                    const data = await response.json();
-
-                    // 累加所有仓库的标签数
-                    totalTags += data.Data.RepoInfo.reduce((sum, repo) => sum + (repo.TagCount || 0), 0);
-
-                    // 更新进度
-                    setUsageData(prev => ({
-                        ...prev,
-                        tagCount: totalTags,
-                    }));
-                }
-            }
-
-            setUsageData(prev => ({
-                ...prev,
-                loading: {...prev.loading, tag: false}
-            }));
-        } catch (error) {
-            console.error('获取仓库和标签数量失败:', error);
-        }
-    };
-
-    const isAllDataLoaded = !usageData.loading.namespace &&
-        !usageData.loading.repo &&
-        !usageData.loading.tag;
-
-    if (loading || !isAllDataLoaded) {
+    if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <Navigation/>
-                <div className="container mx-auto p-4 mt-0">
+                <div className="container mx-auto p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                         <div className="flex justify-center items-center h-64">
                             <div className="flex flex-col items-center">
@@ -183,7 +67,7 @@ function QuotaPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <Navigation/>
-            <div className="container mx-auto p-4 mt-0">
+            <div className="container mx-auto p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                     <div className="flex justify-end items-center mb-6">
                         <div className="flex items-center space-x-2">
@@ -210,70 +94,49 @@ function QuotaPage() {
                             className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
                             <p className="font-medium">错误提示</p>
                             <p className="text-sm mt-1">{error}</p>
-                            {error.includes('ResourceNotFound.ErrNoUser') && (
-                                <a
-                                    href="https://console.cloud.tencent.com/tcr/?rid=1"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-600"
-                                >
-                                    您还没开通镜像服务，点击此处前往腾讯云控制台初始化
-                                </a>
-                            )}
                         </div>
                     )}
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full table-auto divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead>
-                            <tr className="bg-gray-50 dark:bg-gray-700">
-                                <th id="repoType"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    资源类型
-                                </th>
-                                <th id="quota"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    已用/总数
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">命名空间数量</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300">
-                                    <span
-                                        className="text-blue-600 font-mono dark:text-blue-400">{usageData.namespaceCount}</span>
-                                    <span className="text-gray-500 mx-1 dark:text-gray-500">/</span>
-                                    <span className="text-gray-600 font-mono dark:text-gray-400">
-                                            {quotaData?.LimitInfo.find(i => i.Type === 'namespace')?.Value || '-'}
-                                        </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">镜像数量</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span
-                                        className="text-blue-600 font-mono dark:text-blue-400">{usageData.repoCount}</span>
-                                    <span className="text-gray-500 mx-1 dark:text-gray-500">/</span>
-                                    <span className="text-gray-600 font-mono dark:text-gray-400">
-                                            {quotaData?.LimitInfo.find(i => i.Type === 'repo')?.Value || '-'}
-                                        </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">标签数量</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span
-                                        className="text-blue-600 font-mono dark:text-blue-400">{usageData.tagCount}</span>
-                                    <span className="text-gray-500 mx-1 dark:text-gray-500">/</span>
-                                    <span className="text-gray-600 font-mono dark:text-gray-400">
-                                            {quotaData?.LimitInfo.find(i => i.Type === 'tag')?.Value || '-'}
-                                        </span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    {quotaData ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="p-4 bg-gray-50 dark:bg-gray-700/20 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">租户名称</h3>
+                                <p className="text-sm font-mono text-gray-600 dark:text-gray-300 break-all">{quotaData.domain_name}</p>
+                            </div>
+
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">命名空间数量</h3>
+                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{quotaData.namspace_num}</p>
+                            </div>
+
+                            <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">仓库数量</h3>
+                                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{quotaData.repo_num}</p>
+                            </div>
+
+                            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">镜像数量</h3>
+                                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{quotaData.image_num}</p>
+                            </div>
+
+                            <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">存储空间
+                                    (GB)</h3>
+                                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{quotaData.store_space.toFixed(2)}</p>
+                            </div>
+
+                            <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">下行流量
+                                    (GB)</h3>
+                                <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{quotaData.downflow_size.toFixed(2)}</p>
+                            </div>
+
+                        </div>
+                    ) : (
+                        <div className="text-gray-500 dark:text-gray-400 text-center py-8">
+                            暂无配额数据
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
