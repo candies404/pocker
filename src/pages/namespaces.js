@@ -13,9 +13,6 @@ function NamespacesPage() {
     const [loading, setLoading] = useState(true);
     const [namespaces, setNamespaces] = useState(null);
     const [error, setError] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [totalPages, setTotalPages] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newNamespace, setNewNamespace] = useState('');
     const [creating, setCreating] = useState(false);
@@ -34,44 +31,30 @@ function NamespacesPage() {
 
     useEffect(() => {
         if (isAuth) {
-            fetchNamespaces(currentPage);
+            fetchNamespaces();
         }
-    }, [isAuth, currentPage, pageSize]);
+    }, [isAuth]);
 
-    const fetchNamespaces = async (page) => {
+    const fetchNamespaces = async () => {
         setLoading(true);
-        setError("")
+        setError("");
         try {
-            const response = await fetch(`/api/tcr/namespaces?page=${page}&pageSize=${pageSize}`, {
+            const response = await fetch('/api/swr/namespaces', {
                 headers: {
                     'x-access-key': getAccessKey(),
                 },
             });
             const data = await response.json();
-            if (data.Data) {
-                setNamespaces(data.Data);
-                const total = data.Data.NamespaceCount;
-                setTotalPages(Math.ceil(total / pageSize));
-            } else if (data.code === "ResourceNotFound.ErrNoUser") {
-                setError('获取命名空间列表失败：ResourceNotFound.ErrNoUser');
+            if (data.success) {
+                setNamespaces(data.data);
             } else {
-                setError('获取命名空间列表失败');
+                setError(data.message || '获取命名空间列表失败');
             }
-            setLoading(false);
         } catch (error) {
             setError(error.message || '获取命名空间列表失败');
+        } finally {
             setLoading(false);
         }
-    };
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
-
-    const handlePageSizeChange = (e) => {
-        const newSize = parseInt(e.target.value);
-        setPageSize(newSize);
-        setCurrentPage(1); // 重置到第一页
     };
 
     const handleCreateNamespace = async (e) => {
@@ -83,7 +66,7 @@ function NamespacesPage() {
 
         setCreating(true);
         try {
-            const response = await fetch('/api/tcr/create-namespace', {
+            const response = await fetch('/api/swr/create-namespace', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,10 +83,10 @@ function NamespacesPage() {
                 setShowCreateModal(false);
                 setNewNamespace('');
                 // 刷新列表
-                fetchNamespaces(currentPage);
+                fetchNamespaces();
             } else {
-                setError("创建命名空间失败：" + data.error);
-                setShowCreateModal(false)
+                setError(data.message || "创建命名空间失败");
+                setShowCreateModal(false);
             }
         } catch (error) {
             setError('创建命名空间失败');
@@ -131,7 +114,7 @@ function NamespacesPage() {
         setDeletingNamespace(namespace);
 
         try {
-            const response = await fetch(`/api/tcr/delete-namespace?namespace=${encodeURIComponent(namespace)}`, {
+            const response = await fetch(`/api/swr/delete-namespace?namespace=${encodeURIComponent(namespace)}`, {
                 method: 'DELETE',
                 headers: {
                     'x-access-key': getAccessKey(),
@@ -142,9 +125,9 @@ function NamespacesPage() {
 
             if (data.success) {
                 // 刷新列表
-                fetchNamespaces(currentPage);
+                fetchNamespaces();
             } else {
-                setError("删除命名空间失败：" + data.error);
+                setError(data.message || "删除命名空间失败");
             }
         } catch (error) {
             setError('删除命名空间失败');
@@ -184,7 +167,7 @@ function NamespacesPage() {
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center space-x-4">
                             <div className="text-sm text-gray-500 dark:text-gray-300">
-                                命名空间总数: {namespaces?.NamespaceCount || 0}
+                                命名空间总数: {namespaces?.namespaces?.length || 0}
                             </div>
                             <button
                                 id="create-namespace-btn"
@@ -194,37 +177,22 @@ function NamespacesPage() {
                                 创建命名空间
                             </button>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                                <label className="text-sm text-gray-600 dark:text-gray-300">每页显示：</label>
-                                <select
-                                    value={pageSize}
-                                    onChange={handlePageSizeChange}
-                                    className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                >
-                                    <option value="5">5</option>
-                                    <option value="10">10</option>
-                                    <option value="20">20</option>
-                                    <option value="50">50</option>
-                                </select>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <button
-                                    onClick={startTour}
-                                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                                >
-                                    查看引导
-                                </button>
-                                <span className="text-gray-300 dark:text-gray-600">|</span>
-                                <a
-                                    href={APP_CONFIG.docs}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                                >
-                                    查看文档
-                                </a>
-                            </div>
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={startTour}
+                                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                            >
+                                查看引导
+                            </button>
+                            <span className="text-gray-300 dark:text-gray-600">|</span>
+                            <a
+                                href={APP_CONFIG.docs}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                            >
+                                查看文档
+                            </a>
                         </div>
                     </div>
 
@@ -233,118 +201,55 @@ function NamespacesPage() {
                             className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
                             <p className="font-medium">错误提示</p>
                             <p className="text-sm mt-1">{error}</p>
-                            {error.includes('ResourceNotFound.ErrNoUser') && (
-                                <a
-                                    href="https://console.cloud.tencent.com/tcr/?rid=1"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-600"
-                                >
-                                    您还没开通镜像服务，点击此处前往腾讯云控制台初始化
-                                </a>
-                            )}
                         </div>
                     )}
 
-                    {namespaces && namespaces.NamespaceInfo.length > 0 ? (
-                        <>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead className="bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                                            命名空间
-                                        </th>
-                                        <th id="repository-count"
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                                            镜像数量
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                                            创建时间
-                                        </th>
-                                        <th id="del-namespace"
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                                            操作
-                                        </th>
+                    {namespaces?.namespaces?.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        命名空间
+                                    </th>
+                                    <th id="repository-count"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        镜像数量
+                                    </th>
+                                    <th id="del-namespace"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                                        操作
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                                {namespaces.namespaces.map((namespace, index) => (
+                                    <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
+                                            {namespace.name}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                            {namespace.repo_count || 0}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                            <button
+                                                onClick={() => handleDeleteClick(namespace.name)}
+                                                disabled={namespace.repo_count > 0}
+                                                className={`text-sm rounded px-2 py-1 ${
+                                                    namespace.repo_count > 0
+                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-300 dark:text-gray-500 dark:cursor-not-allowed'
+                                                        : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-700 dark:text-red-300 dark:hover:bg-red-600 dark:hover:bg-red-700'
+                                                } dark:bg-gray-700 dark:text-gray-500`}
+                                                title={namespace.repo_count > 0 ? "无法删除非空命名空间" : ""}
+                                            >
+                                                删除
+                                            </button>
+                                        </td>
                                     </tr>
-                                    </thead>
-                                    <tbody
-                                        className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                                    {namespaces.NamespaceInfo.map((namespace, index) => (
-                                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
-                                                {namespace.Namespace}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                                {namespace.RepoCount}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                                {namespace.CreationTime}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                                <button
-                                                    onClick={() => handleDeleteClick(namespace.Namespace)}
-                                                    disabled={namespace.RepoCount > 0}
-                                                    className={`text-sm rounded px-2 py-1 ${
-                                                        namespace.RepoCount > 0
-                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-300 dark:text-gray-500 dark:cursor-not-allowed'
-                                                            : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-700 dark:text-red-300 dark:hover:bg-red-600 dark:hover:bg-red-700'
-                                                    } dark:bg-gray-700 dark:text-gray-500`}
-                                                    title={namespace.RepoCount > 0 ? "无法删除非空命名空间" : ""}
-                                                >
-                                                    删除
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* 分页控件 */}
-                            <div className="mt-4 flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
-                                    <button
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        disabled={currentPage === 1}
-                                        className={`px-3 py-1 rounded-md text-sm ${
-                                            currentPage === 1
-                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
-                                                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                                        }`}
-                                    >
-                                        上一页
-                                    </button>
-                                    {[...Array(totalPages)].map((_, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => handlePageChange(i + 1)}
-                                            className={`px-3 py-1 rounded-md text-sm ${
-                                                currentPage === i + 1
-                                                    ? 'bg-blue-600 text-white dark:bg-blue-600 dark:text-white'
-                                                    : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                                            }`}
-                                        >
-                                            {i + 1}
-                                        </button>
-                                    ))}
-                                    <button
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        disabled={currentPage === totalPages}
-                                        className={`px-3 py-1 rounded-md text-sm ${
-                                            currentPage === totalPages
-                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
-                                                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                                        }`}
-                                    >
-                                        下一页
-                                    </button>
-                                </div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                    第 {currentPage} 页，共 {totalPages} 页
-                                </div>
-                            </div>
-                        </>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -371,7 +276,6 @@ function NamespacesPage() {
                                 暂无命名空间数据
                             </div>
                         </div>
-
                     )}
                 </div>
             </div>
