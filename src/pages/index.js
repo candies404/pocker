@@ -32,9 +32,6 @@ export default function HomePage() {
         repo: null
     });
     const [selectedRepo, setSelectedRepo] = useState(null);
-    const [selectedRepos, setSelectedRepos] = useState(new Set());
-    const [batchDeleting, setBatchDeleting] = useState(false);
-    const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
     const [createTagRepo, setCreateTagRepo] = useState(null);
     const {startTour, shouldShowTour} = useTour('home');
     const [showTour, setShowTour] = useState(false);
@@ -276,60 +273,6 @@ export default function HomePage() {
         setSelectedRepo(repo.name);
     };
 
-    const handleSelectRepo = (repoName) => {
-        const newSelected = new Set(selectedRepos);
-        if (newSelected.has(repoName)) {
-            newSelected.delete(repoName);
-        } else {
-            newSelected.add(repoName);
-        }
-        setSelectedRepos(newSelected);
-    };
-
-    const handleSelectAll = (e) => {
-        if (e.target.checked) {
-            const allRepos = new Set(repositories.data.map(repo => repo.name));
-            setSelectedRepos(allRepos);
-        } else {
-            setSelectedRepos(new Set());
-        }
-    };
-
-    const handleBatchDelete = () => {
-        setBatchDeleteConfirm(true);
-    };
-
-    const handleBatchDeleteConfirm = async () => {
-        setBatchDeleting(true);
-        try {
-            const response = await fetch('/api/swr/batch-delete-repository', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-access-key': getAccessKey(),
-                },
-                body: JSON.stringify({
-                    repoNames: Array.from(selectedRepos)
-                }),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setSelectedRepos(new Set());
-                await fetchRepositories(currentPage);
-            } else {
-                setError("批量删除仓库失败：" + data.error);
-            }
-        } catch (error) {
-            setError('批量删除仓库失败');
-        } finally {
-            setBatchDeleting(false);
-            setBatchDeleteConfirm(false);
-            setLoading(false);
-        }
-    };
-
     const handleToggleAccess = async (repo) => {
         try {
             setLoading(true);
@@ -505,33 +448,10 @@ export default function HomePage() {
 
                         {repositories && repositories.data.length > 0 ? (
                             <>
-                                {/* 添加批量删除按钮 */}
-                                {selectedRepos.size > 0 && (
-                                    <div className="mt-4 flex items-center space-x-2">
-                                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                                            已选择 {selectedRepos.size} 个仓库
-                                        </span>
-                                        <button
-                                            onClick={handleBatchDelete}
-                                            disabled={batchDeleting}
-                                            className="px-3 py-1.5 bg-red-500 dark:bg-red-600 text-white rounded text-sm hover:bg-red-600 dark:hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 dark:focus:ring-red-500 disabled:opacity-50"
-                                        >
-                                            {batchDeleting ? '删除中...' : '批量删除'}
-                                        </button>
-                                    </div>
-                                )}
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                         <thead className="bg-gray-50 dark:bg-gray-700">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                <input
-                                                    type="checkbox"
-                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-400 dark:focus:ring-blue-400"
-                                                    checked={selectedRepos.size === repositories?.data.length}
-                                                    onChange={handleSelectAll}
-                                                />
-                                            </th>
                                             <th id="tag-list"
                                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 命名空间/镜像名称
@@ -557,14 +477,6 @@ export default function HomePage() {
                                             className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                         {repositories.data.map((repo, index) => (
                                             <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-400 dark:focus:ring-blue-400"
-                                                        checked={selectedRepos.has(repo.name)}
-                                                        onChange={() => handleSelectRepo(repo.name)}
-                                                    />
-                                                </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
                                                     <button
                                                         onClick={() => handleRepoClick(repo)}
@@ -676,8 +588,6 @@ export default function HomePage() {
                                         第 {currentPage} 页，共 {totalPages} 页
                                     </div>
                                 </div>
-
-
                             </>
                         ) : (
                             <div className="overflow-x-auto">
@@ -710,7 +620,6 @@ export default function HomePage() {
                                     暂无镜像数据
                                 </div>
                             </div>
-
                         )}
                     </div>
                 </div>
@@ -806,25 +715,13 @@ export default function HomePage() {
                     server={server}
                 />
 
-                {/* 批量删除确认模态框 */}
-                <ConfirmModal
-                    isOpen={batchDeleteConfirm}
-                    onClose={() => setBatchDeleteConfirm(false)}
-                    onConfirm={handleBatchDeleteConfirm}
-                    title="批量删除仓库"
-                    message={`确定要删除选中的 ${selectedRepos.size} 个仓库吗？此操作不可恢复。`}
-                    confirmText="删除"
-                    cancelText="取消"
-                    isLoading={batchDeleting}
-                />
-
                 {/* 新增标签模态框 */}
                 {createTagRepo && (
                     <CreateTagModal
                         isOpen={!!createTagRepo}
                         onClose={() => handleCloseCreateTagModal()}
-                        repoName={createTagRepo.name.split('/')[1]}
-                        namespace={createTagRepo.name.split('/')[0]}
+                        repoName={createTagRepo.name}
+                        namespace={createTagRepo.namespace}
                     />
                 )}
             </div>
