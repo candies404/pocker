@@ -61,25 +61,23 @@ export default function HomePage() {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch(`/api/tcr/repositories?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`, {
+            const response = await fetch(`/api/swr/repositories?page=${page}&pageSize=${pageSize}&searchKey=${encodeURIComponent(search)}`, {
                 headers: {
                     'x-access-key': getAccessKey(),
                 },
             });
             const data = await response.json();
-            if (data.Data) {
-                setRepositories(data.Data);
-                setServer(data.Data.Server)
-                const total = data.Data.TotalCount;
+            if (data.success) {
+                setRepositories(data);
+                // setServer(data.data.path)
+                const total = data.data[0].total_range || 0;
                 setTotalPages(Math.ceil(total / pageSize));
-            } else if (data.code === "ResourceNotFound.ErrNoUser") {
-                setError('获取仓库列表失败：ResourceNotFound.ErrNoUser');
             } else {
-                setError('获取仓库列表失败');
+                setError(data.message || '获取仓库列表失败');
             }
-            setLoading(false);
         } catch (error) {
             setError(error.message || '获取仓库列表失败');
+        } finally {
             setLoading(false);
         }
     };
@@ -152,24 +150,24 @@ export default function HomePage() {
 
     const fetchNamespaces = async () => {
         try {
-            const response = await fetch('/api/tcr/namespaces', {
+            const response = await fetch('/api/swr/namespaces', {
                 headers: {
                     'x-access-key': getAccessKey(),
                 },
             });
             const data = await response.json();
 
-            if (data.Data && data.Data.NamespaceInfo) {
-                setNamespaces(data.Data.NamespaceInfo);
+            if (data.success) {
+                setNamespaces(data.data.namespaces || []);
                 // 如果有命名空间，默认选中第一个
-                if (data.Data.NamespaceInfo.length > 0) {
-                    setSelectedNamespace(data.Data.NamespaceInfo[0].Namespace);
+                if (data.data.namespaces && data.data.namespaces.length > 0) {
+                    setSelectedNamespace(data.data.namespaces[0].name);
                 }
             }
         } catch (error) {
             setError('获取命名空间列表失败');
         } finally {
-            setFetchNameSpacesIng(false)
+            setFetchNameSpacesIng(false);
         }
     };
 
@@ -190,20 +188,19 @@ export default function HomePage() {
             return;
         }
 
-        const fullRepoName = `${selectedNamespace}/${newRepoName.trim()}`;
-
         setCreating(true);
         setError(null);
 
         try {
-            const response = await fetch('/api/tcr/create-repository', {
+            const response = await fetch('/api/swr/create-repository', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-access-key': getAccessKey(),
                 },
                 body: JSON.stringify({
-                    repoName: fullRepoName
+                    namespace: selectedNamespace,
+                    repository: newRepoName.trim()
                 }),
             });
 
@@ -246,10 +243,10 @@ export default function HomePage() {
 
     const handleDeleteConfirm = async () => {
         const repo = deleteConfirm.repo;
-        setDeletingRepo(repo.RepoName);
+        setDeletingRepo(repo.name);
 
         try {
-            const response = await fetch(`/api/tcr/delete-repository?repoName=${encodeURIComponent(repo.RepoName)}`, {
+            const response = await fetch(`/api/swr/delete-repository?namespace=${encodeURIComponent(repo.namespace)}&repository=${encodeURIComponent(repo.name)}`, {
                 method: 'DELETE',
                 headers: {
                     'x-access-key': getAccessKey(),
@@ -272,12 +269,11 @@ export default function HomePage() {
                 show: false,
                 repo: null
             });
-            setLoading(false);
         }
     };
 
     const handleRepoClick = (repo) => {
-        setSelectedRepo(repo.RepoName);
+        setSelectedRepo(repo.name);
     };
 
     const handleSelectRepo = (repoName) => {
@@ -292,7 +288,7 @@ export default function HomePage() {
 
     const handleSelectAll = (e) => {
         if (e.target.checked) {
-            const allRepos = new Set(repositories.RepoInfo.map(repo => repo.RepoName));
+            const allRepos = new Set(repositories.data.map(repo => repo.name));
             setSelectedRepos(allRepos);
         } else {
             setSelectedRepos(new Set());
@@ -306,7 +302,7 @@ export default function HomePage() {
     const handleBatchDeleteConfirm = async () => {
         setBatchDeleting(true);
         try {
-            const response = await fetch('/api/tcr/batch-delete-repository', {
+            const response = await fetch('/api/swr/batch-delete-repository', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -337,15 +333,16 @@ export default function HomePage() {
     const handleToggleAccess = async (repo) => {
         try {
             setLoading(true);
-            const response = await fetch('/api/tcr/toggle-repo-access', {
+            const response = await fetch('/api/swr/toggle-repo-access', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-access-key': getAccessKey(),
                 },
                 body: JSON.stringify({
-                    repoName: repo.RepoName,
-                    public: repo.Public === 1 ? 0 : 1
+                    namespace: repo.namespace,
+                    repository: repo.name,
+                    isPublic: repo.is_public !== true
                 }),
             });
 
@@ -403,7 +400,7 @@ export default function HomePage() {
                         <div className="flex justify-between items-center mb-6">
                             <div className="flex items-center space-x-4">
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                                    镜像总数: {repositories?.TotalCount || 0}
+                                    镜像总数: {repositories?.data[0].total_range || 0}
                                 </div>
                                 <button
                                     id="create-image-btn"
@@ -503,21 +500,10 @@ export default function HomePage() {
                                 className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4">
                                 <p className="font-medium">错误提示</p>
                                 <p className="text-sm mt-1">{error}</p>
-                                {error.includes('ResourceNotFound.ErrNoUser') && (
-                                    <a
-                                        id="TencentCloudServiceInitialization"
-                                        href="https://console.cloud.tencent.com/tcr/?rid=1"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block dark:text-blue-400 dark:hover:text-blue-600"
-                                    >
-                                        您还没开通镜像服务，点击此处前往腾讯云控制台初始化
-                                    </a>
-                                )}
                             </div>
                         )}
 
-                        {repositories && repositories.RepoInfo.length > 0 ? (
+                        {repositories && repositories.data.length > 0 ? (
                             <>
                                 {/* 添加批量删除按钮 */}
                                 {selectedRepos.size > 0 && (
@@ -542,7 +528,7 @@ export default function HomePage() {
                                                 <input
                                                     type="checkbox"
                                                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-400 dark:focus:ring-blue-400"
-                                                    checked={selectedRepos.size === repositories?.RepoInfo.length}
+                                                    checked={selectedRepos.size === repositories?.data.length}
                                                     onChange={handleSelectAll}
                                                 />
                                             </th>
@@ -569,14 +555,14 @@ export default function HomePage() {
                                         </thead>
                                         <tbody
                                             className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {repositories.RepoInfo.map((repo, index) => (
+                                        {repositories.data.map((repo, index) => (
                                             <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <input
                                                         type="checkbox"
                                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-400 dark:focus:ring-blue-400"
-                                                        checked={selectedRepos.has(repo.RepoName)}
-                                                        onChange={() => handleSelectRepo(repo.RepoName)}
+                                                        checked={selectedRepos.has(repo.name)}
+                                                        onChange={() => handleSelectRepo(repo.name)}
                                                     />
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
@@ -584,22 +570,22 @@ export default function HomePage() {
                                                         onClick={() => handleRepoClick(repo)}
                                                         className="hover:underline focus:outline-none"
                                                     >
-                                                        {repo.RepoName}
+                                                        {`${repo.namespace}/${repo.name}`}
                                                     </button>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {repo.TagCount}
+                                                    {repo.num_images}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {repo.Public === 1 ? '公开' : '私有'}
+                                                    {repo.is_public === true ? '公开' : '私有'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {repo.UpdateTime}
+                                                    {repo.updated_at}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     <div className="flex items-center space-x-2">
                                                         <button
-                                                            onClick={() => setSelectedRepo(repo.RepoName)}
+                                                            onClick={() => setSelectedRepo(repo.name)}
                                                             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
                                                         >
                                                             查看标签
@@ -613,9 +599,9 @@ export default function HomePage() {
                                                         <button
                                                             onClick={() => handleToggleAccess(repo)}
                                                             className="text-sm rounded px-2 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
-                                                            title={repo.Public === 1 ? "设为私有" : "设为公开"}
+                                                            title={repo.is_public === true ? "设为私有" : "设为公开"}
                                                         >
-                                                            {repo.Public === 1 ? "私有" : "公开"}
+                                                            {repo.is_public === true ? "私有" : "公开"}
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteClick(repo)}
@@ -752,8 +738,8 @@ export default function HomePage() {
                                     <option value="">暂无可用命名空间，请先创建</option>
                                 ) : (
                                     namespaces.map((ns) => (
-                                        <option key={ns.Namespace} value={ns.Namespace}>
-                                            {ns.Namespace}
+                                        <option key={ns.name} value={ns.name}>
+                                            {ns.name}
                                         </option>
                                     ))
                                 ))}
@@ -806,7 +792,7 @@ export default function HomePage() {
                     onClose={handleDeleteCancel}
                     onConfirm={handleDeleteConfirm}
                     title="删除仓库"
-                    message={`确定要删除仓库 "${deleteConfirm.repo?.RepoName}" 吗？此操作不可恢复。`}
+                    message={`确定要删除仓库 "${deleteConfirm.repo?.namespace}/${deleteConfirm.repo?.name}" 吗？此操作不可恢复。`}
                     confirmText="删除"
                     cancelText="取消"
                     isLoading={!!deletingRepo}
@@ -837,8 +823,8 @@ export default function HomePage() {
                     <CreateTagModal
                         isOpen={!!createTagRepo}
                         onClose={() => handleCloseCreateTagModal()}
-                        repoName={createTagRepo.RepoName.split('/')[1]}
-                        namespace={createTagRepo.RepoName.split('/')[0]}
+                        repoName={createTagRepo.name.split('/')[1]}
+                        namespace={createTagRepo.name.split('/')[0]}
                     />
                 )}
             </div>

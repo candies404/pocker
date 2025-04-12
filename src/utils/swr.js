@@ -75,4 +75,153 @@ export const deleteNamespace = async (namespace) => {
     }
 };
 
+// 获取仓库列表
+export const listRepositories = async (namespace, params = {}) => {
+    try {
+        const client = initSwrClient();
+        const request = new swr.ListReposDetailsRequest();
+        request.withNamespace(namespace);
+
+        // 添加可选参数
+        if (params.limit) request.withLimit(params.limit);
+        if (params.offset) request.withOffset(params.offset);
+        if (params.name) request.withName(params.name);
+
+        const result = await client.listReposDetails(request);
+        return {
+            success: true,
+            data: result
+        };
+    } catch (error) {
+        console.error('获取仓库列表失败:', error);
+        throw error;
+    }
+};
+
+// 创建仓库
+export const createRepository = async (namespace, repository, description = '') => {
+    try {
+        const client = initSwrClient();
+        const request = new swr.CreateRepoRequest();
+        request.withNamespace(namespace);
+        request.withBody({
+            repository: repository,
+            description: description,
+            category: 'other',
+            is_public: false
+        });
+
+        const result = await client.createRepo(request);
+        return {
+            success: true,
+            data: result
+        };
+    } catch (error) {
+        console.error('创建仓库失败:', error);
+        throw error;
+    }
+};
+
+// 删除仓库
+export const deleteRepository = async (namespace, repository) => {
+    try {
+        const client = initSwrClient();
+        const request = new swr.DeleteRepoRequest();
+        request.withNamespace(namespace);
+        request.withRepository(repository);
+
+        const result = await client.deleteRepo(request);
+        return {
+            success: true,
+            data: result
+        };
+    } catch (error) {
+        console.error('删除仓库失败:', error);
+        throw error;
+    }
+};
+
+// 更新仓库信息
+export const updateRepository = async (namespace, repository, updateInfo) => {
+    try {
+        const client = initSwrClient();
+        const request = new swr.UpdateRepoRequest();
+        request.withNamespace(namespace);
+        request.withRepository(repository);
+        request.withBody({
+            description: updateInfo.description,
+            is_public: updateInfo.is_public
+        });
+
+        const result = await client.updateRepo(request);
+        return {
+            success: true,
+            data: result
+        };
+    } catch (error) {
+        console.error('更新仓库信息失败:', error);
+        throw error;
+    }
+};
+
+// 获取镜像标签列表
+export const listImageTags = async (namespace, repository, params = {}) => {
+    try {
+        const client = initSwrClient();
+        const request = new swr.ListRepositoryTagsRequest();
+        request.withNamespace(namespace);
+        request.withRepository(repository);
+
+        // 添加可选参数
+        if (params.limit) request.withLimit(params.limit);
+        request.withOffset(params.offset);
+        if (params.tag) request.withTag(params.tag);
+
+        const result = await client.listRepositoryTags(request);
+        return {
+            success: true,
+            data: result
+        };
+    } catch (error) {
+        console.error('获取镜像标签列表失败:', error);
+        throw error;
+    }
+};
+
+// 删除镜像标签
+export const deleteImageTag = async (namespace, repository, tag) => {
+    try {
+        const client = initSwrClient();
+        const request = new swr.DeleteRepoTagRequest();
+        request.withNamespace(namespace);
+        request.withRepository(repository);
+        request.withTag(tag);
+
+        const result = await client.deleteRepoTag(request);
+        return {
+            success: true,
+            data: result
+        };
+    } catch (error) {
+        console.error('删除镜像标签失败:', error);
+        throw error;
+    }
+};
+
+// 获取配额信息
+export const getQuota = async () => {
+    try {
+        const client = initSwrClient();
+        const request = new swr.ShowDomainOverviewRequest();
+        const result = await client.showDomainOverview(request);
+        return {
+            success: true,
+            data: result
+        };
+    } catch (error) {
+        console.error('获取配额信息失败:', error);
+        throw error;
+    }
+};
+
 
