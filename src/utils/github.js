@@ -133,18 +133,18 @@ jobs:
         run: |
           docker pull 源Docker Hub镜像地址
 
-      - name: Login to Tencent Docker Hub
+      - name: Login to HuaWei Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ccr.ccs.tencentyun.com
-          username: 腾讯云账号
-          password: 腾讯云容器镜像服务初始化的密码
+          registry: swr.cn-north-4.myhuaweicloud.com
+          username: 华为云账号
+          password: 华为云容器镜像服务初始化的密码
 
-      - name: Tag the image for Tencent
+      - name: Tag the image for HuaWei
         run: |
           docker tag 源Docker Hub镜像地址 目标容器镜像地址
 
-      - name: Push the image to Tencent Docker Hub
+      - name: Push the image to HuaWei Docker Hub
         run: |
           docker push 目标容器镜像地址
 `;
@@ -324,18 +324,18 @@ jobs:
         run: |
           docker pull ${sourceImage}
 
-      - name: Login to Tencent Docker Hub
+      - name: Login to HuaWei Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ccr.ccs.tencentyun.com
-          username: ${tenCentUserName}
-          password: ${process.env.TENCENTCLOUD_PASSWORD}
+          registry: swr.cn-north-4.myhuaweicloud.com
+          username: ${process.env.NEXT_PUBLIC_HUAWEICLOUD_USERNAME}
+          password: ${process.env.HUAWEICLOUD_PASSWORD}
 
-      - name: Tag the image for Tencent
+      - name: Tag the image for HuaWei
         run: |
           docker tag ${sourceImage} ${targetImage}
 
-      - name: Push the image to Tencent Docker Hub
+      - name: Push the image to HuaWei Docker Hub
         run: |
           docker push ${targetImage}
 `;

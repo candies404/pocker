@@ -83,7 +83,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
 
         try {
             // 构建目标镜像地址
-            const targetImage = `ccr.ccs.tencentyun.com/${namespace}/${repoName}:${targetTag}`;
+            const targetImage = `swr.cn-north-4.myhuaweicloud.com/${namespace}/${repoName}:${targetTag}`;
 
             // 1. 更新工作流文件
             const updateResponse = await fetch('/api/github/update-workflow', {
@@ -289,7 +289,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             <div className="text-sm text-gray-500 dark:text-gray-300">
                                 <p>最终地址将为：</p>
                                 <p className="font-mono mt-1 dark:text-white">
-                                    ccr.ccs.tencentyun.com/{namespace}/{repoName}:{targetTag || '[标签名]'}
+                                    swr.cn-north-4.myhuaweicloud.com/{namespace}/{repoName}:{targetTag || '[标签名]'}
                                 </p>
                             </div>
                         )}

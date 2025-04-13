@@ -3,7 +3,7 @@ import Modal from '@/components/Modal';
 import {getAccessKey} from '@/utils/auth';
 import ConfirmModal from '@/components/ConfirmModal';
 
-export default function TagListModal({isOpen, onClose, repoName, server}) {
+export default function TagListModal({isOpen, onClose, repoName, namespace, server, username: defaultUsername}) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [tags, setTags] = useState(null);
@@ -24,21 +24,21 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
         repoName: null
     });
     const [searchKey, setSearchKey] = useState('');
-    const [username, setUsername] = useState('');
+    const [username, setUsername] = useState(defaultUsername || '');
 
     useEffect(() => {
         if (isOpen && repoName) {
             fetchTags(currentPage);
-            fetchUsername();
+            setUsername(defaultUsername || '');
         }
-    }, [isOpen, repoName, currentPage, pageSize]);
+    }, [isOpen, repoName, currentPage, pageSize, defaultUsername]);
 
     const fetchTags = async (page, search = searchKey) => {
         setLoading(true);
         setError(null);
         try {
             const response = await fetch(
-                `/api/tcr/image-tags?repoName=${encodeURIComponent(repoName)}&page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`,
+                `/api/swr/image-tags?namespace=${encodeURIComponent(namespace)}&repository=${encodeURIComponent(repoName)}&page=${page}&pageSize=${pageSize}&searchKey=${encodeURIComponent(search)}`,
                 {
                     headers: {
                         'x-access-key': getAccessKey(),
@@ -47,9 +47,9 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
             );
             const data = await response.json();
 
-            if (data.Data) {
-                setTags(data.Data);
-                const total = data.Data.TagCount || data.Data.TagInfo.length;
+            if (data.success) {
+                setTags(data.data);
+                const total = data.data.length || 0;
                 setTotalPages(Math.ceil(total / pageSize));
             } else {
                 setError('获取标签列表失败');
@@ -61,22 +61,6 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
         }
     };
 
-    const fetchUsername = async () => {
-        try {
-            const response = await fetch('/api/tcr/quota', {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
-            const data = await response.json();
-            if (data && data.Data.LimitInfo[0].Username) {
-                setUsername(data.Data.LimitInfo[0].Username);
-            }
-        } catch (error) {
-            console.error('获取用户名失败:', error);
-        }
-    };
-
     const formatSize = (size) => {
         if (typeof size === 'string') return size;
         const mb = size / (1024 * 1024);
@@ -84,10 +68,10 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
     };
 
     const handleCopy = async (tag) => {
-        const fullImageUrl = `${tags.Server}/${repoName}:${tag.TagName}`;
+        const fullImageUrl = `${tag.path}`;
         try {
             await navigator.clipboard.writeText(fullImageUrl);
-            setCopyStatus(tag.TagName);
+            setCopyStatus(tag.Tag);
             setTimeout(() => {
                 setCopyStatus('');
             }, 1500);
@@ -115,11 +99,11 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
     const handleDeleteConfirm = async () => {
         const tag = deleteConfirm.tag;
         const currentRepoName = deleteConfirm.repoName;
-        setDeletingTag(tag.TagName);
+        setDeletingTag(tag.Tag);
 
         try {
             const response = await fetch(
-                `/api/tcr/delete-tag?repoName=${encodeURIComponent(currentRepoName)}&tag=${encodeURIComponent(tag.TagName)}`,
+                `/api/swr/delete-tag?namespace=${encodeURIComponent(namespace)}&repository=${encodeURIComponent(currentRepoName)}&tag=${encodeURIComponent(tag.Tag)}`,
                 {
                     method: 'DELETE',
                     headers: {
@@ -131,19 +115,7 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
             const data = await response.json();
 
             if (data.success) {
-                // 使用保存的 currentRepoName 重新获取标签列表
-                const tagsResponse = await fetch(`/api/tcr/image-tags?repoName=${encodeURIComponent(currentRepoName)}`, {
-                    headers: {
-                        'x-access-key': getAccessKey(),
-                    },
-                });
-                const tagsData = await tagsResponse.json();
-
-                if (tagsData.Data) {
-                    setTags(tagsData.Data);
-                } else {
-                    setError('获取标签列表失败');
-                }
+                await fetchTags(currentPage);
             } else {
                 setError("删除标签失败：" + data.error);
             }
@@ -161,7 +133,7 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
 
     const handleSelectAll = (e) => {
         if (e.target.checked) {
-            const allTags = new Set(tags.TagInfo.map(tag => tag.TagName));
+            const allTags = new Set(tags.tags.map(tag => tag.Tag));
             setSelectedTags(allTags);
         } else {
             setSelectedTags(new Set());
@@ -190,14 +162,14 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
     const handleBatchDeleteConfirm = async () => {
         setBatchDeleting(true);
         try {
-            const response = await fetch('/api/tcr/batch-delete-tag', {
+            const response = await fetch('/api/swr/batch-delete-tags', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-access-key': getAccessKey(),
                 },
                 body: JSON.stringify({
-                    repoName: batchDeleteConfirm.repoName,
+                    repository: batchDeleteConfirm.repoName,
                     tags: Array.from(selectedTags)
                 }),
             });
@@ -258,7 +230,7 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
             <Modal
                 isOpen={isOpen}
                 onClose={onClose}
-                title={`镜像标签列表 - ${repoName}`}
+                title={`镜像标签列表 - ${namespace}/${repoName}`}
                 maxWidth="max-w-4xl"
                 maxHeight="max-h-[93vh]"
             >
@@ -291,10 +263,10 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                                         批量删除 ({selectedTags.size})
                                     </button>
                                 )}
-                                {tags?.TagInfo && (
+                                {tags && (
                                     <span className="text-sm text-gray-600 dark:text-gray-300">
                                         标签总数：<span className="font-medium text-blue-600 dark:text-blue-400">
-                                            {tags.TagCount || tags.TagInfo.length}
+                                            {tags.length}
                                         </span>
                                     </span>
                                 )}
@@ -352,7 +324,7 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                                 </select>
                             </div>
                         </div>
-                        {tags?.TagInfo?.length > 0 ? (
+                        {tags.length > 0 ? (
                             <>
                                 <div className="overflow-x-auto max-h-[calc(100vh-16rem)] scrollbar-custom">
                                     <style jsx global>{`
@@ -398,13 +370,11 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                                                 <input
                                                     type="checkbox"
                                                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
-                                                    checked={selectedTags.size === tags.TagInfo.length}
+                                                    checked={selectedTags.size === tags.total}
                                                     onChange={handleSelectAll}
                                                 />
                                             </th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">标签</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">平台</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">系统</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">大小</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">推送时间</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
@@ -412,40 +382,34 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                                         </thead>
                                         <tbody
                                             className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {tags.TagInfo.map((tag, index) => (
-                                            <tr key={`${tag.TagName}-${index}`}
+                                        {tags.map((tag, index) => (
+                                            <tr key={`${tag.Tag}-${index}`}
                                                 className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <input
                                                         type="checkbox"
                                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
-                                                        checked={selectedTags.has(tag.TagName)}
-                                                        onChange={() => handleSelectTag(tag.TagName)}
+                                                        checked={selectedTags.has(tag.Tag)}
+                                                        onChange={() => handleSelectTag(tag.Tag)}
                                                     />
                                                 </td>
                                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-600 dark:text-blue-500">
-                                                    {tag.TagName}
+                                                    {tag.Tag}
                                                 </td>
                                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {tag.Architecture}
+                                                    {formatSize(tag.size)}
                                                 </td>
                                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {tag.OS}
-                                                </td>
-                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {formatSize(tag.SizeByte || tag.Size)}
-                                                </td>
-                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {tag.PushTime}
+                                                    {tag.updated}
                                                 </td>
                                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     <div className="flex items-center space-x-2">
                                                         <button
                                                             onClick={() => handleCopy(tag)}
                                                             className="group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500"
-                                                            title={`复制：${tags.Server}/${repoName}:${tag.TagName}`}
+                                                            title={`复制：${tag.path}`}
                                                         >
-                                                            {copyStatus === tag.TagName ? (
+                                                            {copyStatus === tag.Tag ? (
                                                                 <svg
                                                                     className="w-5 h-5 text-green-500 dark:text-green-400"
                                                                     fill="none"
@@ -469,9 +433,9 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteClick(tag)}
-                                                            disabled={deletingTag === tag.TagName}
+                                                            disabled={deletingTag === tag.Tag}
                                                             className={`group relative p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-500 ${
-                                                                deletingTag === tag.TagName ? 'opacity-50 cursor-not-allowed' : ''
+                                                                deletingTag === tag.Tag ? 'opacity-50 cursor-not-allowed' : ''
                                                             }`}
                                                             title="删除标签"
                                                         >
@@ -551,7 +515,7 @@ export default function TagListModal({isOpen, onClose, repoName, server}) {
                 onClose={handleDeleteCancel}
                 onConfirm={handleDeleteConfirm}
                 title="删除标签"
-                message={`确定要删除标签 "${deleteConfirm.tag?.TagName}" 吗？此操作不可恢复。`}
+                message={`确定要删除标签 "${deleteConfirm.tag?.Tag}" 吗？此操作不可恢复。`}
                 confirmText="删除"
                 cancelText="取消"
                 isLoading={!!deletingTag}

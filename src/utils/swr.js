@@ -86,6 +86,8 @@ export const listRepositories = async (namespace, params = {}) => {
         if (params.limit) request.withLimit(params.limit);
         if (params.offset) request.withOffset(params.offset);
         if (params.name) request.withName(params.name);
+        request.withOrderColumn("updated_time")
+        request.withOrderType("desc")
 
         const result = await client.listReposDetails(request);
         return {

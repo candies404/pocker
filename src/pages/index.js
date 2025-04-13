@@ -66,7 +66,7 @@ export default function HomePage() {
             const data = await response.json();
             if (data.success) {
                 setRepositories(data);
-                // setServer(data.data.path)
+                setServer("swr.cn-north-4.myhuaweicloud.com")
                 const total = data.data[0].total_range || 0;
                 setTotalPages(Math.ceil(total / pageSize));
             } else {
@@ -271,6 +271,7 @@ export default function HomePage() {
 
     const handleRepoClick = (repo) => {
         setSelectedRepo(repo.name);
+        setSelectedNamespace(repo.namespace)
     };
 
     const handleToggleAccess = async (repo) => {
@@ -312,6 +313,7 @@ export default function HomePage() {
 
     const handleCloseTagListModal = async (repo) => {
         setSelectedRepo(null);
+        setSelectedNamespace("")
         await fetchRepositories(currentPage);
     }
 
@@ -497,7 +499,10 @@ export default function HomePage() {
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     <div className="flex items-center space-x-2">
                                                         <button
-                                                            onClick={() => setSelectedRepo(repo.name)}
+                                                            onClick={() => {
+                                                                setSelectedRepo(repo.name);
+                                                                setSelectedNamespace(repo.namespace);
+                                                            }}
                                                             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
                                                         >
                                                             查看标签
@@ -712,7 +717,9 @@ export default function HomePage() {
                     isOpen={!!selectedRepo}
                     onClose={() => handleCloseTagListModal()}
                     repoName={selectedRepo}
+                    namespace={selectedNamespace}
                     server={server}
+                    username={process.env.NEXT_PUBLIC_HUAWEICLOUD_USERNAME}
                 />
 
                 {/* 新增标签模态框 */}
