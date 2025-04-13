@@ -226,7 +226,7 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
                             <code className="font-mono text-yellow-700 dark:text-yellow-500">
                                 docker login {server} --username={username}
                             </code><br/>
-                            <span className="font-semibold">🔑</span> 密码就是环境变量 TENCENTCLOUD_PASSWORD 的值
+                            <span className="font-semibold">🔑</span> 密码就是环境变量 HUAWEICLOUD_PASSWORD 的值
                         </p>
                         <div className="mb-4 flex justify-between items-center">
                             <div className="flex items-center space-x-4">

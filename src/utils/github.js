@@ -304,7 +304,7 @@ export const configureAutoUpdate = async (repo) => {
 };
 
 // 更新工作流文件
-export const updateWorkflowFile = async (sourceImage, targetImage, tenCentUserName) => {
+export const updateWorkflowFile = async (sourceImage, targetImage) => {
     try {
         const username = await getUsername();
         const workflowContent = `

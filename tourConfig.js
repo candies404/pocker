@@ -9,15 +9,6 @@ export const tourSteps = {
             }
         },
         {
-            element: '#TencentCloudServiceInitialization',
-            popover: {
-                title: '腾讯云服务初始化',
-                description: '请先完成腾讯云服务配置：<br/>- 访问 <a href="https://console.cloud.tencent.com/tcr/repository" target="_blank">腾讯云控制台</a><br/>- 完成以下操作：<br/> 1. 开通容器镜像服务<br/> 2. 获取API访问密钥',
-                side: 'bottom',
-                align: 'start'
-            }
-        },
-        {
             element: '#GitHub配置',
             popover: {
                 title: 'GitHub 私有仓库配置',

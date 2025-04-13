@@ -17,8 +17,7 @@ const handler = async (req, res) => {
     }
 
     try {
-        const tenCentUserName = await getTenCentUsername();
-        const result = await updateWorkflowFile(sourceImage, targetImage, tenCentUserName);
+        const result = await updateWorkflowFile(sourceImage, targetImage);
         res.status(200).json({
             success: true,
             data: result
@@ -28,15 +27,6 @@ const handler = async (req, res) => {
             success: false,
             message: error.message
         });
-    }
-};
-
-const getTenCentUsername = async () => {
-    try {
-        const result = await tcrClient.DescribeUserQuotaPersonal();
-        return result.Data.LimitInfo[0].Username;
-    } catch (error) {
-        throw error;
     }
 };
 
