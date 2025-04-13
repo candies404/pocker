@@ -26,6 +26,7 @@ function QuotaPage() {
     }, [isAuth]);
 
     const fetchQuotaData = async () => {
+        setLoading(true)
         try {
             const response = await fetch('/api/swr/quota', {
                 headers: {
@@ -69,7 +70,10 @@ function QuotaPage() {
             <Navigation/>
             <div className="container mx-auto p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                    <div className="flex justify-end items-center mb-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                            当前容器镜像服务基于华为云容器镜像服务 SWR 构建
+                        </div>
                         <div className="flex items-center space-x-2">
                             <button
                                 onClick={startTour}
@@ -106,7 +110,7 @@ function QuotaPage() {
 
                             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                                 <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">命名空间数量</h3>
-                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{quotaData.namspace_num}</p>
+                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{quotaData.namspace_num}/5</p>
                             </div>
 
                             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">

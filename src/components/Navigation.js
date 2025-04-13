@@ -18,7 +18,7 @@ export default function Navigation() {
         {path: '/workflow-logs', label: '构建日志'},
         {path: '/namespaces', label: '命名空间'},
         {path: '/github-config', label: 'GitHub 配置'},
-        {path: '/quota', label: '配额信息'},
+        {path: '/quota', label: '用量统计'},
         {path: '/donate', label: '支持项目'},
     ];
 
