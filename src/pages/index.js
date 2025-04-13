@@ -345,7 +345,7 @@ export default function HomePage() {
                         <div className="flex justify-between items-center mb-6">
                             <div className="flex items-center space-x-4">
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                                    镜像总数: {repositories?.data[0].total_range || 0}
+                                    镜像总数: {repositories?.data?.[0]?.total_range || 0}
                                 </div>
                                 <button
                                     id="create-image-btn"

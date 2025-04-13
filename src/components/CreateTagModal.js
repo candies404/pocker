@@ -244,7 +244,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div>
-                            <div className="flex justify-between items-center mb-1">
+                            <div className="flex justify-between items-center mb-0">
                                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Docker Hub 镜像地址
                                 </label>

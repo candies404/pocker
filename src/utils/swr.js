@@ -80,7 +80,7 @@ export const listRepositories = async (namespace, params = {}) => {
     try {
         const client = initSwrClient();
         const request = new swr.ListReposDetailsRequest();
-        request.withNamespace(namespace);
+        if (namespace) request.withNamespace(namespace);
 
         // 添加可选参数
         if (params.limit) request.withLimit(params.limit);
@@ -106,12 +106,12 @@ export const createRepository = async (namespace, repository, description = '') 
         const client = initSwrClient();
         const request = new swr.CreateRepoRequest();
         request.withNamespace(namespace);
-        request.withBody({
-            repository: repository,
-            description: description,
-            category: 'other',
-            is_public: false
-        });
+        const body = new swr.CreateRepoRequestBody();
+        body.withRepository(repository);
+        body.withDescription(description);
+        body.withCategory('other');
+        body.withIsPublic(false);
+        request.withBody(body);
 
         const result = await client.createRepo(request);
         return {
@@ -150,10 +150,10 @@ export const updateRepository = async (namespace, repository, updateInfo) => {
         const request = new swr.UpdateRepoRequest();
         request.withNamespace(namespace);
         request.withRepository(repository);
-        request.withBody({
-            description: updateInfo.description,
-            is_public: updateInfo.is_public
-        });
+        const body = new swr.UpdateRepoRequestBody();
+        body.withDescription(updateInfo.description);
+        body.withIsPublic(updateInfo.is_public);
+        request.withBody(body);
 
         const result = await client.updateRepo(request);
         return {
@@ -178,6 +178,9 @@ export const listImageTags = async (namespace, repository, params = {}) => {
         if (params.limit) request.withLimit(params.limit);
         request.withOffset(params.offset);
         if (params.tag) request.withTag(params.tag);
+        // 默认按更新时间倒序
+        request.withOrderColumn("updated_at")
+        request.withOrderType("desc")
 
         const result = await client.listRepositoryTags(request);
         return {

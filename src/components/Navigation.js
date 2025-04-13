@@ -47,7 +47,7 @@ export default function Navigation() {
                                 className="text-xl font-bold text-gray-800 dark:text-white">Pocker - 镜像私服</span>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <div className="flex space-x-4">
+                            <div className="flex space-x-0.5">
                                 {menuItems.map((item) => (
                                     <button
                                         id={item.label}
