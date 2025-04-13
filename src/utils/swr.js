@@ -229,4 +229,20 @@ export const getQuota = async () => {
     }
 };
 
+// 获取 API 版本信息
+export const listApiVersions = async () => {
+    try {
+        const client = initSwrClient();
+        const request = new swr.ListApiVersionsRequest();
+        const result = await client.listApiVersions(request);
+        return {
+            success: true,
+            data: result
+        };
+    } catch (error) {
+        console.error('获取 API 版本信息失败:', error);
+        throw error;
+    }
+};
+
 
