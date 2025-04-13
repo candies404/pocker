@@ -12,6 +12,7 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
     const [deleteConfirm, setDeleteConfirm] = useState({
         show: false,
         tag: null,
@@ -20,13 +21,33 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
     const [searchKey, setSearchKey] = useState('');
     const [username, setUsername] = useState(defaultUsername || '');
 
-    useEffect(() => {
-        if (isOpen && repoName) {
-            fetchTags(currentPage);
-            setUsername(defaultUsername || '');
-        }
-    }, [isOpen, repoName, currentPage, pageSize, defaultUsername]);
+    // 获取总数的函数
+    const fetchTotalCount = async (search = searchKey) => {
+        try {
+            const response = await fetch(
+                `/api/swr/image-tags?namespace=${encodeURIComponent(namespace)}&repository=${encodeURIComponent(repoName)}&page=1&pageSize=1000&searchKey=${encodeURIComponent(search)}`,
+                {
+                    headers: {
+                        'x-access-key': getAccessKey(),
+                    },
+                }
+            );
+            const data = await response.json();
 
+            if (data.success) {
+                const total = data.data.length || 0;
+                setTotalCount(total);
+                setTotalPages(Math.ceil(total / pageSize));
+                return total;
+            }
+            return 0;
+        } catch (error) {
+            console.error('获取总数失败:', error);
+            return 0;
+        }
+    };
+
+    // 获取当前页数据的函数
     const fetchTags = async (page, search = searchKey) => {
         setLoading(true);
         setError(null);
@@ -43,8 +64,6 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
 
             if (data.success) {
                 setTags(data.data);
-                const total = data.data.length || 0;
-                setTotalPages(Math.ceil(total / pageSize));
             } else {
                 setError('获取标签列表失败');
             }
@@ -54,6 +73,24 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (isOpen && repoName) {
+            const initData = async () => {
+                setLoading(true);
+                await fetchTotalCount();
+                await fetchTags(currentPage);
+                setUsername(defaultUsername || '');
+            };
+            initData();
+        }
+    }, [isOpen, repoName]);
+
+    useEffect(() => {
+        if (isOpen && repoName) {
+            fetchTags(currentPage);
+        }
+    }, [currentPage, pageSize]);
 
     const formatSize = (size) => {
         if (typeof size === 'string') return size;
@@ -129,10 +166,12 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
         setCurrentPage(page);
     };
 
-    const handlePageSizeChange = (e) => {
+    const handlePageSizeChange = async (e) => {
         const newSize = parseInt(e.target.value);
         setPageSize(newSize);
-        setCurrentPage(1); // 重置到第一页
+        setCurrentPage(1);
+        // 重新计算总页数
+        setTotalPages(Math.ceil(totalCount / newSize));
     };
 
     const handleSearch = (e) => {
@@ -140,22 +179,25 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
         setSearchKey(value);
     };
 
-    const handleKeyPress = (e) => {
+    const handleKeyPress = async (e) => {
         if (e.key === 'Enter') {
-            fetchTags(1);
             setCurrentPage(1);
+            await fetchTotalCount(searchKey);
+            await fetchTags(1);
         }
     };
 
-    const handleSearchClick = () => {
-        fetchTags(1);
+    const handleSearchClick = async () => {
         setCurrentPage(1);
+        await fetchTotalCount(searchKey);
+        await fetchTags(1);
     };
 
-    const handleClearSearch = () => {
+    const handleClearSearch = async () => {
         setSearchKey('');
         setCurrentPage(1);
-        fetchTags(1, '');
+        await fetchTotalCount('');
+        await fetchTags(1, '');
     };
 
     return (
@@ -191,7 +233,7 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
                                 {tags && (
                                     <span className="text-sm text-gray-600 dark:text-gray-300">
                                         标签总数：<span className="font-medium text-blue-600 dark:text-blue-400">
-                                            {tags.length}
+                                            {totalCount}
                                         </span>
                                     </span>
                                 )}
@@ -249,7 +291,7 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
                                 </select>
                             </div>
                         </div>
-                        {tags.length > 0 ? (
+                        {tags && tags.length > 0 ? (
                             <>
                                 <div className="overflow-x-auto max-h-[calc(100vh-16rem)] scrollbar-custom">
                                     <style jsx global>{`
@@ -366,7 +408,7 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
                                 </div>
 
                                 {/* 添加分页控件 */}
-                                <div className="mt-4 flex items-center justify-between">
+                                <div className="mt-2 flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
                                         <button
                                             onClick={() => handlePageChange(currentPage - 1)}
