@@ -17,12 +17,6 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
         tag: null,
         repoName: null
     });
-    const [selectedTags, setSelectedTags] = useState(new Set());
-    const [batchDeleting, setBatchDeleting] = useState(false);
-    const [batchDeleteConfirm, setBatchDeleteConfirm] = useState({
-        show: false,
-        repoName: null
-    });
     const [searchKey, setSearchKey] = useState('');
     const [username, setUsername] = useState(defaultUsername || '');
 
@@ -131,67 +125,6 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
         }
     };
 
-    const handleSelectAll = (e) => {
-        if (e.target.checked) {
-            const allTags = new Set(tags.tags.map(tag => tag.Tag));
-            setSelectedTags(allTags);
-        } else {
-            setSelectedTags(new Set());
-        }
-    };
-
-    const handleSelectTag = (tagName) => {
-        const newSelectedTags = new Set(selectedTags);
-        if (newSelectedTags.has(tagName)) {
-            newSelectedTags.delete(tagName);
-        } else {
-            newSelectedTags.add(tagName);
-        }
-        setSelectedTags(newSelectedTags);
-    };
-
-    const handleBatchDelete = () => {
-        if (selectedTags.size > 0) {
-            setBatchDeleteConfirm({
-                show: true,
-                repoName: repoName
-            });
-        }
-    };
-
-    const handleBatchDeleteConfirm = async () => {
-        setBatchDeleting(true);
-        try {
-            const response = await fetch('/api/swr/batch-delete-tags', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-access-key': getAccessKey(),
-                },
-                body: JSON.stringify({
-                    repository: batchDeleteConfirm.repoName,
-                    tags: Array.from(selectedTags)
-                }),
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                setSelectedTags(new Set());
-                await fetchTags(currentPage);
-            } else {
-                setError(data.message || '批量删除失败');
-            }
-        } catch (error) {
-            setError('批量删除失败');
-        } finally {
-            setBatchDeleting(false);
-            setBatchDeleteConfirm({
-                show: false,
-                repoName: null
-            });
-        }
-    };
-
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -255,14 +188,6 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
                         </p>
                         <div className="mb-4 flex justify-between items-center">
                             <div className="flex items-center space-x-4">
-                                {selectedTags.size > 0 && (
-                                    <button
-                                        onClick={handleBatchDelete}
-                                        className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 dark:bg-red-700 dark:hover:bg-red-800"
-                                    >
-                                        批量删除 ({selectedTags.size})
-                                    </button>
-                                )}
                                 {tags && (
                                     <span className="text-sm text-gray-600 dark:text-gray-300">
                                         标签总数：<span className="font-medium text-blue-600 dark:text-blue-400">
@@ -366,14 +291,6 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
                                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                         <thead className="bg-gray-50 dark:bg-gray-700">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <input
-                                                    type="checkbox"
-                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
-                                                    checked={selectedTags.size === tags.total}
-                                                    onChange={handleSelectAll}
-                                                />
-                                            </th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">标签</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">大小</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">推送时间</th>
@@ -385,14 +302,6 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
                                         {tags.map((tag, index) => (
                                             <tr key={`${tag.Tag}-${index}`}
                                                 className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:text-blue-500 dark:focus:ring-blue-400"
-                                                        checked={selectedTags.has(tag.Tag)}
-                                                        onChange={() => handleSelectTag(tag.Tag)}
-                                                    />
-                                                </td>
                                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-600 dark:text-blue-500">
                                                     {tag.Tag}
                                                 </td>
@@ -519,21 +428,6 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
                 confirmText="删除"
                 cancelText="取消"
                 isLoading={!!deletingTag}
-            />
-
-            {/* 批量删除确认模态框 */}
-            <ConfirmModal
-                isOpen={batchDeleteConfirm.show}
-                onClose={() => setBatchDeleteConfirm({
-                    show: false,
-                    repoName: null
-                })}
-                onConfirm={handleBatchDeleteConfirm}
-                title="批量删除标签"
-                message={`确定要从仓库 "${batchDeleteConfirm.repoName}" 中删除选中的 ${selectedTags.size} 个标签吗？此操作不可恢复。`}
-                confirmText="删除"
-                cancelText="取消"
-                isLoading={batchDeleting}
             />
         </>
     );
