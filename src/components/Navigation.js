@@ -97,6 +97,8 @@ export default function Navigation() {
         const newRegion = event.target.value;
         setCurrentRegion(newRegion);
         localStorage.setItem(SWR_CONSTANTS.CURRENT_REGION_KEY, newRegion);
+        // 刷新页面，应用新的region设置
+        router.reload();
     };
 
     const menuItems = [

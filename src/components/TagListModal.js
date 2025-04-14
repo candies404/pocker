@@ -22,13 +22,23 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, user
     const [searchKey, setSearchKey] = useState('');
     const [username, setUsername] = useState(defaultUsername || '');
     const [server, setServer] = useState('');
+    const [currentRegion, setCurrentRegion] = useState('');
 
     useEffect(() => {
         if (isOpen) {
-            const currentRegion = localStorage.getItem(SWR_CONSTANTS.CURRENT_REGION_KEY) || 'cn-north-4';
-            setServer(`swr.${currentRegion}.myhuaweicloud.com`);
+            const region = localStorage.getItem(SWR_CONSTANTS.CURRENT_REGION_KEY) || 'cn-north-4';
+            setCurrentRegion(region);
+            setServer(`swr.${region}.myhuaweicloud.com`);
+
+            if (defaultUsername && defaultUsername.includes('@')) {
+                const parts = defaultUsername.split('@');
+                const newUsername = `${region}@${parts[1]}`;
+                setUsername(newUsername);
+            } else {
+                setUsername(defaultUsername || '');
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, defaultUsername]);
 
     // 获取总数的函数
     const fetchTotalCount = async (search = searchKey) => {
@@ -77,7 +87,6 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, user
                 setLoading(true);
                 await fetchTotalCount();
                 await fetchTags(currentPage);
-                setUsername(defaultUsername || '');
             };
             initData();
         }

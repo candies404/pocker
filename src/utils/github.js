@@ -307,6 +307,14 @@ export const configureAutoUpdate = async (repo) => {
 export const updateWorkflowFile = async (sourceImage, targetImage, region) => {
     try {
         const username = await getUsername();
+        const huaweicloud_username = process.env.NEXT_PUBLIC_HUAWEICLOUD_USERNAME;
+        let newUsername = '';
+        if (huaweicloud_username && huaweicloud_username.includes('@')) {
+            const parts = huaweicloud_username.split('@');
+            newUsername = `${region}@${parts[1]}`;
+        } else {
+            newUsername = huaweicloud_username || '';
+        }
         const workflowContent = `
 name: Docker Image CI
 
@@ -328,7 +336,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: swr.${region}.myhuaweicloud.com
-          username: ${process.env.NEXT_PUBLIC_HUAWEICLOUD_USERNAME}
+          username: ${newUsername}
           password: ${process.env.HUAWEICLOUD_PASSWORD}
 
       - name: Tag the image for HuaWei

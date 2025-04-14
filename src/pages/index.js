@@ -62,7 +62,7 @@ export default function HomePage() {
             const data = await response.json();
             if (data.success) {
                 setRepositories(data);
-                const total = data.data[0].total_range || 0;
+                const total = data?.data?.[0]?.total_range || 0
                 setTotalPages(Math.ceil(total / pageSize));
             } else {
                 setError(data.message || '获取仓库列表失败');
