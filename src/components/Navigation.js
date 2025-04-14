@@ -4,9 +4,10 @@ import {useTheme} from '@/utils/themeContext';
 import {useVersionCheck} from '@/hooks/useVersionCheck';
 import {useHeartbeat} from '@/hooks/useHeartbeat';
 import {UpdateNotification} from './UpdateNotification';
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
+import {SWR_CONSTANTS} from '@/utils/constants';
 
-// Region 映射关系
+// Region 映射关系，默认 华北-北京四
 const REGION_MAP = {
     'cn-north-1': '华北-北京一',
     'cn-north-4': '华北-北京四',
@@ -39,62 +40,62 @@ export default function Navigation() {
     const {needsUpdate} = useVersionCheck();
     const [currentRegion, setCurrentRegion] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    
+
     // 添加心跳检测
     useHeartbeat();
 
     useEffect(() => {
-        const initRegion = async () => {
-            // 先从 localStorage 获取
-            const savedRegion = localStorage.getItem('currentRegion');
-            if (savedRegion) {
-                setCurrentRegion(savedRegion);
-                setIsLoading(false);
-                return;
-            }
-
-            try {
-                // 如果没有保存的 region，从 API 获取
-                const response = await fetch('/api/swr/api-versions');
-                const data = await response.json();
-                if (data.success && data.data?.versions?.[0]?.links?.href) {
-                    // 从 href 中提取 region
-                    // 例如从 "swr-api.cn-north-4.myhuaweicloud.com" 提取 "cn-north-4"
-                    const href = data.data.versions[0].links.href;
-                    const regionMatch = href.match(/swr-api\.([\w-]+)\.myhuaweicloud\.com/);
-                    if (regionMatch && regionMatch[1]) {
-                        const region = regionMatch[1];
-                        if (REGION_MAP[region]) {  // 确保是支持的 region
-                            setCurrentRegion(region);
-                            localStorage.setItem('currentRegion', region);
-                        } else {
-                            // 如果不是支持的 region，使用默认值
-                            setCurrentRegion('cn-north-4');
-                            localStorage.setItem('currentRegion', 'cn-north-4');
-                        }
-                    }
-                } else {
-                    // 如果无法获取 region 信息，使用默认值
-                    setCurrentRegion('cn-north-4');
-                    localStorage.setItem('currentRegion', 'cn-north-4');
-                }
-            } catch (error) {
-                console.error('获取 region 信息失败:', error);
-                // 发生错误时使用默认值
-                setCurrentRegion('cn-north-4');
-                localStorage.setItem('currentRegion', 'cn-north-4');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         initRegion();
     }, []);
+
+    const initRegion = async () => {
+        // 先从 localStorage 获取
+        const savedRegion = localStorage.getItem(SWR_CONSTANTS.CURRENT_REGION_KEY);
+        if (savedRegion) {
+            setCurrentRegion(savedRegion);
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            // 如果没有保存的 region，从 API 获取
+            const response = await fetch('/api/swr/api-versions');
+            const data = await response.json();
+            if (data.success && data.data?.versions?.[0]?.links?.href) {
+                // 从 href 中提取 region
+                // 例如从 "swr-api.cn-north-4.myhuaweicloud.com" 提取 "cn-north-4"
+                const href = data.data.versions[0].links.href;
+                const regionMatch = href.match(/swr-api\.([\w-]+)\.myhuaweicloud\.com/);
+                if (regionMatch && regionMatch[1]) {
+                    const region = regionMatch[1];
+                    if (REGION_MAP[region]) {  // 确保是支持的 region
+                        setCurrentRegion(region);
+                        localStorage.setItem(SWR_CONSTANTS.CURRENT_REGION_KEY, region);
+                    } else {
+                        // 如果不是支持的 region，使用默认值
+                        setCurrentRegion('cn-north-4');
+                        localStorage.setItem(SWR_CONSTANTS.CURRENT_REGION_KEY, 'cn-north-4');
+                    }
+                }
+            } else {
+                // 如果无法获取 region 信息，使用默认值
+                setCurrentRegion('cn-north-4');
+                localStorage.setItem(SWR_CONSTANTS.CURRENT_REGION_KEY, 'cn-north-4');
+            }
+        } catch (error) {
+            console.error('获取 region 信息失败:', error);
+            // 发生错误时使用默认值
+            setCurrentRegion('cn-north-4');
+            localStorage.setItem(SWR_CONSTANTS.CURRENT_REGION_KEY, 'cn-north-4');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleRegionChange = (event) => {
         const newRegion = event.target.value;
         setCurrentRegion(newRegion);
-        localStorage.setItem('currentRegion', newRegion);
+        localStorage.setItem(SWR_CONSTANTS.CURRENT_REGION_KEY, newRegion);
     };
 
     const menuItems = [
@@ -128,14 +129,17 @@ export default function Navigation() {
                     width: 8px;
                     height: 8px;
                 }
+
                 .dark select::-webkit-scrollbar-track {
                     background: #374151;
                     border-radius: 4px;
                 }
+
                 .dark select::-webkit-scrollbar-thumb {
                     background: #4B5563;
                     border-radius: 4px;
                 }
+
                 .dark select::-webkit-scrollbar-thumb:hover {
                     background: #6B7280;
                 }

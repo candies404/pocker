@@ -19,4 +19,4 @@ export function runMiddleware(req, res, fn) {
 }
 
 // 导出 cors 中间件
-export { cors }; 
+export {cors};

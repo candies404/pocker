@@ -178,7 +178,7 @@ export const createWorkflowFile = async (workflowContent = DEFAULT_WORKFLOW_CONT
 
 // 自动更新工作流内容
 const AUTO_UPDATE_WORKFLOW_CONTENT =
-`name: Upstream Sync
+    `name: Upstream Sync
 
 permissions:
   contents: write
@@ -304,7 +304,7 @@ export const configureAutoUpdate = async (repo) => {
 };
 
 // 更新工作流文件
-export const updateWorkflowFile = async (sourceImage, targetImage) => {
+export const updateWorkflowFile = async (sourceImage, targetImage, region) => {
     try {
         const username = await getUsername();
         const workflowContent = `
@@ -327,7 +327,7 @@ jobs:
       - name: Login to HuaWei Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: swr.cn-north-4.myhuaweicloud.com
+          registry: swr.${region}.myhuaweicloud.com
           username: ${process.env.NEXT_PUBLIC_HUAWEICLOUD_USERNAME}
           password: ${process.env.HUAWEICLOUD_PASSWORD}
 

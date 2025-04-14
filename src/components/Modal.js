@@ -4,7 +4,15 @@ import ReactDOM from 'react-dom';
 // 用于追踪打开的模态框数量
 let openModalsCount = 0;
 
-const Modal = ({isOpen, onClose, title, onOverlayClick, maxWidth = "md:w-1/2", maxHeight = "max-h-[80vh]", children}) => {
+const Modal = ({
+                   isOpen,
+                   onClose,
+                   title,
+                   onOverlayClick,
+                   maxWidth = "md:w-1/2",
+                   maxHeight = "max-h-[80vh]",
+                   children
+               }) => {
     useEffect(() => {
         if (isOpen) {
             // 第一个模态框打开时禁用滚动

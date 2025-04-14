@@ -139,7 +139,7 @@ function QuotaPage() {
                     ) : (
                         <div className="text-gray-500 dark:text-gray-400 text-center py-8">
                             暂无配额数据
-                    </div>
+                        </div>
                     )}
                 </div>
             </div>

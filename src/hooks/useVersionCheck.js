@@ -32,7 +32,7 @@ export function useVersionCheck() {
                 if (data.currentVersion && data.latestVersion) {
                     const currentParts = data.currentVersion.replace('v', '').split('.');
                     const latestParts = data.latestVersion.replace('v', '').split('.');
-                    
+
                     for (let i = 0; i < 3; i++) {
                         const current = parseInt(currentParts[i], 10);
                         const latest = parseInt(latestParts[i], 10);

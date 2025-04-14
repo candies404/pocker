@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {getAccessKey} from '@/utils/auth';
 import ConfirmModal from '@/components/ConfirmModal';
 import Modal from '@/components/Modal';
+import {SWR_CONSTANTS} from '@/utils/constants';
 
 export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
     const [sourceImage, setSourceImage] = useState('');
@@ -12,6 +13,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
     const [checkInterval, setCheckInterval] = useState(null);
     const [showConfirm, setShowConfirm] = useState(false); // 控制确认模态框的显示
     const [isOfficial, setIsOfficial] = useState(true); // 默认是官方镜像
+    const currentRegion = localStorage.getItem(SWR_CONSTANTS.CURRENT_REGION_KEY) || 'cn-north-4';
 
     useEffect(() => {
         return () => {
@@ -83,7 +85,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
 
         try {
             // 构建目标镜像地址
-            const targetImage = `swr.cn-north-4.myhuaweicloud.com/${namespace}/${repoName}:${targetTag}`;
+            const targetImage = `swr.${currentRegion}.myhuaweicloud.com/${namespace}/${repoName}:${targetTag}`;
 
             // 1. 更新工作流文件
             const updateResponse = await fetch('/api/github/update-workflow', {
@@ -94,7 +96,8 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                 },
                 body: JSON.stringify({
                     sourceImage: sourceImage.trim(),
-                    targetImage
+                    targetImage,
+                    region: currentRegion
                 }),
             });
 
@@ -289,7 +292,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             <div className="text-sm text-gray-500 dark:text-gray-300">
                                 <p>最终地址将为：</p>
                                 <p className="font-mono mt-1 dark:text-white">
-                                    swr.cn-north-4.myhuaweicloud.com/{namespace}/{repoName}:{targetTag || '[标签名]'}
+                                    swr.{currentRegion}.myhuaweicloud.com/{namespace}/{repoName}:{targetTag || '[标签名]'}
                                 </p>
                             </div>
                         )}

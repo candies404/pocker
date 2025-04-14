@@ -23,7 +23,8 @@ export default function ConfirmModal({
     if (!isOpen) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={title} onOverlayClick={onClose} maxWidth={maxWidth} maxHeight={maxHeight}>
+        <Modal isOpen={isOpen} onClose={onClose} title={title} onOverlayClick={onClose} maxWidth={maxWidth}
+               maxHeight={maxHeight}>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
                 <p className="mt-2 text-gray-700 dark:text-gray-300">{message}</p>
                 <div className="mt-4 flex justify-end space-x-2">

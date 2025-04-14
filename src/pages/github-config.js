@@ -313,7 +313,8 @@ function GithubConfigPage() {
 
                     {repoExists && (
                         <div className="mt-8 space-y-4">
-                            <h3 id="workflow-status" className="text-lg font-medium dark:text-white">GitHub 中转仓库工作流</h3>
+                            <h3 id="workflow-status" className="text-lg font-medium dark:text-white">GitHub
+                                中转仓库工作流</h3>
                             {workflowExists ? (
                                 <div className="space-y-4">
                                     <p className="text-sm text-gray-500 dark:text-gray-300">
@@ -354,7 +355,8 @@ function GithubConfigPage() {
                             handleConfigureAutoUpdate();
                         }}>
                             {modalError && (
-                                <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md">
+                                <div
+                                    className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md">
                                     <p className="text-sm">{modalError}</p>
                                 </div>
                             )}

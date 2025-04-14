@@ -2,8 +2,9 @@ import {useEffect, useState} from 'react';
 import Modal from '@/components/Modal';
 import {getAccessKey} from '@/utils/auth';
 import ConfirmModal from '@/components/ConfirmModal';
+import {SWR_CONSTANTS} from '@/utils/constants';
 
-export default function TagListModal({isOpen, onClose, repoName, namespace, server, username: defaultUsername}) {
+export default function TagListModal({isOpen, onClose, repoName, namespace, username: defaultUsername}) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [tags, setTags] = useState(null);
@@ -20,6 +21,14 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, serv
     });
     const [searchKey, setSearchKey] = useState('');
     const [username, setUsername] = useState(defaultUsername || '');
+    const [server, setServer] = useState('');
+
+    useEffect(() => {
+        if (isOpen) {
+            const currentRegion = localStorage.getItem(SWR_CONSTANTS.CURRENT_REGION_KEY) || 'cn-north-4';
+            setServer(`swr.${currentRegion}.myhuaweicloud.com`);
+        }
+    }, [isOpen]);
 
     // 获取总数的函数
     const fetchTotalCount = async (search = searchKey) => {

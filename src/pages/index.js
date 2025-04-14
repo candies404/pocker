@@ -35,7 +35,6 @@ export default function HomePage() {
     const [createTagRepo, setCreateTagRepo] = useState(null);
     const {startTour, shouldShowTour} = useTour('home');
     const [showTour, setShowTour] = useState(false);
-    const [server, setServer] = useState(false);
 
     useEffect(() => {
         setIsAuth(isAuthenticated());
@@ -66,7 +65,6 @@ export default function HomePage() {
             const data = await response.json();
             if (data.success) {
                 setRepositories(data);
-                setServer("swr.cn-north-4.myhuaweicloud.com")
                 const total = data.data[0].total_range || 0;
                 setTotalPages(Math.ceil(total / pageSize));
             } else {
@@ -718,7 +716,6 @@ export default function HomePage() {
                     onClose={() => handleCloseTagListModal()}
                     repoName={selectedRepo}
                     namespace={selectedNamespace}
-                    server={server}
                     username={process.env.NEXT_PUBLIC_HUAWEICLOUD_USERNAME}
                 />
 

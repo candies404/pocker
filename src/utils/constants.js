@@ -7,4 +7,9 @@ export const VERSION_CONSTANTS = {
 // GitHub相关常量
 export const GITHUB_CONSTANTS = {
     VERCEL_REPO_NAME_KEY: 'vercelRepoName', // localStorage中保存Vercel仓库名的key
+};
+
+// SWR相关常量
+export const SWR_CONSTANTS = {
+    CURRENT_REGION_KEY: 'currentRegion', // localStorage中保存当前region的key
 }; 
