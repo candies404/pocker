@@ -1,10 +1,11 @@
 import {useEffect, useState} from 'react';
-import {getAccessKey, isAuthenticated} from '@/utils/auth';
+import {isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import Navigation from '@/components/Navigation';
 import {useTour} from '@/hooks/useTour';
 import withPageAuth from '@/utils/withPageAuth';
 import {APP_CONFIG} from '@/config/version';
+import {apiRequest} from '@/utils/api';
 
 function WorkflowLogsPage() {
     const router = useRouter();
@@ -32,14 +33,8 @@ function WorkflowLogsPage() {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch(
-                `/api/github/workflow-logs?page=${page}&per_page=${pageSize}`,
-                {
-                    headers: {
-                        'x-access-key': getAccessKey(),
-                    },
-                }
-            );
+            const response = await apiRequest(
+                `/api/github/workflow-logs?page=${page}&per_page=${pageSize}`);
             const data = await response.json();
 
             if (data.workflow_runs) {

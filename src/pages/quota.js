@@ -1,10 +1,11 @@
 import {useEffect, useState} from 'react';
-import {getAccessKey, isAuthenticated} from '@/utils/auth';
+import {isAuthenticated} from '@/utils/auth';
 import Navigation from '@/components/Navigation';
 import {useRouter} from 'next/router';
 import {useTour} from '@/hooks/useTour';
 import withPageAuth from '@/utils/withPageAuth';
 import {APP_CONFIG} from '@/config/version';
+import {apiRequest} from '@/utils/api';
 
 function QuotaPage() {
     const router = useRouter();
@@ -28,11 +29,7 @@ function QuotaPage() {
     const fetchQuotaData = async () => {
         setLoading(true)
         try {
-            const response = await fetch('/api/swr/quota', {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
+            const response = await apiRequest('/api/swr/quota');
             const data = await response.json();
             if (data.success) {
                 setQuotaData(data.data);

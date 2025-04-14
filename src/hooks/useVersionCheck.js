@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {getAccessKey} from "@/utils/auth";
+import {apiRequest} from '@/utils/api';
 import {VERSION_CONSTANTS} from '@/utils/constants';
 
 export function useVersionCheck() {
@@ -23,11 +23,7 @@ export function useVersionCheck() {
 
             try {
                 isChecking.current = true;
-                const response = await fetch('/api/github/latest-tag', {
-                    headers: {
-                        'x-access-key': getAccessKey(),
-                    },
-                });
+                const response = await apiRequest('/api/github/latest-tag');
                 const data = await response.json();
                 if (data.currentVersion && data.latestVersion) {
                     const currentParts = data.currentVersion.replace('v', '').split('.');

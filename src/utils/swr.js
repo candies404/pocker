@@ -1,12 +1,19 @@
 import core from '@huaweicloud/huaweicloud-sdk-core';
 import swr from '@huaweicloud/huaweicloud-sdk-swr/v2/public-api';
 
+// 使用闭包管理 region
+let currentRegion = 'cn-north-4';
+
+export const setSwrRegion = (region) => {
+    currentRegion = region;
+};
+
 // 初始化 SWR 客户端
 const initSwrClient = () => {
     const ak = process.env.HUAWEICLOUD_AK;
     const sk = process.env.HUAWEICLOUD_SK;
     const projectId = process.env.HUAWEICLOUD_PROJECT_ID || '';
-    const endpoint = process.env.HUAWEICLOUD_SWR_ENDPOINT || 'https://swr-api.cn-north-4.myhuaweicloud.com';
+    const endpoint = `https://swr-api.${currentRegion}.myhuaweicloud.com`;
 
     if (!ak || !sk) {
         throw new Error('华为云认证信息未配置，请检查环境变量');
@@ -101,7 +108,7 @@ export const listRepositories = async (namespace, params = {}) => {
 };
 
 // 创建仓库
-export const createRepository = async (namespace, repository, description = '') => {
+export const createRepository = async (namespace, repository, description = '', category = 'other', isPublic = false) => {
     try {
         const client = initSwrClient();
         const request = new swr.CreateRepoRequest();
@@ -109,8 +116,8 @@ export const createRepository = async (namespace, repository, description = '') 
         const body = new swr.CreateRepoRequestBody();
         body.withRepository(repository);
         body.withDescription(description);
-        body.withCategory('other');
-        body.withIsPublic(false);
+        body.withCategory(category);
+        body.withIsPublic(isPublic);
         request.withBody(body);
 
         const result = await client.createRepo(request);

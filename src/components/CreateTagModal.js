@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react';
-import {getAccessKey} from '@/utils/auth';
 import ConfirmModal from '@/components/ConfirmModal';
 import Modal from '@/components/Modal';
 import {SWR_CONSTANTS} from '@/utils/constants';
+import {apiRequest} from '@/utils/api';
 
 export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
     const [sourceImage, setSourceImage] = useState('');
@@ -88,11 +88,10 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             const targetImage = `swr.${currentRegion}.myhuaweicloud.com/${namespace}/${repoName}:${targetTag}`;
 
             // 1. 更新工作流文件
-            const updateResponse = await fetch('/api/github/update-workflow', {
+            const updateResponse = await apiRequest('/api/github/update-workflow', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-key': getAccessKey(),
                 },
                 body: JSON.stringify({
                     sourceImage: sourceImage.trim(),
@@ -110,11 +109,8 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
 
             // 2. 触发工作流
             setStatus('triggering'); // 更新状态
-            const triggerResponse = await fetch('/api/github/trigger-workflow', {
+            const triggerResponse = await apiRequest('/api/github/trigger-workflow', {
                 method: 'POST',
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
             });
 
             if (!triggerResponse.ok) {
@@ -127,11 +123,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             // 3. 开始检查工作流状态
             setStatus('checking'); // 更新状态
             const interval = setInterval(async () => {
-                const checkResponse = await fetch('/api/github/check-workflow-run', {
-                    headers: {
-                        'x-access-key': getAccessKey(),
-                    },
-                });
+                const checkResponse = await apiRequest('/api/github/check-workflow-run');
 
                 if (!checkResponse.ok) {
                     clearInterval(interval);
@@ -169,11 +161,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
     // 检查源镜像地址是否存在的函数
     const checkSourceImageExists = async (image) => {
         try {
-            const response = await fetch(`/api/dockerHub/check-repository-tag?image=${encodeURIComponent(image)}`, {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
+            const response = await apiRequest(`/api/dockerHub/check-repository-tag?image=${encodeURIComponent(image)}`);
             const data = await response.json();
             return {exists: data.exists, isOfficial: data.isOfficial}; // 返回存在性和是否为官方镜像
         } catch (error) {

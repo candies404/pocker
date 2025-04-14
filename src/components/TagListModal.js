@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react';
 import Modal from '@/components/Modal';
-import {getAccessKey} from '@/utils/auth';
 import ConfirmModal from '@/components/ConfirmModal';
 import {SWR_CONSTANTS} from '@/utils/constants';
+import {apiRequest} from '@/utils/api';
 
 export default function TagListModal({isOpen, onClose, repoName, namespace, username: defaultUsername}) {
     const [loading, setLoading] = useState(true);
@@ -33,14 +33,8 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, user
     // 获取总数的函数
     const fetchTotalCount = async (search = searchKey) => {
         try {
-            const response = await fetch(
-                `/api/swr/image-tags?namespace=${encodeURIComponent(namespace)}&repository=${encodeURIComponent(repoName)}&page=1&pageSize=1000&searchKey=${encodeURIComponent(search)}`,
-                {
-                    headers: {
-                        'x-access-key': getAccessKey(),
-                    },
-                }
-            );
+            const response = await apiRequest(
+                `/api/swr/image-tags?namespace=${encodeURIComponent(namespace)}&repository=${encodeURIComponent(repoName)}&page=1&pageSize=1000&searchKey=${encodeURIComponent(search)}`);
             const data = await response.json();
 
             if (data.success) {
@@ -61,14 +55,8 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, user
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(
-                `/api/swr/image-tags?namespace=${encodeURIComponent(namespace)}&repository=${encodeURIComponent(repoName)}&page=${page}&pageSize=${pageSize}&searchKey=${encodeURIComponent(search)}`,
-                {
-                    headers: {
-                        'x-access-key': getAccessKey(),
-                    },
-                }
-            );
+            const response = await apiRequest(
+                `/api/swr/image-tags?namespace=${encodeURIComponent(namespace)}&repository=${encodeURIComponent(repoName)}&page=${page}&pageSize=${pageSize}&searchKey=${encodeURIComponent(search)}`);
             const data = await response.json();
 
             if (data.success) {
@@ -142,13 +130,10 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, user
         setDeletingTag(tag.Tag);
 
         try {
-            const response = await fetch(
+            const response = await apiRequest(
                 `/api/swr/delete-tag?namespace=${encodeURIComponent(namespace)}&repository=${encodeURIComponent(currentRepoName)}&tag=${encodeURIComponent(tag.Tag)}`,
                 {
                     method: 'DELETE',
-                    headers: {
-                        'x-access-key': getAccessKey(),
-                    },
                 }
             );
 

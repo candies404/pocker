@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {getAccessKey, isAuthenticated, setAccessKey} from '@/utils/auth';
+import {isAuthenticated, setAccessKey} from '@/utils/auth';
 import Navigation from '@/components/Navigation';
 import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
@@ -7,6 +7,7 @@ import TagListModal from '@/components/TagListModal';
 import CreateTagModal from '@/components/CreateTagModal';
 import {useTour} from '@/hooks/useTour';
 import {APP_CONFIG} from '@/config/version';
+import {apiRequest} from '@/utils/api';
 
 export default function HomePage() {
     const [key, setKey] = useState('');
@@ -57,11 +58,7 @@ export default function HomePage() {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch(`/api/swr/repositories?page=${page}&pageSize=${pageSize}&searchKey=${encodeURIComponent(search)}`, {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
+            const response = await apiRequest(`/api/swr/repositories?page=${page}&pageSize=${pageSize}&searchKey=${encodeURIComponent(search)}`);
             const data = await response.json();
             if (data.success) {
                 setRepositories(data);
@@ -145,11 +142,7 @@ export default function HomePage() {
 
     const fetchNamespaces = async () => {
         try {
-            const response = await fetch('/api/swr/namespaces', {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
+            const response = await apiRequest('/api/swr/namespaces');
             const data = await response.json();
 
             if (data.success) {
@@ -187,11 +180,10 @@ export default function HomePage() {
         setError(null);
 
         try {
-            const response = await fetch('/api/swr/create-repository', {
+            const response = await apiRequest('/api/swr/create-repository', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-key': getAccessKey(),
                 },
                 body: JSON.stringify({
                     namespace: selectedNamespace,
@@ -241,11 +233,8 @@ export default function HomePage() {
         setDeletingRepo(repo.name);
 
         try {
-            const response = await fetch(`/api/swr/delete-repository?namespace=${encodeURIComponent(repo.namespace)}&repository=${encodeURIComponent(repo.name)}`, {
+            const response = await apiRequest(`/api/swr/delete-repository?namespace=${encodeURIComponent(repo.namespace)}&repository=${encodeURIComponent(repo.name)}`, {
                 method: 'DELETE',
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
             });
 
             const data = await response.json();
@@ -275,11 +264,10 @@ export default function HomePage() {
     const handleToggleAccess = async (repo) => {
         try {
             setLoading(true);
-            const response = await fetch('/api/swr/toggle-repo-access', {
+            const response = await apiRequest('/api/swr/toggle-repo-access', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-key': getAccessKey(),
                 },
                 body: JSON.stringify({
                     namespace: repo.namespace,

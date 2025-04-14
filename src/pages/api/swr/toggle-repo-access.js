@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import {updateRepository} from '@/utils/swr';
+import {setSwrRegion, updateRepository} from '@/utils/swr';
 
 const handler = async (req, res) => {
     if (req.method !== 'POST') {
@@ -15,7 +15,14 @@ const handler = async (req, res) => {
         });
     }
 
+    // 从请求头获取region
+    const region = req.headers['x-region'] || 'cn-north-4';
+
     try {
+        // 设置SWR客户端的region
+        if (region) {
+            setSwrRegion(region);
+        }
         const result = await updateRepository(namespace, repository, {
             is_public: isPublic
         });

@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import {createNamespace} from '@/utils/swr';
+import {createNamespace, setSwrRegion} from '@/utils/swr';
 
 const handler = async (req, res) => {
     if (req.method !== 'POST') {
@@ -15,7 +15,14 @@ const handler = async (req, res) => {
         });
     }
 
+    // 从请求头获取region
+    const region = req.headers['x-region'] || 'cn-north-4';
+
     try {
+        // 设置SWR客户端的region
+        if (region) {
+            setSwrRegion(region);
+        }
         const result = await createNamespace(namespace);
         res.status(200).json({
             success: true,

@@ -1,12 +1,13 @@
 import {useEffect, useState} from 'react';
 import Navigation from '@/components/Navigation';
-import {getAccessKey, isAuthenticated} from '@/utils/auth';
+import {isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import {useTour} from '@/hooks/useTour';
 import withPageAuth from '@/utils/withPageAuth';
 import {APP_CONFIG} from '@/config/version';
 import FormModal from '@/components/FormModal';
 import {GITHUB_CONSTANTS} from '@/utils/constants';
+import {apiRequest} from '@/utils/api';
 
 function GithubConfigPage() {
     const router = useRouter();
@@ -40,11 +41,8 @@ function GithubConfigPage() {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch('/api/github/check-repo', {
+            const response = await apiRequest('/api/github/check-repo', {
                 method: 'GET',
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
             });
             const data = await response.json();
 
@@ -67,11 +65,8 @@ function GithubConfigPage() {
     const handleCreateRepo = async () => {
         setCreating(true);
         try {
-            const response = await fetch('/api/github/create-repo', {
+            const response = await apiRequest('/api/github/create-repo', {
                 method: 'POST',
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
             });
             const data = await response.json();
 
@@ -91,11 +86,7 @@ function GithubConfigPage() {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch('/api/github/check-workflow', {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
+            const response = await apiRequest('/api/github/check-workflow');
             const data = await response.json();
 
             if (data.success) {
@@ -116,11 +107,8 @@ function GithubConfigPage() {
     const handleCreateWorkflow = async () => {
         setCreatingWorkflow(true);
         try {
-            const response = await fetch('/api/github/create-workflow', {
+            const response = await apiRequest('/api/github/create-workflow', {
                 method: 'POST',
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
             });
             const data = await response.json();
 
@@ -159,11 +147,8 @@ function GithubConfigPage() {
         setModalError(null);
         try {
             // 1. 先检查仓库是否存在
-            const repoResponse = await fetch(`/api/github/check-repo?repoName=${encodeURIComponent(autoUpdateRepo.trim())}`, {
+            const repoResponse = await apiRequest(`/api/github/check-repo?repoName=${encodeURIComponent(autoUpdateRepo.trim())}`, {
                 method: 'GET',
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
             });
             const repoData = await repoResponse.json();
 
@@ -173,11 +158,7 @@ function GithubConfigPage() {
             }
 
             // 2. 检查工作流是否已配置
-            const workflowResponse = await fetch(`/api/github/check-workflow?repo=${encodeURIComponent(autoUpdateRepo.trim())}&workflowFile=${AUTO_UPDATE_WORKFLOW_FILE}`, {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
+            const workflowResponse = await apiRequest(`/api/github/check-workflow?repo=${encodeURIComponent(autoUpdateRepo.trim())}&workflowFile=${AUTO_UPDATE_WORKFLOW_FILE}`);
             const workflowData = await workflowResponse.json();
 
             if (workflowData.success && workflowData.exists) {
@@ -188,11 +169,10 @@ function GithubConfigPage() {
             }
 
             // 3. 配置自动更新工作流
-            const response = await fetch('/api/github/configure-auto-update', {
+            const response = await apiRequest('/api/github/configure-auto-update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-key': getAccessKey(),
                 },
                 body: JSON.stringify({
                     repoName: autoUpdateRepo.trim()

@@ -6,14 +6,17 @@ const handler = async (req, res) => {
         return res.status(405).json({message: '方法不允许'});
     }
 
-    const {sourceImage, targetImage, region} = req.body;
+    const {sourceImage, targetImage} = req.body;
 
-    if (!sourceImage || !targetImage || !region) {
+    if (!sourceImage || !targetImage) {
         return res.status(400).json({
             success: false,
-            message: '源镜像、目标镜像和区域不能为空'
+            message: '源镜像、目标镜像不能为空'
         });
     }
+
+    // 从请求头获取region
+    const region = req.headers['x-region'] || 'cn-north-4';
 
     try {
         const result = await updateWorkflowFile(sourceImage, targetImage, region);

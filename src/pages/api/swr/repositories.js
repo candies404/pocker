@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import {listRepositories} from '@/utils/swr';
+import {listRepositories, setSwrRegion} from '@/utils/swr';
 import {cors, runMiddleware} from '@/middleware/cors';
 
 const handler = async (req, res) => {
@@ -16,7 +16,15 @@ const handler = async (req, res) => {
         const namespace = req.query.namespace || "";
         const searchKey = req.query.searchKey || "";
 
+        // 从请求头获取region
+        const region = req.headers['x-region'] || 'cn-north-4';
+
         try {
+            // 设置SWR客户端的region
+            if (region) {
+                setSwrRegion(region);
+            }
+
             const result = await listRepositories(namespace, {
                 limit: pageSize,
                 offset: offset,

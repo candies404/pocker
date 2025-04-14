@@ -1,5 +1,5 @@
 import {useEffect, useRef} from 'react';
-import {getAccessKey} from "@/utils/auth";
+import {apiRequest} from '@/utils/api';
 
 export function useHeartbeat() {
     const isBeating = useRef(false);
@@ -11,12 +11,7 @@ export function useHeartbeat() {
 
             try {
                 isBeating.current = true;
-                const response = await fetch('/api/heartbeat', {
-                    headers: {
-                        'x-access-key': getAccessKey(),
-                    },
-                });
-
+                await apiRequest('/api/heartbeat');
             } catch (error) {
                 console.error('Failed to send heartbeat:', error);
             } finally {

@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import {getQuota} from '@/utils/swr';
+import {getQuota, setSwrRegion} from '@/utils/swr';
 import {cors, runMiddleware} from '@/middleware/cors';
 
 const handler = async (req, res) => {
@@ -10,7 +10,15 @@ const handler = async (req, res) => {
         res.setHeader('Allow', ['GET']);
         res.status(405).end(`Method ${req.method} Not Allowed`);
     } else {
+        // 从请求头获取region
+        const region = req.headers['x-region'] || 'cn-north-4';
+
         try {
+            // 设置SWR客户端的region
+            if (region) {
+                setSwrRegion(region);
+            }
+
             const result = await getQuota();
             res.status(200).json(result);
         } catch (error) {

@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import {deleteNamespace} from '@/utils/swr';
+import {deleteNamespace, setSwrRegion} from '@/utils/swr';
 
 const handler = async (req, res) => {
     if (req.method !== 'DELETE') {
@@ -15,7 +15,14 @@ const handler = async (req, res) => {
         });
     }
 
+    // 从请求头获取region
+    const region = req.headers['x-region'] || 'cn-north-4';
+
     try {
+        // 设置SWR客户端的region
+        if (region) {
+            setSwrRegion(region);
+        }
         const result = await deleteNamespace(namespace);
         res.status(200).json({
             success: true,

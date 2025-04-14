@@ -1,12 +1,13 @@
 import Navigation from '@/components/Navigation';
 import {useEffect, useState} from 'react';
-import {getAccessKey, isAuthenticated} from '@/utils/auth';
+import {isAuthenticated} from '@/utils/auth';
 import {useRouter} from 'next/router';
 import ConfirmModal from '@/components/ConfirmModal';
 import FormModal from '@/components/FormModal';
 import {useTour} from '@/hooks/useTour';
 import withPageAuth from '@/utils/withPageAuth';
 import {APP_CONFIG} from '@/config/version';
+import {apiRequest} from '@/utils/api';
 
 function NamespacesPage() {
     const router = useRouter();
@@ -39,11 +40,7 @@ function NamespacesPage() {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch('/api/swr/namespaces', {
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
-            });
+            const response = await apiRequest('/api/swr/namespaces');
             const data = await response.json();
             if (data.success) {
                 setNamespaces(data.data);
@@ -66,11 +63,10 @@ function NamespacesPage() {
 
         setCreating(true);
         try {
-            const response = await fetch('/api/swr/create-namespace', {
+            const response = await apiRequest('/api/swr/create-namespace', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-key': getAccessKey(),
                 },
                 body: JSON.stringify({
                     namespace: newNamespace.trim()
@@ -114,11 +110,8 @@ function NamespacesPage() {
         setDeletingNamespace(namespace);
 
         try {
-            const response = await fetch(`/api/swr/delete-namespace?namespace=${encodeURIComponent(namespace)}`, {
+            const response = await apiRequest(`/api/swr/delete-namespace?namespace=${encodeURIComponent(namespace)}`, {
                 method: 'DELETE',
-                headers: {
-                    'x-access-key': getAccessKey(),
-                },
             });
 
             const data = await response.json();

@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import {deleteImageTag} from '@/utils/swr';
+import {deleteImageTag, setSwrRegion} from '@/utils/swr';
 
 const handler = async (req, res) => {
     if (req.method !== 'DELETE') {
@@ -15,7 +15,14 @@ const handler = async (req, res) => {
         });
     }
 
+    // 从请求头获取region
+    const region = req.headers['x-region'] || 'cn-north-4';
+
     try {
+        // 设置SWR客户端的region
+        if (region) {
+            setSwrRegion(region);
+        }
         const result = await deleteImageTag(namespace, repository, tag);
         res.status(200).json({
             success: true,

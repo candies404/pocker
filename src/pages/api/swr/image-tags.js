@@ -1,5 +1,5 @@
 import {withAuth} from '@/utils/withAuth';
-import {listImageTags} from '@/utils/swr';
+import {listImageTags, setSwrRegion} from '@/utils/swr';
 
 const handler = async (req, res) => {
     if (req.method !== 'GET') {
@@ -20,7 +20,14 @@ const handler = async (req, res) => {
         });
     }
 
+    // 从请求头获取region
+    const region = req.headers['x-region'] || 'cn-north-4';
+
     try {
+        // 设置SWR客户端的region
+        if (region) {
+            setSwrRegion(region);
+        }
         const result = await listImageTags(namespace, repository, {
             limit: pageSize,
             offset: offset,

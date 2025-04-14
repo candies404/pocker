@@ -6,6 +6,7 @@ import {useHeartbeat} from '@/hooks/useHeartbeat';
 import {UpdateNotification} from './UpdateNotification';
 import {useEffect, useState} from 'react';
 import {SWR_CONSTANTS} from '@/utils/constants';
+import {apiRequest} from '@/utils/api';
 
 // Region 映射关系，默认 华北-北京四
 const REGION_MAP = {
@@ -59,7 +60,7 @@ export default function Navigation() {
 
         try {
             // 如果没有保存的 region，从 API 获取
-            const response = await fetch('/api/swr/api-versions');
+            const response = await apiRequest('/api/swr/api-versions');
             const data = await response.json();
             if (data.success && data.data?.versions?.[0]?.links?.href) {
                 // 从 href 中提取 region
