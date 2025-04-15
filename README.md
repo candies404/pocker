@@ -8,6 +8,10 @@
 支持一键部署，彻底解决镜像拉取缓慢问题，保障数据安全，让您完全掌控自己的 Docker
 数据，我的 Docker 我做主。
 
+<div align="center">
+  <img src=".github/screenShots/3.png" alt="3" width="800" />
+</div>
+
 ## 体验地址
 - https://pocker4u.vercel.app/
 - 访问密钥：pocker4u
