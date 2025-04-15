@@ -1,5 +1,5 @@
-import core from '@huaweicloud/huaweicloud-sdk-core';
-import swr from '@huaweicloud/huaweicloud-sdk-swr/v2/public-api';
+const core = require('@huaweicloud/huaweicloud-sdk-core');
+const swr = require('@huaweicloud/huaweicloud-sdk-swr/v2/public-api');
 
 // 使用闭包管理 region
 let currentRegion = 'cn-north-4';
