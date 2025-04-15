@@ -105,7 +105,7 @@ export default function Navigation() {
         {path: '/', label: '镜像仓库'},
         {path: '/workflow-logs', label: '构建日志'},
         {path: '/namespaces', label: '命名空间'},
-        {path: '/github-config', label: 'GitHub 配置'},
+        {path: '/github-config', label: 'GitHub配置'},
         {path: '/quota', label: '用量统计'},
         {path: '/donate', label: '支持项目'},
     ];
@@ -153,6 +153,7 @@ export default function Navigation() {
                         <div className="flex-shrink-0 flex items-center space-x-4">
                             <span className="text-xl font-bold text-gray-800 dark:text-white">Pocker - 镜像私服</span>
                             <select
+                                id="区域选择"
                                 value={currentRegion}
                                 onChange={handleRegionChange}
                                 disabled={isLoading}

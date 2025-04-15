@@ -11,8 +11,17 @@ export const tourSteps = {
         {
             element: '#GitHub配置',
             popover: {
-                title: 'GitHub 私有仓库配置',
-                description: '在此创建私有 GitHub 仓库，用于：<br/>- 存储 CI/CD 构建工作流<br/>- 中转 Docker Hub 镜像至腾讯云镜像仓库',
+                title: 'GitHub 相关配置',
+                description: '在此创建一个私有 GitHub 仓库，用于：<br/>- 存储 CI/CD 构建工作流<br/>- 中转 Docker Hub 镜像至华为云镜像仓库<br/><br/>另外还可配置自动更新',
+                side: 'bottom',
+                align: 'start'
+            }
+        },
+        {
+            element: '#区域选择',
+            popover: {
+                title: '区域选择',
+                description: '提供全球23个区域节点供您选择,每个区域的资源完全独立,可根据需要灵活切换',
                 side: 'bottom',
                 align: 'start'
             }
@@ -21,7 +30,7 @@ export const tourSteps = {
             element: '#命名空间',
             popover: {
                 title: '命名空间管理',
-                description: '在此创建新的命名空间，每个账户最多可创建 10 个命名空间',
+                description: '在此创建新的命名空间，每个区域节点最多可创建 5 个命名空间',
                 side: 'bottom',
                 align: 'start'
             }
@@ -30,7 +39,7 @@ export const tourSteps = {
             element: '#镜像仓库',
             popover: {
                 title: '镜像仓库管理',
-                description: '在此集中管理所有镜像仓库，支持以下核心功能：<br/>- 镜像管理：创建、查看、删除镜像<br/>- 标签管理：查看、删除标签，复制镜像地址',
+                description: '在此集中管理所有镜像仓库，支持以下核心功能：<br/>- 镜像管理：创建、查看、删除、公开/私有镜像<br/>- 标签管理：查看、删除标签，复制镜像地址',
                 side: 'bottom',
                 align: 'start'
             }
@@ -39,16 +48,16 @@ export const tourSteps = {
             element: '#构建日志',
             popover: {
                 title: '构建日志监控中心',
-                description: '实时监控镜像构建全流程，支持：<br/>- 跳转GitHub查看详细日志<br/> - 构建进度实时追踪<br/> - 构建结果实时更新',
+                description: '实时监控镜像构建全流程，支持：<br/>- 跳转 GitHub 查看详细日志<br/> - 构建进度实时追踪<br/> - 构建结果实时更新',
                 side: 'bottom',
                 align: 'start'
             }
         },
         {
-            element: '#配额信息',
+            element: '#用量统计',
             popover: {
-                title: '资源配额监控中心',
-                description: '全面掌握腾讯云资源使用情况：<br/>- 实时监控资源消耗<br/>- 查看各项配额上限<br/>- 支持命名空间、镜像仓库、镜像标签等多维度统计',
+                title: '资源用量统计',
+                description: '全面掌握华为云资源使用情况：<br/>- 实时监控资源消耗<br/>- 支持命名空间、镜像仓库、镜像标签、存储空间、下行流量等多维度统计',
                 side: 'bottom',
                 align: 'start'
             }
@@ -74,8 +83,8 @@ export const tourSteps = {
         {
             element: '#tag-list',
             popover: {
-                title: '查看标签',
-                description: '点击链接可管理镜像标签，支持以下功能：<br/>- 一键复制镜像地址<br/>- 查看镜像所属所有标签详情<br/>- 快速搜索定位标签<br/>- 删除标签（支持批量操作）',
+                title: '查看标签列表',
+                description: '点击链接可管理镜像标签，支持以下功能：<br/>- 提供docker login登陆指令引导<br/>- 一键复制镜像地址<br/>- 查看镜像所属所有标签详情<br/>- 快速搜索定位标签',
                 side: 'bottom',
                 align: 'start'
             }
@@ -99,10 +108,28 @@ export const tourSteps = {
             }
         },
         {
+            element: '#repo-size',
+            popover: {
+                title: '仓库容量统计',
+                description: '实时统计当前镜像仓库占用的存储空间，方便您合理规划资源使用',
+                side: 'bottom',
+                align: 'start'
+            }
+        },
+        {
+            element: '#repo-downloads',
+            popover: {
+                title: '镜像拉取次数',
+                description: '统计镜像被拉取的总次数，帮助您掌握镜像的使用频率和受欢迎程度',
+                side: 'bottom',
+                align: 'start'
+            }
+        },
+        {
             element: '#repo-actions',
             popover: {
                 title: '镜像操作栏',
-                description: '支持：<br/>- 查看镜像所属标签详情<br/>- 添加新版本标签<br/>- 调整拉取权限级别<br/>- 删除镜像仓库',
+                description: '支持：<br/>- 查看镜像所属标签详情列表<br/>- 添加新标签<br/>- 调整拉取权限级别<br/>- 删除镜像仓库',
                 side: 'bottom',
                 align: 'start'
             }
@@ -111,7 +138,7 @@ export const tourSteps = {
             element: '[class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"]',
             popover: {
                 title: '查看标签',
-                description: '点击可管理镜像标签，支持以下功能：<br/>- 一键复制镜像地址<br/>- 查看镜像所属所有标签详情<br/>- 快速搜索定位标签<br/>- 删除标签（支持批量操作）',
+                description: '点击链接可管理镜像标签，支持以下功能：<br/>- 提供docker login登陆指令引导<br/>- 一键复制镜像地址<br/>- 查看镜像所属所有标签详情<br/>- 快速搜索定位标签',
                 side: 'bottom',
                 align: 'start'
             }
@@ -120,7 +147,7 @@ export const tourSteps = {
             element: '[class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-600"]',
             popover: {
                 title: '新增标签',
-                description: '点击可创建新版本标签，支持将Docker Hub镜像地址转换为腾讯云镜像地址',
+                description: '点击可创建新标签，支持将 Docker Hub 镜像地址中转至华为云容器镜像服务 SWR',
                 side: 'bottom',
                 align: 'start'
             }
@@ -149,7 +176,7 @@ export const tourSteps = {
             element: '#workflow-link',
             popover: {
                 title: '查看详细构建日志',
-                description: '点击此列将跳转至GitHub Actions页面，查看完整的构建日志信息',
+                description: '点击此列将跳转至 GitHub Actions 页面，查看完整的构建日志信息',
                 side: 'bottom',
                 align: 'start'
             }
@@ -158,7 +185,7 @@ export const tourSteps = {
             element: '#workflow-content',
             popover: {
                 title: '镜像信息',
-                description: '显示当前构建任务对应的Docker Hub镜像名称',
+                description: '显示当前构建任务对应的 Docker Hub 镜像名称',
                 side: 'bottom',
                 align: 'start'
             }
@@ -167,7 +194,7 @@ export const tourSteps = {
             element: '#workflow-status',
             popover: {
                 title: '构建状态追踪',
-                description: '实时监控CI/CD流水线状态，包括：排队等待、构建进行中、构建完成等阶段',
+                description: '实时监控 CI/CD 流水线状态，包括：排队等待、构建进行中、构建完成等阶段',
                 side: 'bottom',
                 align: 'start'
             }
@@ -215,8 +242,26 @@ export const tourSteps = {
         {
             element: '#repo-status',
             popover: {
-                title: 'GitHub Repo 配置',
-                description: '显示 GitHub 私有仓库的状态，这个仓库用于存储 CI/CD 构建工作流，中转 Docker Hub 镜像至腾讯云镜像仓库',
+                title: 'GitHub 中转仓库配置',
+                description: '显示 GitHub 私有中转仓库的状态，这个仓库用于存储 CI/CD 构建中转工作流，中转 Docker Hub 镜像至华为云容器镜像服务 SWR',
+                side: 'right',
+                align: 'start'
+            }
+        },
+        {
+            element: '#repo-link',
+            popover: {
+                title: '跳转查看中转仓库',
+                description: '点击可直接访问 GitHub 中转仓库页面',
+                side: 'right',
+                align: 'start'
+            }
+        },
+        {
+            element: '#auto-update-button',
+            popover: {
+                title: '可配置自动更新',
+                description: '点击配置自动更新功能，需要填写已部署在 Vercel 上的项目名称（默认是：pocker）',
                 side: 'right',
                 align: 'start'
             }
@@ -224,8 +269,8 @@ export const tourSteps = {
         {
             element: '#workflow-status',
             popover: {
-                title: 'GitHub Actions 工作流',
-                description: '显示 GitHub Actions 工作流的配置内容',
+                title: 'GitHub 中转工作流',
+                description: '显示用于中转的 GitHub Actions 工作流的配置内容',
                 side: 'right',
                 align: 'start'
             }
@@ -233,19 +278,10 @@ export const tourSteps = {
     ],
     quota: [
         {
-            element: '#repoType',
+            element: '#quota-data',
             popover: {
                 title: '资源类型概览',
-                description: '展示命名空间、仓库和标签的数量信息',
-                side: 'bottom',
-                align: 'start'
-            }
-        },
-        {
-            element: '#quota',
-            popover: {
-                title: '配额详情',
-                description: '显示当前账号已创建的资源数量及可使用的总数量',
+                description: '展示华为云租户名称、命名空间、仓库和标签的数量信息，已用华为云存储空间和下行流量',
                 side: 'bottom',
                 align: 'start'
             }
@@ -258,7 +294,7 @@ export const defaultOptions = {
     showProgress: true,
     showButtons: ['close', 'next', 'previous'],
     overlayColor: 'rgba(0, 0, 0, 0.5)',
-    stagePadding: 5,
+    stagePadding: 1,
     popoverClass: 'driverjs-theme',
     popoverOffset: 15,
     prevBtnText: '上一步',

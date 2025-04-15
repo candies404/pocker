@@ -261,6 +261,7 @@ function GithubConfigPage() {
                             </div>
                             <div className="flex space-x-3">
                                 <a
+                                    id="repo-link"
                                     href={repoData.html_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -269,6 +270,7 @@ function GithubConfigPage() {
                                     查看中转仓库
                                 </a>
                                 <button
+                                    id="auto-update-button"
                                     onClick={handleOpenAutoUpdateModal}
                                     className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white dark:hover:text-white"
                                 >

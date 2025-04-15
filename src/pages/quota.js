@@ -99,7 +99,7 @@ function QuotaPage() {
                     )}
 
                     {quotaData ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div id="quota-data" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div className="p-4 bg-red-50 dark:bg-gray-700/20 rounded-lg">
                                 <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">租户名称</h3>
                                 <p className="text-sm font-mono text-gray-600 dark:text-gray-300 break-all">{quotaData.domain_name}</p>
@@ -116,7 +116,7 @@ function QuotaPage() {
                             </div>
 
                             <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">镜像数量</h3>
+                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">标签数量</h3>
                                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{quotaData.image_num}</p>
                             </div>
 
