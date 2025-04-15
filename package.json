@@ -19,8 +19,7 @@
     "node-fetch": "^3.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "socks-proxy-agent": "^8.0.4",
-    "tencentcloud-sdk-nodejs-tcr": "^4.0.785"
+    "socks-proxy-agent": "^8.0.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
