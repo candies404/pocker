@@ -105,7 +105,7 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, user
     };
 
     const handleCopy = async (tag) => {
-        const fullImageUrl = `${tag.path}`;
+        const fullImageUrl = `docker pull ${tag.path}`;
         try {
             await navigator.clipboard.writeText(fullImageUrl);
             setCopyStatus(tag.Tag);
@@ -354,7 +354,7 @@ export default function TagListModal({isOpen, onClose, repoName, namespace, user
                                                     {formatSize(tag.size)}
                                                 </td>
                                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {tag.updated}
+                                                    {new Date(tag.updated).toLocaleString('zh-CN', {timeZone: 'Asia/Shanghai'})}
                                                 </td>
                                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     <div className="flex items-center space-x-2">

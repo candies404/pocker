@@ -453,8 +453,12 @@ export default function HomePage() {
                                                 访问级别
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                更新时间
+                                                仓库大小
                                             </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                下载次数
+                                            </th>
+
                                             <th id="repo-actions"
                                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 操作
@@ -480,7 +484,10 @@ export default function HomePage() {
                                                     {repo.is_public === true ? '公开' : '私有'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {repo.updated_at}
+                                                    {(repo.size / (1024 * 1024 * 1024)).toFixed(2)}G
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                    {repo.num_download}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     <div className="flex items-center space-x-2">
