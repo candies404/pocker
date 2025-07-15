@@ -8,6 +8,7 @@ import CreateTagModal from '@/components/CreateTagModal';
 import {useTour} from '@/hooks/useTour';
 import {APP_CONFIG} from '@/config/version';
 import {apiRequest} from '@/utils/api';
+import {validateRepositoryName, getValidationHint} from '@/utils/validation';
 
 export default function HomePage() {
     const [key, setKey] = useState('');
@@ -22,6 +23,7 @@ export default function HomePage() {
     const [searchTimeout, setSearchTimeout] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newRepoName, setNewRepoName] = useState('');
+    const [repoNameValidation, setRepoNameValidation] = useState({isValid: true, error: null});
     const [creating, setCreating] = useState(false);
     const [verifying, setVerifying] = useState(false);
     const [fetchNameSpacesIng, setFetchNameSpacesIng] = useState(false);
@@ -165,14 +167,33 @@ export default function HomePage() {
         await fetchNamespaces();
     };
 
+    // 处理仓库名称输入变化
+    const handleRepoNameChange = (e) => {
+        const value = e.target.value;
+        setNewRepoName(value);
+
+        // 实时验证
+        const validation = validateRepositoryName(value);
+        setRepoNameValidation(validation);
+
+        // 如果有错误，清除全局错误信息
+        if (error && validation.isValid) {
+            setError('');
+        }
+    };
+
     const handleCreateRepository = async (e) => {
         e.preventDefault();
         if (!selectedNamespace) {
             setError('请选择命名空间');
             return;
         }
-        if (!newRepoName.trim()) {
-            setError('仓库名称不能为空');
+
+        // 验证仓库名称
+        const validation = validateRepositoryName(newRepoName);
+        if (!validation.isValid) {
+            setError(validation.error);
+            setRepoNameValidation(validation);
             return;
         }
 
@@ -661,16 +682,40 @@ export default function HomePage() {
                             <input
                                 type="text"
                                 value={newRepoName}
-                                onChange={(e) => setNewRepoName(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-600 dark:focus:border-blue-600 dark:bg-gray-700 dark:text-white"
+                                onChange={handleRepoNameChange}
+                                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white ${
+                                    !repoNameValidation.isValid
+                                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500 dark:border-red-600'
+                                        : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-600 dark:focus:border-blue-600'
+                                }`}
                                 placeholder="请输入镜像名称"
                                 disabled={creating || !selectedNamespace}
                             />
+
+                            {/* 验证错误信息 */}
+                            {!repoNameValidation.isValid && (
+                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                    {repoNameValidation.error}
+                                </p>
+                            )}
+
+                            {/* 验证提示信息 */}
+                            {repoNameValidation.isValid && newRepoName && (
+                                <p className="mt-1 text-sm text-green-600 dark:text-green-400">
+                                    ✓ 镜像名称格式正确
+                                </p>
+                            )}
+
                             {selectedNamespace && (
                                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                     完整镜像名称: {selectedNamespace}/{newRepoName || '[镜像名称]'}
                                 </p>
                             )}
+
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                {getValidationHint('repository')}
+                            </p>
+
                             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 注：镜像默认创建为私有镜像
                             </p>
@@ -687,7 +732,7 @@ export default function HomePage() {
                             <button
                                 type="submit"
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-500 dark:text-white"
-                                disabled={creating || !selectedNamespace || !newRepoName.trim()}
+                                disabled={creating || !selectedNamespace || !newRepoName.trim() || !repoNameValidation.isValid}
                             >
                                 {creating ? '创建中...' : '创建'}
                             </button>
