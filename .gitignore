@@ -44,3 +44,5 @@ next-env.d.ts
 /.vscode
 .augment-guidelines
 .augmentignore
+
+*.code-workspace
