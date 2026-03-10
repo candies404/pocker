@@ -5,9 +5,28 @@ import {SWR_CONSTANTS} from '@/utils/constants';
 import {apiRequest} from '@/utils/api';
 import {validateTag, validateImageAddress, getValidationHint} from '@/utils/validation';
 
+const SOURCE_REGISTRY_CONFIG = {
+    dockerHub: {
+        label: 'Docker Hub',
+        placeholder: '例如：henrygd/beszel:dev 或 docker pull henrygd/beszel:dev',
+        linkText: '前往 Docker Hub 搜索镜像',
+        href: 'https://hub.docker.com/search',
+        expectedRegistry: 'docker.io'
+    },
+    ghcr: {
+        label: 'GHCR',
+        placeholder: '例如：ghcr.io/openclaw/openclaw:latest',
+        linkText: '',
+        href: '',
+        expectedRegistry: 'ghcr.io'
+    }
+};
+
 export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
+    const [sourceRegistry, setSourceRegistry] = useState('dockerHub');
     const [sourceImage, setSourceImage] = useState('');
     const [sourceImageValidation, setSourceImageValidation] = useState({isValid: true, error: null});
+    const [verifiedSourceImage, setVerifiedSourceImage] = useState('');
     const [targetTag, setTargetTag] = useState('');
     const [targetTagValidation, setTargetTagValidation] = useState({isValid: true, error: null});
     const [creating, setCreating] = useState(false);
@@ -17,6 +36,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
     const [showConfirm, setShowConfirm] = useState(false); // 控制确认模态框的显示
     const [isOfficial, setIsOfficial] = useState(true); // 默认是官方镜像
     const currentRegion = localStorage.getItem(SWR_CONSTANTS.CURRENT_REGION_KEY) || 'cn-north-4';
+    const currentSourceRegistryConfig = SOURCE_REGISTRY_CONFIG[sourceRegistry];
 
     useEffect(() => {
         return () => {
@@ -29,6 +49,9 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
     const handleSourceImageChange = (e) => {
         const value = e.target.value;
         setSourceImage(value);
+        setVerifiedSourceImage('');
+        setShowConfirm(false);
+        setIsOfficial(true);
 
         // 实时验证源镜像地址
         const validation = validateImageAddress(value);
@@ -38,6 +61,17 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         if (error && validation.isValid) {
             setError(null);
         }
+    };
+
+    const handleSourceRegistryChange = (e) => {
+        setSourceRegistry(e.target.value);
+        setSourceImage('');
+        setSourceImageValidation({isValid: true, error: null});
+        setVerifiedSourceImage('');
+        setShowConfirm(false);
+        setIsOfficial(true);
+        setStatus('initial');
+        setError(null);
     };
 
     // 处理目标标签输入变化
@@ -61,6 +95,23 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         checkSourceImageChange(e);
     };
 
+    const getSourceCheckErrorMessage = (result) => {
+        switch (result?.reason) {
+            case 'SOURCE_REGISTRY_MISMATCH':
+                return result.message || `当前选择的是 ${currentSourceRegistryConfig.label}，请填写匹配的镜像地址`;
+            case 'INVALID_IMAGE':
+                return result.message || '源镜像地址格式不正确';
+            case 'TAG_NOT_FOUND':
+                return `${currentSourceRegistryConfig.label} 中未找到该镜像或标签，请检查后重试`;
+            case 'AUTH_REQUIRED':
+                return `${currentSourceRegistryConfig.label} 镜像当前无法匿名拉取，请检查它是否为公开镜像`;
+            case 'UNSUPPORTED_REGISTRY':
+                return '当前仅支持 Docker Hub 和 GHCR 作为源仓库';
+            default:
+                return result?.message || '源镜像校验失败，请稍后重试';
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -69,6 +120,15 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         if (!sourceValidation.isValid) {
             setError(sourceValidation.error);
             setSourceImageValidation(sourceValidation);
+            return;
+        }
+
+        const normalizedInputRegistry = ['index.docker.io', 'registry-1.docker.io'].includes(sourceValidation.parsed.registry.toLowerCase())
+            ? 'docker.io'
+            : sourceValidation.parsed.registry.toLowerCase();
+
+        if (normalizedInputRegistry !== currentSourceRegistryConfig.expectedRegistry) {
+            setError(`当前选择的是 ${currentSourceRegistryConfig.label}，请填写匹配的镜像地址`);
             return;
         }
 
@@ -81,95 +141,100 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
         }
 
         setCreating(true);
-        setStatus('examining'); // 设置状态为检查中
+        setStatus('examining');
         setError(null);
 
-        // 检查源镜像地址是否存在
-        const {exists, isOfficial: official} = await checkSourceImageExists(sourceImage.trim());
-        setIsOfficial(official);
+        const sourceCheckResult = await checkSourceImageExists(sourceImage.trim());
+        setIsOfficial(Boolean(sourceCheckResult.isOfficial));
+        setVerifiedSourceImage(sourceCheckResult.normalizedImage || '');
 
-        if (!exists) {
-            setError('Docker Hub 镜像地址输入错误，请检查，建议去 Docker Hub 复制指令。');
-            setCreating(false); // 结束创建状态
-            setStatus('initial'); // 重置状态
+        if (sourceCheckResult.verdict !== 'allow') {
+            setError(getSourceCheckErrorMessage(sourceCheckResult));
+            setVerifiedSourceImage('');
+            setCreating(false);
+            setStatus('initial');
             return;
         }
 
-        if (!official) {
-            // 如果不是官方镜像，显示确认模态框
+        if (sourceRegistry === 'dockerHub' && !sourceCheckResult.isOfficial) {
             setShowConfirm(true);
-            setCreating(false); // 结束创建状态
+            setCreating(false);
+            setStatus('initial');
             return;
         }
 
-        // 如果是官方镜像，继续执行创建标签的逻辑
-        await handleCreateTag();
+        await handleCreateTag(sourceCheckResult.normalizedImage);
     };
 
     const handleConfirm = async (e) => {
-        e.stopPropagation(); // 阻止事件冒泡
-        setShowConfirm(false); // 关闭确认模态框
-        await handleCreateTag(); // 确认后继续执行创建标签的逻辑
+        e.stopPropagation();
+        setShowConfirm(false);
+
+        if (!verifiedSourceImage) {
+            setError('源镜像校验结果已失效，请重新提交');
+            setStatus('initial');
+            return;
+        }
+
+        await handleCreateTag(verifiedSourceImage);
     };
 
     const handleCancel = (e) => {
         if (e) {
-            e.stopPropagation(); // 只在事件存在时阻止冒泡
+            e.stopPropagation();
         }
-        setShowConfirm(false); // 关闭确认模态框
+        setShowConfirm(false);
         setStatus('initial');
     };
 
-    const handleCreateTag = async () => {
-        setStatus('updating'); // 更新状态
+    const handleCreateTag = async (checkedSourceImage = verifiedSourceImage || sourceImage.trim()) => {
+        setStatus('updating');
 
         try {
-            // 构建目标镜像地址
             const targetImage = `swr.${currentRegion}.myhuaweicloud.com/${namespace}/${repoName}:${targetTag}`;
 
-            // 1. 更新工作流文件
             const updateResponse = await apiRequest('/api/github/update-workflow', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    sourceImage: sourceImage.trim(),
+                    sourceImage: checkedSourceImage,
+                    sourceRegistry,
                     targetImage,
                     region: currentRegion
                 }),
             });
 
             if (!updateResponse.ok) {
-                setError('更新工作流文件失败');
-                setCreating(false); // 结束创建状态
-                setStatus('initial'); // 重置状态
+                const updateData = await updateResponse.json().catch(() => null);
+                setError(updateData?.message || '更新工作流文件失败');
+                setCreating(false);
+                setStatus('initial');
                 return;
             }
 
-            // 2. 触发工作流
-            setStatus('triggering'); // 更新状态
+            setStatus('triggering');
             const triggerResponse = await apiRequest('/api/github/trigger-workflow', {
                 method: 'POST',
             });
 
             if (!triggerResponse.ok) {
                 setError('触发工作流失败');
-                setCreating(false); // 结束创建状态
-                setStatus('initial'); // 重置状态
+                setCreating(false);
+                setStatus('initial');
                 return;
             }
 
-            // 3. 开始检查工作流状态
-            setStatus('checking'); // 更新状态
+            setStatus('checking');
             const interval = setInterval(async () => {
                 const checkResponse = await apiRequest('/api/github/check-workflow-run');
 
                 if (!checkResponse.ok) {
                     clearInterval(interval);
                     setError('检查工作流状态失败');
-                    setCreating(false); // 结束创建状态
-                    setStatus('initial'); // 重置状态
+                    setCreating(false);
+                    setStatus('initial');
                     return;
                 }
 
@@ -182,8 +247,8 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             setStatus('completed');
                         } else {
                             setError(`工作流执行失败: ${conclusion}，具体错误日志请看《构建日志》`);
-                            setCreating(false); // 结束创建状态
-                            setStatus('initial'); // 重置状态
+                            setCreating(false);
+                            setStatus('initial');
                         }
                     }
                 }
@@ -194,19 +259,35 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
             setError(error.message);
             setStatus('error');
         } finally {
-            setCreating(false); // 结束创建状态
+            setCreating(false);
         }
     };
 
-    // 检查源镜像地址是否存在的函数
     const checkSourceImageExists = async (image) => {
         try {
-            const response = await apiRequest(`/api/dockerHub/check-repository-tag?image=${encodeURIComponent(image)}`);
+            const response = await apiRequest('/api/registry/check-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image,
+                    sourceRegistry
+                })
+            });
             const data = await response.json();
-            return {exists: data.exists, isOfficial: data.isOfficial}; // 返回存在性和是否为官方镜像
+            return data.data || {
+                verdict: 'deny',
+                exists: false,
+                reason: 'CHECK_UNAVAILABLE'
+            };
         } catch (error) {
             console.error('检查源镜像地址失败:', error);
-            return {exists: false, isOfficial: false}; // 网络错误处理
+            return {
+                verdict: 'deny',
+                exists: false,
+                reason: 'CHECK_UNAVAILABLE'
+            };
         }
     };
 
@@ -295,25 +376,43 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div>
-                            <div className="flex justify-between items-center mb-0">
+                            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+                                源仓库类型
+                            </label>
+                            <select
+                                value={sourceRegistry}
+                                onChange={handleSourceRegistryChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                                disabled={creating}
+                            >
+                                {Object.entries(SOURCE_REGISTRY_CONFIG).map(([value, config]) => (
+                                    <option key={value} value={value}>
+                                        {config.label}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <div className="flex justify-between items-center mb-0 mt-4">
                                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Docker Hub 镜像地址
+                                    {currentSourceRegistryConfig.label} 镜像地址
                                 </label>
-                                <a
-                                    href="https://hub.docker.com/search"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                                >
-                                    前往 Docker Hub 搜索镜像
-                                </a>
+                                {currentSourceRegistryConfig.linkText && (
+                                    <a
+                                        href={currentSourceRegistryConfig.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                    >
+                                        {currentSourceRegistryConfig.linkText}
+                                    </a>
+                                )}
                             </div>
                             <input
                                 type="text"
                                 value={sourceImage}
                                 onChange={handleSourceImageChange}
                                 onBlur={handleBlur}
-                                placeholder="例如：nginx:alpine 或 docker pull nginx:alpine"
+                                placeholder={currentSourceRegistryConfig.placeholder}
                                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white ${
                                     !sourceImageValidation.isValid
                                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500 dark:border-red-600'
@@ -322,14 +421,12 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                                 disabled={creating}
                             />
 
-                            {/* 验证错误信息 */}
                             {!sourceImageValidation.isValid && (
                                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                                     {sourceImageValidation.error}
                                 </p>
                             )}
 
-                            {/* 验证成功信息 */}
                             {sourceImageValidation.isValid && sourceImage && (
                                 <p className="mt-1 text-sm text-green-600 dark:text-green-400">
                                     ✓ 镜像地址格式正确
@@ -337,7 +434,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             )}
 
                             <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
-                                支持直接粘贴 docker pull 命令，将自动解析，不带标签默认latest
+                                支持直接粘贴 docker pull 命令，将自动解析，不带标签默认 latest
                             </p>
 
                             <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
@@ -403,7 +500,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                             </div>
                         )}
 
-                        <div className="flex justify-end space-x-3 mt-6">
+                        <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -429,7 +526,7 @@ export default function CreateTagModal({isOpen, onClose, repoName, namespace}) {
                     onClose={handleCancel}
                     onConfirm={handleConfirm}
                     title="确认风险"
-                    message="您正在 pull 非 Docker 官方镜像，继续操作可能存在风险。您确定要继续吗？"
+                    message="您正在 pull 非 Docker Hub 官方镜像，继续操作可能存在风险。您确定要继续吗？"
                     confirmText="继续"
                     cancelText="取消"
                 />

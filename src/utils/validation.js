@@ -81,6 +81,43 @@ export const validateRepositoryName = (name) => {
 };
 
 /**
+ * 验证Docker仓库路径（支持 namespace/repository 多段路径）
+ * @param {string} repositoryPath - 仓库路径
+ * @returns {Object} - {isValid: boolean, error: string}
+ */
+const validateRepositoryPath = (repositoryPath) => {
+    if (!repositoryPath || typeof repositoryPath !== 'string') {
+        return {
+            isValid: false,
+            error: '仓库路径不能为空'
+        };
+    }
+
+    const segments = repositoryPath.split('/');
+    if (segments.some((segment) => !segment.trim())) {
+        return {
+            isValid: false,
+            error: '仓库路径格式不正确'
+        };
+    }
+
+    for (const segment of segments) {
+        const segmentValidation = validateRepositoryName(segment);
+        if (!segmentValidation.isValid) {
+            return {
+                isValid: false,
+                error: segmentValidation.error
+            };
+        }
+    }
+
+    return {
+        isValid: true,
+        error: null
+    };
+};
+
+/**
  * 验证Docker标签名称
  * @param {string} tag - 标签名称
  * @returns {Object} - {isValid: boolean, error: string}
@@ -149,15 +186,11 @@ export const validateImageAddress = (imageAddress) => {
         };
     }
 
-    // 移除可能的 "docker pull " 前缀
     const cleanAddress = trimmedAddress.replace(/^docker\s+pull\s+/, '');
+    const [addressWithoutDigest, digest] = cleanAddress.split('@');
+    const pathSegments = addressWithoutDigest.split('/').filter(Boolean);
 
-    // 解析镜像地址格式: [registry/]namespace/repository[:tag][@digest]
-    const imageRegex = /^(?:([a-zA-Z0-9.-]+(?::[0-9]+)?)\/)?((?:[a-z0-9]+(?:[._-][a-z0-9]+)*\/)*[a-z0-9]+(?:[._-][a-z0-9]+)*)(?::([a-zA-Z0-9._-]+))?(?:@([a-zA-Z0-9:.-]+))?$/;
-    
-    const match = cleanAddress.match(imageRegex);
-    
-    if (!match) {
+    if (pathSegments.length === 0) {
         return {
             isValid: false,
             error: '镜像地址格式不正确，请使用格式：[registry/]namespace/repository[:tag]',
@@ -165,19 +198,44 @@ export const validateImageAddress = (imageAddress) => {
         };
     }
 
-    const [, registry, repository, tag, digest] = match;
+    const firstSegment = pathSegments[0];
+    const hasExplicitRegistry = pathSegments.length > 1 && (
+        firstSegment.includes('.') ||
+        firstSegment.includes(':') ||
+        firstSegment === 'localhost'
+    );
 
-    // 验证仓库名称
-    const repoValidation = validateRepositoryName(repository);
-    if (!repoValidation.isValid) {
+    const registry = hasExplicitRegistry ? firstSegment : 'docker.io';
+    const repositorySegments = hasExplicitRegistry ? pathSegments.slice(1) : [...pathSegments];
+
+    if (repositorySegments.length === 0) {
         return {
             isValid: false,
-            error: `仓库名称验证失败：${repoValidation.error}`,
+            error: '镜像地址格式不正确，请使用格式：[registry/]namespace/repository[:tag]',
             parsed: null
         };
     }
 
-    // 验证标签（如果存在）
+    const lastSegment = repositorySegments[repositorySegments.length - 1];
+    const tagSeparatorIndex = lastSegment.lastIndexOf(':');
+    let tag = null;
+
+    if (tagSeparatorIndex > -1) {
+        tag = lastSegment.slice(tagSeparatorIndex + 1);
+        repositorySegments[repositorySegments.length - 1] = lastSegment.slice(0, tagSeparatorIndex);
+    }
+
+    const repository = repositorySegments.join('/');
+
+    const repoValidation = validateRepositoryPath(repository);
+    if (!repoValidation.isValid) {
+        return {
+            isValid: false,
+            error: `仓库路径验证失败：${repoValidation.error}`,
+            parsed: null
+        };
+    }
+
     if (tag) {
         const tagValidation = validateTag(tag);
         if (!tagValidation.isValid) {
@@ -193,10 +251,10 @@ export const validateImageAddress = (imageAddress) => {
         isValid: true,
         error: null,
         parsed: {
-            registry: registry || 'docker.io',
+            registry,
             repository,
             tag: tag || 'latest',
-            digest,
+            digest: digest || null,
             fullAddress: cleanAddress
         }
     };

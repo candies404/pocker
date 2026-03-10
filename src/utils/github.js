@@ -129,22 +129,22 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Pull Docker image from Docker Hub
+      - name: Pull source image
         run: |
           docker pull 源Docker Hub镜像地址
 
-      - name: Login to HuaWei Docker Hub
+      - name: Login to HuaWei SWR
         uses: docker/login-action@v3
         with:
           registry: swr.cn-north-4.myhuaweicloud.com
           username: 华为云账号
           password: 华为云容器镜像服务初始化的密码
 
-      - name: Tag the image for HuaWei
+      - name: Tag the image for HuaWei SWR
         run: |
           docker tag 源Docker Hub镜像地址 目标容器镜像地址
 
-      - name: Push the image to HuaWei Docker Hub
+      - name: Push the image to HuaWei SWR
         run: |
           docker push 目标容器镜像地址
 `;
@@ -328,22 +328,22 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Pull Docker image from Docker Hub
+      - name: Pull source image
         run: |
           docker pull ${sourceImage}
 
-      - name: Login to HuaWei Docker Hub
+      - name: Login to HuaWei SWR
         uses: docker/login-action@v3
         with:
           registry: swr.${region}.myhuaweicloud.com
           username: ${newUsername}
           password: ${process.env.HUAWEICLOUD_PASSWORD}
 
-      - name: Tag the image for HuaWei
+      - name: Tag the image for HuaWei SWR
         run: |
           docker tag ${sourceImage} ${targetImage}
 
-      - name: Push the image to HuaWei Docker Hub
+      - name: Push the image to HuaWei SWR
         run: |
           docker push ${targetImage}
 `;

@@ -46,3 +46,4 @@ next-env.d.ts
 .augmentignore
 
 *.code-workspace
+.ace-tool/
